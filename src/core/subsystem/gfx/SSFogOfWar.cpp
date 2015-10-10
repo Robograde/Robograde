@@ -1,5 +1,5 @@
 /**************************************************
-Copyright 2015 Ola Enberg
+2015 Ola Enberg
 ***************************************************/
 
 #include "SSFogOfWar.h"
@@ -109,6 +109,9 @@ void SSFogOfWar::Startup()
 	m_FilterShader = gfx::g_ShaderBank.LoadShaderProgram( "../../../shader/FogFilter.glsl" );
 
 	g_SSCollision.SetFogOfWarInfo( m_Texture[m_UsedVisionIndex], glm::ivec2( FOG_OF_WAR_CPU_TEXTURE_WIDTH, FOG_OF_WAR_CPU_TEXTURE_HEIGHT ), m_CPUTileSize );
+
+	if ( g_GameModeSelector.GetCurrentGameMode().Type == GameModeType::Editor )
+		SetFogActive( false );
 
 	Subsystem::Startup();
 }

@@ -1,5 +1,9 @@
+/**************************************************
+2015 Viktor Kelkkanen & Ola Enberg
+***************************************************/
+
 #include "Agent.h"
-#include <messaging/GameMessages.h>
+#include "../input/GameMessages.h"
 #include <gfx/Animation.h>
 #include "Terrain.h"
 #include "../datadriven/ComponentHelper.h"

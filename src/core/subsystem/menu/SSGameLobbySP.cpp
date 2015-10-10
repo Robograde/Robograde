@@ -1,5 +1,5 @@
 /**************************************************
-Copyright 2015 Johan Melin
+2015 Johan Melin
 ***************************************************/
 
 #include "SSGameLobbySP.h"
@@ -321,9 +321,14 @@ void SSGameLobbySP::LoadLevels( )
 	rVector<rString> directoryContent;
 	FileUtility::GetListOfContentInDirectory( m_MapsFolder.c_str(), directoryContent );
 
+	bool isEditor = g_GameModeSelector.GetCurrentGameMode().Type == GameModeType::Editor;
 	for ( auto& entry : directoryContent )
 	{
-		m_ComboBoxSelectLevel->AddItem( entry );
+		// Only show hidden entries if we're in editor mode
+		if (entry[0] != '_' || isEditor)
+		{
+			m_ComboBoxSelectLevel->AddItem(entry);
+		}
 	}
 
 	LoadLevelPreviews( directoryContent );
@@ -336,8 +341,13 @@ void SSGameLobbySP::LoadLevels( )
 void SSGameLobbySP::LoadLevelPreviews( const rVector<rString> levelNames )
 {
 	m_SpawnPoints.clear();
+	bool isEditor = g_GameModeSelector.GetCurrentGameMode().Type == GameModeType::Editor;
 	for ( auto& level : levelNames )
 	{
+		// Skip hidden folders
+		if (level[0] == '_' && !isEditor) 
+			continue;
+
 		gfx::Texture* texture = tNew( gfx::Texture );
 		rString levelPath = m_MapsFolder + level + "/" + level + m_LevelPreviewFormat;
 		if ( texture->Init( levelPath.c_str(), gfx::TextureType::TEXTURE_2D ) )

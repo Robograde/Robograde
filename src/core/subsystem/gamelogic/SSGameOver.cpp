@@ -1,12 +1,12 @@
 /**************************************************
-Copyright 2015 Daniel "MonzUn" Bengtsson & David Pejtersen
+2015 Daniel "MonzUn" Bengtsson & David Pejtersen
 ***************************************************/
 
 #include "SSGameOver.h"
 #include <SDL2/SDL_events.h>
 #include <utility/Logger.h>
 #include <utility/Colours.h>
-#include <messaging/GameMessages.h>
+#include "../../input/GameMessages.h"
 #include "../../datadriven/EntityManager.h"
 #include "../../datadriven/DenseComponentCollection.h"
 #include "../../component/AgentComponent.h"

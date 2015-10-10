@@ -1,5 +1,5 @@
 /**************************************************
-Copyright 2015 Robograde Development Team
+2015 Robograde Development Team
 ***************************************************/
 
 #pragma once
@@ -7,6 +7,7 @@ Copyright 2015 Robograde Development Team
 #include <script/ScriptEngine.h>
 #include "../datadriven/ComponentTypes.h"
 #include "../input/Action.h"
+#include "GlobalDefinitions.h"
 
 #define g_PlayerData		PlayerData::GetInstance()
 #define PLAYER_ID_INVALID	SHRT_MIN
@@ -23,7 +24,7 @@ public:
 	short					GetPlayerCount()						const;
 	const rVector<int>&		GetControlGroup( short controlGroupID )	const;
 	fString					GetControlGroupStringForSquad( int squadID, int max );
-
+	
 	void					RemoveSquadFromControlGroup( int controlGroupIndex, int squadIndexToRemove );
 
 	const rString&			GetPlayerName() const;
@@ -53,7 +54,7 @@ private:
 	int						ScriptSetPlayerID		( IScriptEngine* scriptEngine );
 
 	short					m_PlayerID;
-	short					m_PlayerCount;
+	short					m_PlayerCount = MAX_PLAYERS;
 	rString					m_PlayerName;
 	
 	ACTION					m_LastActionPressed;

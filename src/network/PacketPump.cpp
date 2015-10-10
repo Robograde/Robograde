@@ -45,7 +45,7 @@ void PacketPump::SendToAll( const Message& packet )
 	}
 #ifdef _DEBUG
 	else
-		Logger::Log( "Attempted to send packet to all clients altough no clients are connected", "PacketPump", LogSeverity::WARNING_MSG );
+		Logger::Log( "Attempted to send packet to all clients although no clients are connected", "PacketPump", LogSeverity::WARNING_MSG );
 #endif
 }
 

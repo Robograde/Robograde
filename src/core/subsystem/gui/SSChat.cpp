@@ -1,10 +1,10 @@
 /**************************************************
-Copyright 2015 Isak Almgren
+2015 Isak Almgren
 ***************************************************/
 
 #include "SSChat.h"
 #include <cctype>
-#include <messaging/GameMessages.h>
+#include "../../input/GameMessages.h"
 #include "../utility/SSMail.h"
 #include "../network/SSNetworkController.h"
 #include <input/Input.h>

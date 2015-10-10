@@ -1,13 +1,13 @@
 /**************************************************
-Copyright 2015 Ola Enberg
+2015 Ola Enberg
 ***************************************************/
 
 #include "SSResearch.h"
 #include "../../CompileFlags.h"
 
 #include <utility/Logger.h>
-#include <messaging/GameMessages.h>
 #include "../../utility/PlayerData.h"
+#include "../../input/GameMessages.h"
 #include "SSControlPoint.h"
 #include "../utility/SSMail.h"
 

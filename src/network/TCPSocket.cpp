@@ -2,11 +2,11 @@
 Zlib Copyright <2015> <Daniel "MonzUn" Bengtsson>
 ***************************************************/
 
-#include <utility/PlatformDefinitions.h>
 #include "TCPSocket.h"
+#include <utility/PlatformDefinitions.h>
 #include <utility/Logger.h>
+#include <utility/SerializationUtility.h>
 #include <memory/Alloc.h>
-#include <messaging/GameMessages.h>
 #if PLATFORM == PLATFORM_LINUX
 #include <unistd.h>
 #include <netinet/tcp.h>	// Needed for TCP_NODELAY
@@ -147,6 +147,10 @@ bool TCPSocket::SendPacket( const Message& packet )
 #if NETWORK_DEBUG
 	if ( walker != serializedPacket + dataSize )
 	{
+		const NetworkMessage* netmsg;
+		if ( packet.Type == 0 )
+			netmsg = static_cast< const NetworkMessage* >( &packet );
+
 		int differentiatingSize = static_cast<int>(walker - serializedPacket - dataSize);
 		assert(false);
 	}
@@ -261,20 +265,20 @@ Message* TCPSocket::Receive()
 	// If all data was received. Clean up, prepare for next call and return the buffer as a packet (Will need to be cast to the correct type on the outside using the Type field)
 	if ( nrOfBytesReceived == m_ExpectedPayloadBytes )
 	{
-		MessageTypes::MessageType messageType;
+		MESSAGE_TYPE_ENUM_UNDELYING_TYPE messageType;
 		Byte* walker = m_PayloadData;
 
 		memcpy( &messageType, walker, sizeof( MESSAGE_TYPE_ENUM_UNDELYING_TYPE ) );
 		Message* packet;
-		if ( messageType == 0 )
+		if ( messageType == 0ULL )
 		{
 			NetworkMessageTypes::NetworkMessageType networkedMessageType;
 			memcpy( &networkedMessageType, walker + sizeof( MESSAGE_TYPE_ENUM_UNDELYING_TYPE ) + sizeof( bool ), sizeof( NetworkMessageTypes::NetworkMessageType ) );
-			packet = NetworkMessages::GetDefaultMessage( networkedMessageType );
+			packet = m_NetworkMessagesReference->at( static_cast<char>( networkedMessageType ) )->Clone();
 		}
 		else
 		{
-			packet = Messages::GetDefaultMessage( messageType );
+			packet = m_GameMessagesReference->at( static_cast<MESSAGE_TYPE_ENUM_UNDELYING_TYPE>( messageType ) )->Clone();
 		}
 		packet->Deserialize( ( const char*& )walker );
 
@@ -323,6 +327,16 @@ bool TCPSocket::SetTimeout( unsigned int seconds )
 	return toReturn;
 }
 
+void TCPSocket::SetNetworkMessagesReference( rMap<char, NetworkMessage*>* networkMessagesReference )
+{
+	m_NetworkMessagesReference = networkMessagesReference;
+}
+
+void TCPSocket::SetGameMessagesReference( rMap<MESSAGE_TYPE_ENUM_UNDELYING_TYPE, const Message*>* gameMessagesReference )
+{
+	m_GameMessagesReference = gameMessagesReference;
+}
+
 bool TCPSocket::IsConnected() const
 {
 	return m_Connected;
@@ -340,10 +354,7 @@ bool TCPSocket::SetBlockingMode( bool shouldBlock)
 	unsigned long nonBlocking = static_cast<unsigned long>( !shouldBlock );
 	result = ioctlsocket( m_Socket, FIONBIO, &nonBlocking );
 #else
-	if( shouldBlock ) // TODODB: Do this with inline if
-		result = fcntl( m_Socket, F_SETFL, fcntl( m_Socket, F_GETFL, 1 ) | O_NONBLOCK );
-	else
-		result = fcntl( m_Socket, F_SETFL, fcntl( m_Socket, F_GETFL, 0 ) | O_NONBLOCK );
+	shouldBlock ? result = fcntl( m_Socket, F_SETFL, fcntl( m_Socket, F_GETFL, 1 ) | O_NONBLOCK ) : result = fcntl( m_Socket, F_SETFL, fcntl( m_Socket, F_GETFL, 0 ) | O_NONBLOCK );
 #endif
 	if ( result == 0 )
 		return true;

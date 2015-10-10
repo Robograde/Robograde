@@ -1,5 +1,5 @@
 /**************************************************
-Copyright 2015 Johan Melin & Daniel Bengtsson
+2015 Johan Melin & Daniel Bengtsson
 ***************************************************/
 
 #pragma once

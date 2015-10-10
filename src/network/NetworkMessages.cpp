@@ -1,5 +1,5 @@
 /**************************************************
-Zlib Copyright <2015> <Daniel "MonzUn" Bengtsson>
+Zlib Copyright 2015 Daniel "MonzUn" Bengtsson
 ***************************************************/
 
 #include "NetworkMessages.h"
@@ -17,14 +17,9 @@ NetworkMessage::NetworkMessage( NetworkMessageTypes::NetworkMessageType networkM
 	SenderID			= senderID;
 }
 
-Message* NetworkMessage::Clone() const
-{
-	return tNew( NetworkMessage, *this );
-}
-
 unsigned int NetworkMessage::GetSerializationSize() const // Measures 8 bytes
 {
-	return static_cast<unsigned int>( sizeof( NetworkMessageTypes::NetworkMessageType ) + sizeof(unsigned short) + Message::GetSerializationSize() );
+	return static_cast<unsigned int>( sizeof( NetworkMessageTypes::NetworkMessageType ) + sizeof( unsigned short ) + Message::GetSerializationSize() );
 }
 
 void NetworkMessage::Serialize( char*& buffer ) const // Writes 8 bytes
@@ -41,6 +36,7 @@ void NetworkMessage::Deserialize( const char*& buffer ) // Reads 8 bytes
 	SerializationUtility::CopyAndIncrementSource( &SenderID, buffer, sizeof( unsigned short ) );
 }
 
+// ****************************** PING MESSAGE *****************************************
 PingMessage::PingMessage() : NetworkMessage( NetworkMessageTypes::PING )
 {}
 
@@ -51,7 +47,7 @@ Message* PingMessage::Clone() const
 
 unsigned int PingMessage::GetSerializationSize() const
 {
-	return static_cast<unsigned int>( sizeof( double ) );
+	return static_cast<unsigned int>( NetworkMessage::GetSerializationSize() );
 }
 
 void PingMessage::Serialize( char*& buffer ) const
@@ -64,7 +60,8 @@ void PingMessage::Deserialize( const char*& buffer )
 	NetworkMessage::Deserialize( buffer );
 }
 
-LatencyUpdateMessage::LatencyUpdateMessage()
+// ****************************** LATENCY UPDATE MESSAGE *****************************************
+LatencyUpdateMessage::LatencyUpdateMessage() : NetworkMessage( NetworkMessageTypes::LATENCY_UPDATE_MESSAGE )
 {}
 
 LatencyUpdateMessage::LatencyUpdateMessage( const rMap<short, double>& latestPingTimes ) : NetworkMessage( NetworkMessageTypes::LATENCY_UPDATE_MESSAGE )
@@ -112,6 +109,7 @@ void LatencyUpdateMessage::Deserialize( const char*& buffer )
 	}
 }
 
+// ****************************** HANDSHAKE *****************************************
 HandshakeMessage::HandshakeMessage() : NetworkMessage( NetworkMessageTypes::HANDSHAKE )
 {}
 
@@ -135,7 +133,8 @@ void HandshakeMessage::Deserialize( const char*& buffer )
 	NetworkMessage::Deserialize( buffer );
 }
 
-NetworkIDMessage::NetworkIDMessage()
+// ****************************** NETWORK ID MESSAGE *****************************************
+NetworkIDMessage::NetworkIDMessage() : NetworkMessage(NetworkMessageTypes::NETWORKIDMESSAGE)
 {}
 
 NetworkIDMessage::NetworkIDMessage( short networkID, const rVector<short>& connectedClients) : NetworkMessage( NetworkMessageTypes::NETWORKIDMESSAGE )
@@ -175,7 +174,8 @@ void NetworkIDMessage::Deserialize( const char*& buffer )
 	buffer += sizeof( short ) * vectorSize;
 }
 
-ConnectionStatusMessage::ConnectionStatusMessage()
+// ****************************** CONNECTION STATUS MESSAGE *****************************************
+ConnectionStatusMessage::ConnectionStatusMessage() : NetworkMessage( NetworkMessageTypes::CONNECTION_STATUS_MESSAGE )
 {}
 
 ConnectionStatusMessage::ConnectionStatusMessage( short networkID, ConnectionStatusChanges::ConnectionStatus newStatus ) : NetworkMessage( NetworkMessageTypes::CONNECTION_STATUS_MESSAGE )

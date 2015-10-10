@@ -1,5 +1,5 @@
 /**************************************************
-Viktor Kelkkanen & Ola Enberg
+2015 Viktor Kelkkanen & Ola Enberg
 ***************************************************/
 
 #include "Squad.h"
@@ -8,7 +8,7 @@ Viktor Kelkkanen & Ola Enberg
 #include <float.h>
 #include <glm/gtx/vector_angle.hpp>
 #include <gfx/GraphicsEngine.h>
-#include <messaging/GameMessages.h>
+#include "../input/GameMessages.h"
 #include "../component/ResourceComponent.h"
 #include "../subsystem/audio/SSAudio.h"
 #include "../subsystem/gamelogic/SSUpgrades.h"

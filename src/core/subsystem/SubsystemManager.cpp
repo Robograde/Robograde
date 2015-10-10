@@ -1,5 +1,5 @@
 /**************************************************
-Copyright 2015 Johan Melin & Daniel Bengtsson
+2015 Johan Melin & Daniel Bengtsson
 ***************************************************/
 
 #include "SubsystemManager.h"
@@ -80,6 +80,7 @@ Copyright 2015 Johan Melin & Daniel Bengtsson
 #include "gamelogic/SSRadar.h"
 #include "gamelogic/SSResourceManager.h"
 #include "gamelogic/SSDoodad.h"
+#include "gamelogic/SSParticleEmitter.h"
 #include "menu/SSMainMenu.h"
 #include "menu/SSOptionsMenu.h"
 #include "menu/SSGameLobby.h"
@@ -88,6 +89,16 @@ Copyright 2015 Johan Melin & Daniel Bengtsson
 #include "menu/SSReplaySelectMenu.h"
 #include "menu/SSHowTo.h"
 
+//Editor specific subsystems
+#include "editor/SSEditorMain.h"
+#include "editor/SSEditorEvents.h"
+#include "editor/SSEditorSFXEmitter.h"
+#include "editor/SSEditorCameraPaths.h"
+#include "editor/SSEditorToolbox.h"
+#include "editor/SSEditorObjectPlacer.h"
+#include "editor/SSColourPicker.h"
+#include "editor/SSEditorParticle.h"
+#include "editor/SSEditorTerrain.h"
 SubsystemManager& SubsystemManager::GetInstance()
 {
 	static SubsystemManager instance;
@@ -117,6 +128,7 @@ void SubsystemManager::Startup()
 	g_SSResourceFlag.		SetStartOrderPriority( 93U );		// Before squad flags to be drawn bellow	| After GUIUpdate
 	g_SSSquadFlag.			SetStartOrderPriority( 94U );		// Before any other gui windows				| After GUIUpdate
 	g_SSUpgradeWindow.		SetStartOrderPriority( 97U );		//											| After Upgrades & Research
+	g_SSEditorMain.			SetStartOrderPriority( 97U );		// Before any other GUI windows				| 
 	g_SSAI.					SetStartOrderPriority( 100U );		// Before camera							|
 	g_SSSquadControlGUI.	SetStartOrderPriority( 110U );		//											| After SSInput
 	g_SSAudioSettings.		SetStartOrderPriority( 125U );		// After all other sound stuff				|
@@ -139,6 +151,7 @@ void SubsystemManager::Startup()
 	g_SSMiniMap.			SetUpdateOrderPriority( 17U );		// Before SSPicking							|
 	g_SSConsole.			SetUpdateOrderPriority( 19U );		// Before SSPicking, chat					| After input
 	g_SSPicking.			SetUpdateOrderPriority( 21U );		// Before SSMail							| After input
+	g_SSEditorToolbox.		SetUpdateOrderPriority(	22U	);		// Before SSMail							| After Input
 	g_SSMail.				SetUpdateOrderPriority( 23U );		// Before game logic						| After messages aimed for this frame
 	g_SSReplayRecorder.		SetUpdateOrderPriority( 25U );		//											| After SSMail (ASAP to avoid unrecorded crashes)
 	g_SSNetworkOutput.		SetUpdateOrderPriority( 27U );		//											| After SSMail (ASAP to reduce latency)
@@ -183,79 +196,91 @@ void SubsystemManager::Startup()
 	#define NetworkLobby		GameModeType::NetworkLobby
 	#define SPLobby				GameModeType::SinglePlayerLobby
 	#define MainMenu			GameModeType::MainMenu
+	#define Editor				GameModeType::Editor
 	
-	// Decide in what modes subsystems should be active here			  Singleplayer		SingleplayerAI		Ai only 	Multiplayer		Replay		Dedicated Server	Console Only	Network Lobby	SPLobby		Main Menu
-	g_GameModeSelector.AddSubsystemToGameModes( &g_SSRender,			{ Singleplayer,		SingleplayerAI,		AIOnly,		Multiplayer,	Replay,																					} );
-	g_GameModeSelector.AddSubsystemToGameModes( &g_SSGUIUpdate,			{ Singleplayer,		SingleplayerAI,		AIOnly,		Multiplayer,	Replay,							ConsoleOnly,	NetworkLobby,	SPLobby,	MainMenu,	} );
-	g_GameModeSelector.AddSubsystemToGameModes( &g_SSGUIRender,			{ Singleplayer,		SingleplayerAI,		AIOnly,		Multiplayer,	Replay,							ConsoleOnly,	NetworkLobby,	SPLobby,	MainMenu,	} );
-	g_GameModeSelector.AddSubsystemToGameModes( &g_SSCursor,			{ Singleplayer,		SingleplayerAI,		AIOnly,		Multiplayer,	Replay,							ConsoleOnly,	NetworkLobby,	SPLobby,	MainMenu,	} );
-	g_GameModeSelector.AddSubsystemToGameModes( &g_SSAI,				{ Singleplayer,		SingleplayerAI,		AIOnly,		Multiplayer,	Replay,																					} );
-	g_GameModeSelector.AddSubsystemToGameModes( &g_SSAudio,				{ Singleplayer,		SingleplayerAI,		AIOnly,		Multiplayer,	Replay,											NetworkLobby,	SPLobby,	MainMenu,	} );
-	g_GameModeSelector.AddSubsystemToGameModes( &g_SSAudioSettings,		{ Singleplayer,		SingleplayerAI,		AIOnly,		Multiplayer,	Replay,											NetworkLobby,	SPLobby,	MainMenu,	} );
-	g_GameModeSelector.AddSubsystemToGameModes( &g_SSMusicManager,		{ Singleplayer,		SingleplayerAI,		AIOnly,		Multiplayer,	Replay,											NetworkLobby,	SPLobby,	MainMenu,	} );
-	g_GameModeSelector.AddSubsystemToGameModes( &g_SSSFXEmitter,		{ Singleplayer,		SingleplayerAI,		AIOnly,		Multiplayer,	Replay,																					} );
-	g_GameModeSelector.AddSubsystemToGameModes( &g_SSSFXNotification,	{ Singleplayer,		SingleplayerAI,		AIOnly,		Multiplayer,	Replay,											NetworkLobby,	SPLobby,	MainMenu,	} );
-	g_GameModeSelector.AddSubsystemToGameModes( &g_SSMail,				{ Singleplayer,		SingleplayerAI,		AIOnly,		Multiplayer,	Replay,		DedicatedServer,					NetworkLobby,	SPLobby,	MainMenu	} );
-	g_GameModeSelector.AddSubsystemToGameModes( &g_SSCollision,			{ Singleplayer,		SingleplayerAI,		AIOnly,		Multiplayer,	Replay,		DedicatedServer,															} );
-	g_GameModeSelector.AddSubsystemToGameModes( &g_SSCamera,			{ Singleplayer,		SingleplayerAI,		AIOnly,		Multiplayer,	Replay,																					} );
-	g_GameModeSelector.AddSubsystemToGameModes( &g_SSKill,				{ Singleplayer,		SingleplayerAI,		AIOnly,		Multiplayer,	Replay,		DedicatedServer,															} );
-	g_GameModeSelector.AddSubsystemToGameModes( &g_SSConsole,			{ Singleplayer,		SingleplayerAI,		AIOnly,		Multiplayer,	Replay,							ConsoleOnly,	NetworkLobby,	SPLobby,	MainMenu,	} );
-	g_GameModeSelector.AddSubsystemToGameModes( &g_SSTerrainFollow,		{ Singleplayer,		SingleplayerAI,		AIOnly,		Multiplayer,	Replay,																					} );
-	g_GameModeSelector.AddSubsystemToGameModes( &g_SSChildMover,		{ Singleplayer,		SingleplayerAI,		AIOnly,		Multiplayer,	Replay,		DedicatedServer,															} );
-	g_GameModeSelector.AddSubsystemToGameModes( &g_SSControlPoint,		{ Singleplayer,		SingleplayerAI,		AIOnly,		Multiplayer,	Replay,		DedicatedServer,															} );
-	g_GameModeSelector.AddSubsystemToGameModes( &g_SSGameOver,			{ Singleplayer,		SingleplayerAI,		AIOnly,		Multiplayer,				DedicatedServer,															} );
-	g_GameModeSelector.AddSubsystemToGameModes( &g_SSHashComparison,	{													Multiplayer,	Replay,		DedicatedServer,															} );
-	g_GameModeSelector.AddSubsystemToGameModes( &g_SSUpgradeWindow,		{ Singleplayer,		SingleplayerAI,					Multiplayer,																							} );
-	g_GameModeSelector.AddSubsystemToGameModes( &g_SSSquadFlag,			{ Singleplayer,		SingleplayerAI,					Multiplayer,	Replay,																					} );
-	g_GameModeSelector.AddSubsystemToGameModes( &g_SSResourceFlag,		{ Singleplayer,		SingleplayerAI,					Multiplayer,	Replay,																					} );
-	g_GameModeSelector.AddSubsystemToGameModes( &g_SSDecaling,			{ Singleplayer,		SingleplayerAI,					Multiplayer,	Replay,																					} );
-	g_GameModeSelector.AddSubsystemToGameModes( &g_SSHealthBar,			{ Singleplayer,		SingleplayerAI,		AIOnly,		Multiplayer,	Replay,																					} );
-	g_GameModeSelector.AddSubsystemToGameModes( &g_SSRadar,				{ Singleplayer,		SingleplayerAI,					Multiplayer,																							} );
-	g_GameModeSelector.AddSubsystemToGameModes( &g_SSResourceManager,	{ Singleplayer,		SingleplayerAI,		AIOnly,		Multiplayer,	Replay,																					} );
-	g_GameModeSelector.AddSubsystemToGameModes( &g_SSHashGenerator,		{ Singleplayer,		SingleplayerAI,		AIOnly,		Multiplayer,	Replay,		DedicatedServer,															} );
-	g_GameModeSelector.AddSubsystemToGameModes( &g_SSParticle,			{ Singleplayer,		SingleplayerAI,		AIOnly,		Multiplayer,	Replay,																					} );
-	g_GameModeSelector.AddSubsystemToGameModes( &g_SSProjectiles,		{ Singleplayer,		SingleplayerAI,		AIOnly,		Multiplayer,	Replay,		DedicatedServer,															} );
-	g_GameModeSelector.AddSubsystemToGameModes( &g_SSUpgrades,			{ Singleplayer,		SingleplayerAI,		AIOnly,		Multiplayer,	Replay,		DedicatedServer,															} );
-	g_GameModeSelector.AddSubsystemToGameModes( &g_SSResearch,			{ Singleplayer,		SingleplayerAI,		AIOnly,		Multiplayer,	Replay,		DedicatedServer,															} );
-	g_GameModeSelector.AddSubsystemToGameModes( &g_SSAnimation,			{ Singleplayer,		SingleplayerAI,		AIOnly,		Multiplayer,	Replay,																					} );
-	g_GameModeSelector.AddSubsystemToGameModes( &g_SSMiniMap,			{ Singleplayer,		SingleplayerAI,		AIOnly,		Multiplayer,	Replay,																					} );
-	g_GameModeSelector.AddSubsystemToGameModes( &g_SSFogOfWar,			{ Singleplayer,		SingleplayerAI,		AIOnly,		Multiplayer,	Replay,		DedicatedServer,															} );
-	g_GameModeSelector.AddSubsystemToGameModes( &g_SSShadow,			{ Singleplayer,		SingleplayerAI,		AIOnly,		Multiplayer,	Replay,																					} );
-	g_GameModeSelector.AddSubsystemToGameModes( &g_SSKillAll,			{ Singleplayer,		SingleplayerAI,		AIOnly,		Multiplayer,	Replay,		DedicatedServer,															} );
-	g_GameModeSelector.AddSubsystemToGameModes( &g_SSGFXLoader,			{ Singleplayer,		SingleplayerAI,		AIOnly,		Multiplayer,	Replay,																					} );
-	g_GameModeSelector.AddSubsystemToGameModes( &g_SSSceneLoader,		{ Singleplayer,		SingleplayerAI,		AIOnly,		Multiplayer,	Replay,		DedicatedServer,															} );
-	g_GameModeSelector.AddSubsystemToGameModes( &g_SSInput,				{ Singleplayer,		SingleplayerAI,		AIOnly,		Multiplayer,																							} );
-	g_GameModeSelector.AddSubsystemToGameModes( &g_SSPicking,			{ Singleplayer,		SingleplayerAI,		AIOnly,		Multiplayer,																							} );
-	g_GameModeSelector.AddSubsystemToGameModes( &g_SSButtonInput,		{ Singleplayer,		SingleplayerAI,		AIOnly,		Multiplayer,																							} );
-	g_GameModeSelector.AddSubsystemToGameModes( &g_SSReplayRecorder,	{ Singleplayer,		SingleplayerAI,		AIOnly,		Multiplayer,				DedicatedServer,															} );
-	g_GameModeSelector.AddSubsystemToGameModes( &g_SSMetaDataRecorder,	{ Singleplayer,		SingleplayerAI,		AIOnly,		Multiplayer,				DedicatedServer,															} );
-	g_GameModeSelector.AddSubsystemToGameModes( &g_SSReplayPlayer,		{																	Replay,																					} );
-	g_GameModeSelector.AddSubsystemToGameModes( &g_SSNetworkController, {													Multiplayer,				DedicatedServer,					NetworkLobby,							} );
-	g_GameModeSelector.AddSubsystemToGameModes( &g_SSNetworkInput,		{													Multiplayer,				DedicatedServer,					NetworkLobby,							} );
-	g_GameModeSelector.AddSubsystemToGameModes( &g_SSNetworkOutput,		{													Multiplayer,				DedicatedServer,					NetworkLobby,							} );
-	g_GameModeSelector.AddSubsystemToGameModes( &g_SSChat,				{													Multiplayer,													NetworkLobby,							} );
-	g_GameModeSelector.AddSubsystemToGameModes( &g_SSSquadControlGUI,	{ Singleplayer,		SingleplayerAI,					Multiplayer,																							} );
-	g_GameModeSelector.AddSubsystemToGameModes( &g_SSGUIInfo,			{ Singleplayer,		SingleplayerAI,					Multiplayer,	Replay,																					} );
-	g_GameModeSelector.AddSubsystemToGameModes( &g_SSMainMenu,			{																																				MainMenu,	} );
-	g_GameModeSelector.AddSubsystemToGameModes( &g_SSOptionsMenu,		{																																				MainMenu,	} );
-	g_GameModeSelector.AddSubsystemToGameModes( &g_SSReplaySelectMenu,	{																																				MainMenu,	} );
-	g_GameModeSelector.AddSubsystemToGameModes( &g_SSHowTo,				{																																				MainMenu,	} );
-	g_GameModeSelector.AddSubsystemToGameModes( &g_SSGameLobby,			{																													NetworkLobby,							} );
-	g_GameModeSelector.AddSubsystemToGameModes( &g_SSGameLobbySP,		{																																	SPLobby,				} );
-	g_GameModeSelector.AddSubsystemToGameModes( &g_SSProfilerWindow,	{ Singleplayer,		SingleplayerAI,		AIOnly,		Multiplayer,	Replay,							ConsoleOnly,	NetworkLobby,	SPLobby,	MainMenu,	} );
-	g_GameModeSelector.AddSubsystemToGameModes( &g_SSNetworkInfoWindow,	{													Multiplayer,																							} );
-	g_GameModeSelector.AddSubsystemToGameModes( &g_SSKeyBinding,		{ Singleplayer,		SingleplayerAI,		AIOnly,		Multiplayer,	Replay,						 	ConsoleOnly, 	NetworkLobby, 	SPLobby,	MainMenu 	} );
-	g_GameModeSelector.AddSubsystemToGameModes( &g_SSGraphicsSettings,	{ Singleplayer,		SingleplayerAI,		AIOnly,		Multiplayer,	Replay, 						ConsoleOnly, 	NetworkLobby, 	SPLobby,	MainMenu 	} );
-	g_GameModeSelector.AddSubsystemToGameModes( &g_SSInGameMenu,		{ Singleplayer,		SingleplayerAI,		AIOnly,		Multiplayer,	Replay,																					} );
-	g_GameModeSelector.AddSubsystemToGameModes( &g_SSGameTimer,			{ Singleplayer,		SingleplayerAI,		AIOnly,		Multiplayer,	Replay,																					} );
-	g_GameModeSelector.AddSubsystemToGameModes( &g_SSDoodad,			{ Singleplayer,		SingleplayerAI,		AIOnly,		Multiplayer,	Replay,																					} );
-	g_GameModeSelector.AddSubsystemToGameModes( &g_SSCommandQueueGFX,	{ Singleplayer,		SingleplayerAI,					Multiplayer,																							} );
-
+	// Decide in what modes subsystems should be active here				Singleplayer		SingleplayerAI		Ai only 	Multiplayer		Replay		Dedicated Server	Console Only	Network Lobby	SPLobby		Main Menu	Editor
+	g_GameModeSelector.AddSubsystemToGameModes( &g_SSRender,				{ Singleplayer,		SingleplayerAI,		AIOnly,		Multiplayer,	Replay,																						Editor,	} );
+	g_GameModeSelector.AddSubsystemToGameModes( &g_SSGUIUpdate,				{ Singleplayer,		SingleplayerAI,		AIOnly,		Multiplayer,	Replay,							ConsoleOnly,	NetworkLobby,	SPLobby,	MainMenu,		Editor,	} );
+	g_GameModeSelector.AddSubsystemToGameModes( &g_SSGUIRender,				{ Singleplayer,		SingleplayerAI,		AIOnly,		Multiplayer,	Replay,							ConsoleOnly,	NetworkLobby,	SPLobby,	MainMenu,		Editor,	} );
+	g_GameModeSelector.AddSubsystemToGameModes( &g_SSCursor,				{ Singleplayer,		SingleplayerAI,		AIOnly,		Multiplayer,	Replay,							ConsoleOnly,	NetworkLobby,	SPLobby,	MainMenu,		Editor,	} );
+	g_GameModeSelector.AddSubsystemToGameModes( &g_SSAI,					{ Singleplayer,		SingleplayerAI,		AIOnly,		Multiplayer,	Replay,																								} );
+	g_GameModeSelector.AddSubsystemToGameModes( &g_SSAudio,					{ Singleplayer,		SingleplayerAI,		AIOnly,		Multiplayer,	Replay,											NetworkLobby,	SPLobby,	MainMenu,		Editor	} );
+	g_GameModeSelector.AddSubsystemToGameModes( &g_SSAudioSettings,			{ Singleplayer,		SingleplayerAI,		AIOnly,		Multiplayer,	Replay,											NetworkLobby,	SPLobby,	MainMenu,		Editor	} );
+	g_GameModeSelector.AddSubsystemToGameModes( &g_SSMusicManager,			{ Singleplayer,		SingleplayerAI,		AIOnly,		Multiplayer,	Replay,											NetworkLobby,	SPLobby,	MainMenu,				} );
+	g_GameModeSelector.AddSubsystemToGameModes( &g_SSSFXEmitter,			{ Singleplayer,		SingleplayerAI,		AIOnly,		Multiplayer,	Replay,																						Editor	} );
+	g_GameModeSelector.AddSubsystemToGameModes( &g_SSSFXNotification,		{ Singleplayer,		SingleplayerAI,		AIOnly,		Multiplayer,	Replay,											NetworkLobby,	SPLobby,	MainMenu,				} );
+	g_GameModeSelector.AddSubsystemToGameModes( &g_SSMail,					{ Singleplayer,		SingleplayerAI,		AIOnly,		Multiplayer,	Replay,		DedicatedServer,					NetworkLobby,	SPLobby,	MainMenu,		Editor,	} );
+	g_GameModeSelector.AddSubsystemToGameModes( &g_SSCollision,				{ Singleplayer,		SingleplayerAI,		AIOnly,		Multiplayer,	Replay,		DedicatedServer,																Editor,	} );
+	g_GameModeSelector.AddSubsystemToGameModes( &g_SSCamera,				{ Singleplayer,		SingleplayerAI,		AIOnly,		Multiplayer,	Replay,																						Editor,	} );
+	g_GameModeSelector.AddSubsystemToGameModes( &g_SSKill,					{ Singleplayer,		SingleplayerAI,		AIOnly,		Multiplayer,	Replay,		DedicatedServer,																		} );
+	g_GameModeSelector.AddSubsystemToGameModes( &g_SSConsole,				{ Singleplayer,		SingleplayerAI,		AIOnly,		Multiplayer,	Replay,							ConsoleOnly,	NetworkLobby,	SPLobby,	MainMenu,		Editor,	} );
+	g_GameModeSelector.AddSubsystemToGameModes( &g_SSTerrainFollow,			{ Singleplayer,		SingleplayerAI,		AIOnly,		Multiplayer,	Replay,																						Editor,	} );
+	g_GameModeSelector.AddSubsystemToGameModes( &g_SSChildMover,			{ Singleplayer,		SingleplayerAI,		AIOnly,		Multiplayer,	Replay,		DedicatedServer,																Editor,	} );
+	g_GameModeSelector.AddSubsystemToGameModes( &g_SSControlPoint,			{ Singleplayer,		SingleplayerAI,		AIOnly,		Multiplayer,	Replay,		DedicatedServer,																		} );
+	g_GameModeSelector.AddSubsystemToGameModes( &g_SSGameOver,				{ Singleplayer,		SingleplayerAI,		AIOnly,		Multiplayer,				DedicatedServer,																		} );
+	g_GameModeSelector.AddSubsystemToGameModes( &g_SSHashComparison,		{													Multiplayer,	Replay,		DedicatedServer,																		} );
+	g_GameModeSelector.AddSubsystemToGameModes( &g_SSUpgradeWindow,			{ Singleplayer,		SingleplayerAI,					Multiplayer,																										} );
+	g_GameModeSelector.AddSubsystemToGameModes( &g_SSSquadFlag,				{ Singleplayer,		SingleplayerAI,					Multiplayer,	Replay,																								} );
+	g_GameModeSelector.AddSubsystemToGameModes( &g_SSResourceFlag,			{ Singleplayer,		SingleplayerAI,					Multiplayer,	Replay,																								} );
+	g_GameModeSelector.AddSubsystemToGameModes( &g_SSDecaling,				{ Singleplayer,		SingleplayerAI,					Multiplayer,	Replay,																						Editor	} );
+	g_GameModeSelector.AddSubsystemToGameModes( &g_SSHealthBar,				{ Singleplayer,		SingleplayerAI,		AIOnly,		Multiplayer,	Replay,																								} );
+	g_GameModeSelector.AddSubsystemToGameModes( &g_SSRadar,					{ Singleplayer,		SingleplayerAI,					Multiplayer,																										} );
+	g_GameModeSelector.AddSubsystemToGameModes( &g_SSResourceManager,		{ Singleplayer,		SingleplayerAI,		AIOnly,		Multiplayer,	Replay,																								} );
+	g_GameModeSelector.AddSubsystemToGameModes( &g_SSHashGenerator,			{ Singleplayer,		SingleplayerAI,		AIOnly,		Multiplayer,	Replay,		DedicatedServer,																		} );
+	g_GameModeSelector.AddSubsystemToGameModes( &g_SSParticle,				{ Singleplayer,		SingleplayerAI,		AIOnly,		Multiplayer,	Replay,																						Editor	} );
+	g_GameModeSelector.AddSubsystemToGameModes( &g_SSProjectiles,			{ Singleplayer,		SingleplayerAI,		AIOnly,		Multiplayer,	Replay,		DedicatedServer,																		} );
+	g_GameModeSelector.AddSubsystemToGameModes( &g_SSUpgrades,				{ Singleplayer,		SingleplayerAI,		AIOnly,		Multiplayer,	Replay,		DedicatedServer,																		} );
+	g_GameModeSelector.AddSubsystemToGameModes( &g_SSResearch,				{ Singleplayer,		SingleplayerAI,		AIOnly,		Multiplayer,	Replay,		DedicatedServer,																		} );
+	g_GameModeSelector.AddSubsystemToGameModes( &g_SSAnimation,				{ Singleplayer,		SingleplayerAI,		AIOnly,		Multiplayer,	Replay,																								} );
+	g_GameModeSelector.AddSubsystemToGameModes( &g_SSMiniMap,				{ Singleplayer,		SingleplayerAI,		AIOnly,		Multiplayer,	Replay,																								} );
+	g_GameModeSelector.AddSubsystemToGameModes( &g_SSFogOfWar,				{ Singleplayer,		SingleplayerAI,		AIOnly,		Multiplayer,	Replay,		DedicatedServer,																Editor	} );
+	g_GameModeSelector.AddSubsystemToGameModes( &g_SSShadow,				{ Singleplayer,		SingleplayerAI,		AIOnly,		Multiplayer,	Replay,																						Editor,	} );
+	g_GameModeSelector.AddSubsystemToGameModes( &g_SSKillAll,				{ Singleplayer,		SingleplayerAI,		AIOnly,		Multiplayer,	Replay,		DedicatedServer,																		} );
+	g_GameModeSelector.AddSubsystemToGameModes( &g_SSGFXLoader,				{ Singleplayer,		SingleplayerAI,		AIOnly,		Multiplayer,	Replay,																						Editor,	} );
+	g_GameModeSelector.AddSubsystemToGameModes( &g_SSSceneLoader,			{ Singleplayer,		SingleplayerAI,		AIOnly,		Multiplayer,	Replay,		DedicatedServer,																Editor	} );
+	g_GameModeSelector.AddSubsystemToGameModes( &g_SSInput,					{ Singleplayer,		SingleplayerAI,		AIOnly,		Multiplayer,																										} );
+	g_GameModeSelector.AddSubsystemToGameModes( &g_SSPicking,				{ Singleplayer,		SingleplayerAI,		AIOnly,		Multiplayer,																										} );
+	g_GameModeSelector.AddSubsystemToGameModes( &g_SSButtonInput,			{ Singleplayer,		SingleplayerAI,		AIOnly,		Multiplayer,																								Editor	} );
+	g_GameModeSelector.AddSubsystemToGameModes( &g_SSReplayRecorder,		{ Singleplayer,		SingleplayerAI,		AIOnly,		Multiplayer,				DedicatedServer,																		} );
+	g_GameModeSelector.AddSubsystemToGameModes( &g_SSMetaDataRecorder,		{ Singleplayer,		SingleplayerAI,		AIOnly,		Multiplayer,				DedicatedServer,																		} );
+	g_GameModeSelector.AddSubsystemToGameModes( &g_SSReplayPlayer,			{																	Replay,																								} );
+	g_GameModeSelector.AddSubsystemToGameModes( &g_SSNetworkController,		{													Multiplayer,				DedicatedServer,					NetworkLobby,								Editor,	} );
+	g_GameModeSelector.AddSubsystemToGameModes( &g_SSNetworkInput,			{													Multiplayer,				DedicatedServer,					NetworkLobby,								Editor,	} );
+	g_GameModeSelector.AddSubsystemToGameModes( &g_SSNetworkOutput,			{													Multiplayer,				DedicatedServer,					NetworkLobby,								Editor,	} );
+	g_GameModeSelector.AddSubsystemToGameModes( &g_SSChat,					{													Multiplayer,													NetworkLobby,								Editor,	} );
+	g_GameModeSelector.AddSubsystemToGameModes( &g_SSSquadControlGUI,		{ Singleplayer,		SingleplayerAI,					Multiplayer,																										} );
+	g_GameModeSelector.AddSubsystemToGameModes( &g_SSGUIInfo,				{ Singleplayer,		SingleplayerAI,					Multiplayer,	Replay,																						Editor,	} );
+	g_GameModeSelector.AddSubsystemToGameModes( &g_SSMainMenu,				{																																				MainMenu,				} );
+	g_GameModeSelector.AddSubsystemToGameModes( &g_SSOptionsMenu,			{																																				MainMenu,				} );
+	g_GameModeSelector.AddSubsystemToGameModes( &g_SSReplaySelectMenu,		{																																				MainMenu,				} );
+	g_GameModeSelector.AddSubsystemToGameModes( &g_SSHowTo,					{																																				MainMenu,				} );
+	g_GameModeSelector.AddSubsystemToGameModes( &g_SSGameLobby,				{																													NetworkLobby,										} );
+	g_GameModeSelector.AddSubsystemToGameModes( &g_SSGameLobbySP,			{																																	SPLobby,							} );
+	g_GameModeSelector.AddSubsystemToGameModes( &g_SSProfilerWindow,		{ Singleplayer,		SingleplayerAI,		AIOnly,		Multiplayer,	Replay,							ConsoleOnly,	NetworkLobby,	SPLobby,	MainMenu,				} );
+	g_GameModeSelector.AddSubsystemToGameModes( &g_SSNetworkInfoWindow,		{													Multiplayer,																										} );
+	g_GameModeSelector.AddSubsystemToGameModes( &g_SSKeyBinding,			{ Singleplayer,		SingleplayerAI,		AIOnly,		Multiplayer,	Replay,						 	ConsoleOnly, 	NetworkLobby, 	SPLobby,	MainMenu, 		Editor,	} );
+	g_GameModeSelector.AddSubsystemToGameModes( &g_SSGraphicsSettings,		{ Singleplayer,		SingleplayerAI,		AIOnly,		Multiplayer,	Replay, 						ConsoleOnly, 	NetworkLobby, 	SPLobby,	MainMenu, 				} );
+	g_GameModeSelector.AddSubsystemToGameModes( &g_SSInGameMenu,			{ Singleplayer,		SingleplayerAI,		AIOnly,		Multiplayer,	Replay,																								} );
+	g_GameModeSelector.AddSubsystemToGameModes( &g_SSGameTimer,				{ Singleplayer,		SingleplayerAI,		AIOnly,		Multiplayer,	Replay,																								} );
+	g_GameModeSelector.AddSubsystemToGameModes( &g_SSDoodad,				{ Singleplayer,		SingleplayerAI,		AIOnly,		Multiplayer,	Replay,																								} );
+	g_GameModeSelector.AddSubsystemToGameModes( &g_SSCommandQueueGFX,		{ Singleplayer,		SingleplayerAI,					Multiplayer,																										} );
+	g_GameModeSelector.AddSubsystemToGameModes( &g_SSParticleEmitter,		{																																								Editor	} );
+	//Editor specific subsystems
+	g_GameModeSelector.AddSubsystemToGameModes( &g_SSEditorMain,			{																																								Editor,	} );
+	g_GameModeSelector.AddSubsystemToGameModes( &g_SSEditorEvents,			{																																								Editor,	} );
+	g_GameModeSelector.AddSubsystemToGameModes( &g_SSEditorSFXEmitter,		{																																								Editor,	} );	
+	g_GameModeSelector.AddSubsystemToGameModes( &g_SSEditorCameraPaths,		{																																								Editor, } );
+	g_GameModeSelector.AddSubsystemToGameModes( &g_SSEditorToolbox,			{																																								Editor,	} );
+	g_GameModeSelector.AddSubsystemToGameModes( &g_SSEditorObjectPlacer,	{																																								Editor,	} );
+	g_GameModeSelector.AddSubsystemToGameModes( &g_SSColourPicker,			{																																								Editor,	} );
+	g_GameModeSelector.AddSubsystemToGameModes( &g_SSEditorParticle,		{																																								Editor,	} );
+	g_GameModeSelector.AddSubsystemToGameModes( &g_SSEditorTerrain,			{																																								Editor, } );
+	
 	// Pilla bli på denna. SKA LIGGA HÄR. TODOJM move to dev only build? May want users to have this, but should default to toggled off?
-	g_GameModeSelector.AddSubsystemToGameModes( &g_SSFrameCounter,		{ Singleplayer,		SingleplayerAI,		AIOnly,		Multiplayer,	Replay,							ConsoleOnly,	NetworkLobby,				MainMenu,	} );
+	g_GameModeSelector.AddSubsystemToGameModes( &g_SSFrameCounter,		{ Singleplayer,		SingleplayerAI,		AIOnly,		Multiplayer,	Replay,							ConsoleOnly,	NetworkLobby,				MainMenu,	Editor,		} );
 	DEV(
-		g_GameModeSelector.AddSubsystemToGameModes( &g_SSMemoryDebug,	{ Singleplayer,		SingleplayerAI,		AIOnly,		Multiplayer,	Replay,							ConsoleOnly,	NetworkLobby,				MainMenu,	} );
-		g_GameModeSelector.AddSubsystemToGameModes( &g_SSStartupScript,	{ Singleplayer,		SingleplayerAI,		AIOnly,																												} );
+		g_GameModeSelector.AddSubsystemToGameModes( &g_SSMemoryDebug,	{ Singleplayer,		SingleplayerAI,		AIOnly,		Multiplayer,	Replay,							ConsoleOnly,	NetworkLobby,				MainMenu,				} );
+		g_GameModeSelector.AddSubsystemToGameModes( &g_SSStartupScript,	{ Singleplayer,		SingleplayerAI,		AIOnly,																															} );
 	);
 
 	g_GameSpeedController.Startup();

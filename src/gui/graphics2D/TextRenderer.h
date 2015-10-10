@@ -53,6 +53,7 @@ namespace GUI
 		pVector<TextDefinition*>	m_TextQueue;
 		
 		pVector<rString>		m_Lines;
+		pVector<rString>		m_Lines2;
 		rMap<int, glm::vec4>	m_Colours;
 
 		rString			m_TempText;

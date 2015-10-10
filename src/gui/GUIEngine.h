@@ -13,6 +13,7 @@ Zlib Copyright 2015 Isak Almgren
 #include "object/ComboBox.h"
 #include "object/Slider.h"
 #include "object/ProgressBar.h"
+#include "object/CircularSlider.h"
 #include <script/ScriptEngine.h>
 
 #include "GUIScriptFunctions.h"
@@ -60,6 +61,7 @@ namespace GUI
 		GUI_API ComboBox*	AddComboBox		( const rString& name, Rectangle boundingBox, const rString& parent );
 		GUI_API Slider*		AddSlider		( const rString& name, Rectangle boundingBox, const rString& parent );
 		GUI_API ProgressBar*AddProgressBar	( const rString& name, Rectangle boundingBox, const rString& parent );
+		GUI_API CircularSlider* AddCircularSlider	( const rString& name, glm::ivec2 position, const rString& parent );
 		
 		//Add a text. Width and Height are optional, will align text to window if not set
 		GUI_API Text*		AddText			( const rString& name, TextDefinition textDefinition, const rString& parent );
@@ -96,12 +98,16 @@ namespace GUI
 		GUI_API void 		ToggleInput			( bool enableInput );
 		GUI_API bool 		IsInputEnabled		( );
 		
-		
+		GUI_API Object*		GetObject			(  const rString& name, const rString& parent );
+
+		GUI_API void		SetToolTipText		( const rString& text );
 		
 		
 	private:
-		void AddChild					( const rString& name, Object* child, const rString& parent );
-		Object* GetChild				( const rString& name, const rString& parent );
+		void				AddChild			( const rString& name, Object* child, const rString& parent );
+		Object*				GetChild			( const rString& name, const rString& parent );
+
+		void				RenderToolTip		();
 		
 		tMap<rString, Window*>			m_Windows;
 		Window*							m_RootWindow = nullptr;
@@ -115,5 +121,8 @@ namespace GUI
 		
 		bool							m_InputEnabled = true;
 		int								m_ObjectNameIndex = 0;
+
+		TextDefinition					m_ToolTipText;
+		SpriteDefinition				m_ToolTipBackground;
 	};
 }

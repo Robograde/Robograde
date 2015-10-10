@@ -1,11 +1,11 @@
 /**************************************************
-Copyright 2015 Isak Almgren
+2015 Isak Almgren
 ***************************************************/
 
 #include "SSGUIUpdate.h"
 #include <input/Input.h>
 #include <SDL2/SDL.h>
-#include <messaging/GameMessages.h>
+#include "../../input/GameMessages.h"
 #include "../input/SSPicking.h"
 #include "../utility/SSMail.h"
 

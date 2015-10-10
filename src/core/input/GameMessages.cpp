@@ -1,5 +1,5 @@
 /**************************************************
-Zlib Copyright <2015> <Daniel "MonzUn" Bengtsson>
+<2015> <Daniel "MonzUn" Bengtsson>
 ***************************************************/
 
 #include "GameMessages.h"
@@ -9,6 +9,7 @@ using namespace SerializationUtility;
 using namespace DataSizes;
 
 //**************************Hest**************************
+
 HestMessage::HestMessage() : Message( MessageTypes::HEST )
 {}
 
@@ -43,6 +44,7 @@ void HestMessage::Deserialize( const char*& buffer )
 }
   
 //**************************OrderUnits**************************
+
 OrderUnitsMessage::OrderUnitsMessage() : Message( MessageTypes::ORDER_UNITS )
 {}
 
@@ -105,6 +107,7 @@ void OrderUnitsMessage::Deserialize( const char*& buffer )
 }
 
 //**************************OrderInvoke**************************
+
 OrderInvokeMessage::OrderInvokeMessage() : Message( MessageTypes::ORDER_INVOKE )
 {}
 
@@ -160,6 +163,7 @@ void OrderInvokeMessage::Deserialize( const char*& buffer )
 }
 
 //**************************GameOver**************************
+
 GameOverMessage::GameOverMessage() : Message( MessageTypes::GAME_OVER )
 {}
 
@@ -191,6 +195,7 @@ void GameOverMessage::Deserialize( const char*& buffer )
 }
 
 //**************************AIMsg**************************
+
 AIMessage::AIMessage() : Message( MessageTypes::AI_MSG )
 {}
 
@@ -231,6 +236,7 @@ void AIMessage::Deserialize( const char*& buffer )
 }
 
 //**************************ResearchMessage**************************
+
 ResearchMessage::ResearchMessage() : Message( MessageTypes::RESEARCH )
 {}
 
@@ -268,6 +274,7 @@ void ResearchMessage::Deserialize( const char*& buffer )
 }
 
 //**************************ControlPointMessage**************************
+
 ControlPointMessage::ControlPointMessage() : Message( MessageTypes::CONTROL_POINT )
 {}
 
@@ -308,6 +315,7 @@ void ControlPointMessage::Deserialize( const char*& buffer )
 }
 
 //**************************UpgradeMessage**************************
+
 UpgradeMessage::UpgradeMessage() : Message( MessageTypes::UPGRADE )
 {}
 
@@ -360,7 +368,8 @@ void UpgradeMessage::Deserialize( const char*& buffer )
 }
 
 //**************************RandomSeed**************************
-RandomSeedMessage::RandomSeedMessage()
+
+RandomSeedMessage::RandomSeedMessage() : Message( MessageTypes::RANDOM_SEED, false )
 {}
 
 RandomSeedMessage::RandomSeedMessage( unsigned int seed ) : Message( MessageTypes::RANDOM_SEED, false )
@@ -391,7 +400,8 @@ void RandomSeedMessage::Deserialize( const char*& buffer )
 }
 
 //**************************UserSignal**************************
-UserSignalMessage::UserSignalMessage()
+
+UserSignalMessage::UserSignalMessage() : Message( MessageTypes::USER_SIGNAL, false )
 {}
 
 UserSignalMessage::UserSignalMessage( UserSignalType::SINGAL_TYPE type, unsigned short senderID ) : Message( MessageTypes::USER_SIGNAL, false )
@@ -425,7 +435,8 @@ void UserSignalMessage::Deserialize( const char*& buffer )
 }
 
 //**************************StepMessage**************************
-StepMessage::StepMessage()
+
+StepMessage::StepMessage() : Message( MessageTypes::STEP, false )
 {}
 
 StepMessage::StepMessage( unsigned int frame, unsigned int hash, unsigned int randomCount ) : Message( MessageTypes::STEP, false )
@@ -462,7 +473,8 @@ void StepMessage::Deserialize( const char*& buffer )
 }
 
 //**************************StepResponseMessage**************************
-StepResponseMessage::StepResponseMessage()
+
+StepResponseMessage::StepResponseMessage() : Message( MessageTypes::STEP_RESPONSE, false )
 {}
 
 StepResponseMessage::StepResponseMessage( short playerID, unsigned int frame ) : Message( MessageTypes::STEP_RESPONSE, false )
@@ -496,7 +508,8 @@ void StepResponseMessage::Deserialize( const char*& buffer )
 }
 
 //**************************NameUpdateMessage**************************
-NameUpdateMessage::NameUpdateMessage()
+
+NameUpdateMessage::NameUpdateMessage() : Message( MessageTypes::NAME_UPDATE, false )
 {}
 
 NameUpdateMessage::NameUpdateMessage( const rVector<rString>& names, const rVector<short>& playerIDs ) : Message( MessageTypes::NAME_UPDATE, false )
@@ -569,7 +582,7 @@ void NameUpdateMessage::Deserialize( const char*& buffer )
 
 //**************************WriteFileMessage**************************
 
-WriteFileMessage::WriteFileMessage()
+WriteFileMessage::WriteFileMessage() : Message( MessageTypes::WRITE_FILE, false )
 {}
 
 WriteFileMessage::WriteFileMessage(const rString& text, const rString& filePath) : Message(MessageTypes::WRITE_FILE, false)
@@ -626,7 +639,7 @@ void WriteFileMessage::Deserialize( const char*& buffer )
 
 //**************************ChatMessage**************************
 
-ChatMessage::ChatMessage()
+ChatMessage::ChatMessage() : Message( MessageTypes::CHAT, false )
 {}
 
 ChatMessage::ChatMessage( const rString& message, short senderID, short targetID ) : Message( MessageTypes::CHAT, false )
@@ -673,7 +686,7 @@ void ChatMessage::Deserialize( const char*& buffer )
 
 //**************************ConnectionStatusMessage**************************
 
-ConnectionStatusUpdateMessage::ConnectionStatusUpdateMessage()
+ConnectionStatusUpdateMessage::ConnectionStatusUpdateMessage() : Message( MessageTypes::CONNECTION_STATUS, false )
 {}
 
 ConnectionStatusUpdateMessage::ConnectionStatusUpdateMessage( short networkID, ConnectionStatusUpdates::ConnectionStatusUpdate newStatus ) : Message( MessageTypes::CONNECTION_STATUS, false )
@@ -748,6 +761,7 @@ void LevelSelectionChangeMessage::Deserialize( const char*& buffer )
 }
 
 //**************************ColourChangeMessage**************************
+
 ColourChangeMessage::ColourChangeMessage( ) : Message( MessageTypes::COLOUR_CHANGE, false )
 {}
 
@@ -787,6 +801,7 @@ void ColourChangeMessage::Deserialize( const char*& buffer )
 }
 
 //**************************TeamChangeMessage**************************
+
 TeamChangeMessage::TeamChangeMessage( ) : Message( MessageTypes::TEAM_CHANGE, false )
 {}
 
@@ -826,6 +841,7 @@ void TeamChangeMessage::Deserialize( const char*& buffer )
 }
 
 //**************************SpawnPointChangeMessage**************************
+
 SpawnPointChangeMessage::SpawnPointChangeMessage( ) : Message( MessageTypes::SPAWN_POINT_CHANGE, false )
 {}
 
@@ -865,6 +881,7 @@ void SpawnPointChangeMessage::Deserialize( const char*& buffer )
 }
 
 //**************************SpawnCountChangeMessage**************************
+
 SpawnCountChangeMessage::SpawnCountChangeMessage() : Message(MessageTypes::CHANGE_SPAWN_COUNT, false)
 {}
 
@@ -880,7 +897,7 @@ Message* SpawnCountChangeMessage::Clone() const
 
 unsigned int SpawnCountChangeMessage::GetSerializationSize() const
 {
-	return Message::GetSerializationSize() + static_cast<unsigned int> (SHORT_SIZE); // TODOJM: This was wrong, make sure it is right now/
+	return Message::GetSerializationSize() + static_cast<unsigned int>(SHORT_SIZE);
 }
 
 void SpawnCountChangeMessage::Serialize(char*& buffer) const
@@ -898,6 +915,7 @@ void SpawnCountChangeMessage::Deserialize(const char*& buffer)
 }
 
 //**************************ReserveAIMessage**************************
+
 ReserveAIMessage::ReserveAIMessage() : Message(MessageTypes::RESERVE_AI_PLAYER, false)
 {}
 
@@ -934,6 +952,7 @@ void ReserveAIMessage::Deserialize(const char*& buffer)
 }
 
 //**************************UpgradeCompleteMessage**************************
+
 UpgradeCompleteMessage::UpgradeCompleteMessage() : Message( MessageTypes::UPGRADE_COMPLETE, false)
 {}
 
@@ -967,6 +986,7 @@ void UpgradeCompleteMessage::Deserialize( const char*& buffer )
 	CopyAndIncrementSource( &UpgradeType, buffer,		INT_SIZE );
 }
 //**************************SFXPingMessage**************************
+
 SFXPingMessage::SFXPingMessage() : Message( MessageTypes::SFX_PING_MESSAGE, false)
 {}
 
@@ -1001,6 +1021,7 @@ void SFXPingMessage::Deserialize( const char*& buffer )
 }
 
 //**************************UserPingMessage**************************
+
 UserPingMessage::UserPingMessage( ) : Message( MessageTypes::USER_PING_MESSAGE, false )
 {
 }
@@ -1036,6 +1057,7 @@ void UserPingMessage::Deserialize( const char*& buffer )
 }
 
 //**************************SFXPingMessage**************************
+
 SFXButtonClickMessage::SFXButtonClickMessage() : Message( MessageTypes::SFX_BUTTON_CLICK, false)
 {}
 
@@ -1073,4 +1095,741 @@ void SFXButtonClickMessage::Deserialize( const char*& buffer )
 	string[stringLength] = '\0';
 	ButtonName = rString( string );
 	tFree( string );
+}
+
+//**************************PlayerTypeMessage**************************
+
+PlayerTypeMessage::PlayerTypeMessage() : Message( MessageTypes::PLAYER_TYPE, false )
+{}
+
+PlayerTypeMessage::PlayerTypeMessage( short playerType, short playerID, short networkID ) : Message( MessageTypes::PLAYER_TYPE, false )
+{
+	PlayerType	= playerType;
+	PlayerID	= playerID;
+	NetworkID	= networkID;
+}
+
+Message* PlayerTypeMessage::Clone() const
+{
+	return tNew( PlayerTypeMessage, *this );
+}
+
+unsigned int PlayerTypeMessage::GetSerializationSize() const
+{
+	return Message::GetSerializationSize() + static_cast<unsigned int>( SHORT_SIZE + SHORT_SIZE + SHORT_SIZE );
+}
+
+void PlayerTypeMessage::Serialize( char*& buffer ) const
+{
+	Message::Serialize( buffer );
+
+	CopyAndIncrementDestination( buffer, &PlayerType, SHORT_SIZE );
+	CopyAndIncrementDestination( buffer, &PlayerID, SHORT_SIZE );
+	CopyAndIncrementDestination( buffer, &NetworkID, SHORT_SIZE );
+}
+
+void PlayerTypeMessage::Deserialize( const char*& buffer )
+{
+	Message::Deserialize( buffer );
+
+	CopyAndIncrementSource( &PlayerType, buffer, SHORT_SIZE );
+	CopyAndIncrementSource( &PlayerID, buffer, SHORT_SIZE );
+	CopyAndIncrementSource( &NetworkID, buffer, SHORT_SIZE );
+}
+
+//**************************PlacePropMessage**************************
+
+PlacePropMessage::PlacePropMessage() : Message( MessageTypes::PLACE_PROP )
+{}
+
+PlacePropMessage::PlacePropMessage( unsigned int executionFrame, float posX, float posZ, const glm::vec3& scale, const glm::quat& orientation, bool blockpath, const rString modelPath, int radius, bool isTree ) : Message( MessageTypes::PLACE_PROP )
+{
+	this->ExecutionFrame	= executionFrame;
+	this->PosX				= posX;
+	this->PosZ				= posZ;
+	this->Scale				= scale;
+	this->Orientation		= orientation;
+	this->BlockPath			= blockpath;
+	this->ModelPath			= modelPath;
+	this->Radius			= radius;
+	this->IsTree			= isTree;
+}
+
+Message* PlacePropMessage::Clone() const
+{
+	return tNew( PlacePropMessage, *this );
+}
+
+unsigned int PlacePropMessage::GetSerializationSize() const
+{
+	unsigned int modelPathSize = static_cast<unsigned int>( ModelPath.size() );
+	return Message::GetSerializationSize() + static_cast<unsigned int>( UNSIGNED_INT_SIZE + FLOAT_SIZE + FLOAT_SIZE + VEC3_SIZE + QUATERNION_SIZE + BOOL_SIZE + INT_SIZE + modelPathSize + INT_SIZE + BOOL_SIZE );
+}
+
+void PlacePropMessage::Serialize( char*& buffer ) const
+{
+	Message::Serialize( buffer );
+	WriteInt32( ExecutionFrame, buffer );
+	WriteFloat( PosX, buffer );
+	WriteFloat( PosZ, buffer );
+	WriteVec3( Scale, buffer );
+	WriteQuaternion( Orientation, buffer );
+	WriteBool( BlockPath, buffer );
+	WriteString( ModelPath, buffer );
+	WriteInt32( Radius, buffer );
+	WriteBool( IsTree, buffer );
+}
+
+void PlacePropMessage::Deserialize( const char*& buffer )
+{
+	Message::Deserialize( buffer );
+	ReadUint32( ExecutionFrame, buffer );
+	ReadFloat( PosX, buffer );
+	ReadFloat( PosZ, buffer );
+	ReadVec3( Scale, buffer );
+	ReadQuaternion( Orientation, buffer );
+	ReadBool( BlockPath, buffer );
+	ReadString( ModelPath, buffer );
+	ReadInt32( Radius, buffer );
+	ReadBool( IsTree, buffer );
+}
+
+//**************************PlaceResouceMessage**************************
+
+PlaceResourceMessage::PlaceResourceMessage() : Message( MessageTypes::PLACE_RESOUCE )
+{}
+
+PlaceResourceMessage::PlaceResourceMessage( unsigned int executionFrame, float posX, float posZ, const glm::vec3& scale, const glm::quat& orientation, const rString& modelFileName ) : Message( MessageTypes::PLACE_RESOUCE )
+{
+	this->ExecutionFrame	= executionFrame;
+	this->PosX				= posX;
+	this->PosZ				= posZ;
+	this->Scale				= scale;
+	this->Orientation		= orientation;
+	this->ModelFileName		= modelFileName;
+}
+
+Message* PlaceResourceMessage::Clone() const
+{
+	return tNew( PlaceResourceMessage, *this );
+}
+
+unsigned int PlaceResourceMessage::GetSerializationSize() const
+{
+	unsigned int modelFileNameSize = static_cast<unsigned int>( ModelFileName.size() );
+	return Message::GetSerializationSize() + static_cast<unsigned int>( UNSIGNED_INT_SIZE + FLOAT_SIZE + FLOAT_SIZE + (FLOAT_SIZE * 3) + (FLOAT_SIZE * 4) + UNSIGNED_INT_SIZE + modelFileNameSize );
+}
+
+void PlaceResourceMessage::Serialize( char*& buffer ) const
+{
+	unsigned int modelFileNameSize = static_cast<unsigned int>( ModelFileName.size() );
+
+	Message::Serialize( buffer );
+	CopyAndIncrementDestination( buffer, &ExecutionFrame, UNSIGNED_INT_SIZE );
+	CopyAndIncrementDestination( buffer, &PosX, FLOAT_SIZE );
+	CopyAndIncrementDestination( buffer, &PosZ, FLOAT_SIZE );
+	CopyAndIncrementDestination( buffer, &Scale.x, FLOAT_SIZE );
+	CopyAndIncrementDestination( buffer, &Scale.y, FLOAT_SIZE );
+	CopyAndIncrementDestination( buffer, &Scale.z, FLOAT_SIZE );
+	CopyAndIncrementDestination( buffer, &Orientation.w, FLOAT_SIZE );
+	CopyAndIncrementDestination( buffer, &Orientation.x, FLOAT_SIZE );
+	CopyAndIncrementDestination( buffer, &Orientation.y, FLOAT_SIZE );
+	CopyAndIncrementDestination( buffer, &Orientation.z, FLOAT_SIZE );
+	CopyAndIncrementDestination( buffer, &modelFileNameSize, UNSIGNED_INT_SIZE );
+	CopyAndIncrementDestination( buffer, ModelFileName.data(), modelFileNameSize );
+}
+
+void PlaceResourceMessage::Deserialize( const char*& buffer)
+{
+	unsigned int modelFileNameSize;
+
+	Message::Deserialize( buffer );
+	CopyAndIncrementSource( &ExecutionFrame, buffer, UNSIGNED_INT_SIZE );
+	CopyAndIncrementSource( &PosX, buffer, FLOAT_SIZE );
+	CopyAndIncrementSource( &PosZ, buffer, FLOAT_SIZE );
+	CopyAndIncrementSource( &Scale.x, buffer, FLOAT_SIZE );
+	CopyAndIncrementSource( &Scale.y, buffer, FLOAT_SIZE );
+	CopyAndIncrementSource( &Scale.z, buffer, FLOAT_SIZE );
+	CopyAndIncrementSource( &Orientation.w, buffer, FLOAT_SIZE );
+	CopyAndIncrementSource( &Orientation.x, buffer, FLOAT_SIZE );
+	CopyAndIncrementSource( &Orientation.y, buffer, FLOAT_SIZE );
+	CopyAndIncrementSource( &Orientation.z, buffer, FLOAT_SIZE );
+	CopyAndIncrementSource( &modelFileNameSize, buffer, UNSIGNED_INT_SIZE );
+
+	char* modelFileNameBuffer = tAlloc( char, modelFileNameSize + 1 );
+	CopyAndIncrementSource( modelFileNameBuffer, buffer, modelFileNameSize );
+	modelFileNameBuffer[modelFileNameSize] = '\0';
+	ModelFileName = rString( modelFileNameBuffer );
+	tFree( modelFileNameBuffer );
+}
+
+//**************************PlaceControlPointMessage**************************
+
+PlaceControlPointMessage::PlaceControlPointMessage() : Message( MessageTypes::PLACE_CONTROL_POINT )
+{}
+
+PlaceControlPointMessage::PlaceControlPointMessage( unsigned int executionFrame, float posX, float posZ, const glm::vec3& scale, const glm::quat& orientation, const rString& modelFileName ) : Message( MessageTypes::PLACE_CONTROL_POINT )
+{
+	this->ExecutionFrame	= executionFrame;
+	this->PosX				= posX;
+	this->PosZ				= posZ;
+	this->Scale				= scale;
+	this->Orientation		= orientation;
+	this->ModelFileName		= modelFileName;
+}
+
+Message* PlaceControlPointMessage::Clone() const
+{
+	return tNew( PlaceControlPointMessage, *this );
+}
+
+unsigned int PlaceControlPointMessage::GetSerializationSize() const
+{
+	unsigned int modelFileNameSize = static_cast<unsigned int>( ModelFileName.size() );
+	return Message::GetSerializationSize() + static_cast<unsigned int>( UNSIGNED_INT_SIZE + FLOAT_SIZE + FLOAT_SIZE + ( FLOAT_SIZE * 3 ) + ( FLOAT_SIZE * 4 ) + UNSIGNED_INT_SIZE + modelFileNameSize );
+}
+
+void PlaceControlPointMessage::Serialize( char*& buffer ) const
+{
+	unsigned int modelFileNameSize = static_cast<unsigned int>( ModelFileName.size() );
+
+	Message::Serialize( buffer );
+	CopyAndIncrementDestination( buffer, &ExecutionFrame, UNSIGNED_INT_SIZE );
+	CopyAndIncrementDestination( buffer, &PosX, FLOAT_SIZE );
+	CopyAndIncrementDestination( buffer, &PosZ, FLOAT_SIZE );
+	CopyAndIncrementDestination( buffer, &Scale.x, FLOAT_SIZE );
+	CopyAndIncrementDestination( buffer, &Scale.y, FLOAT_SIZE );
+	CopyAndIncrementDestination( buffer, &Scale.z, FLOAT_SIZE );
+	CopyAndIncrementDestination( buffer, &Orientation.w, FLOAT_SIZE );
+	CopyAndIncrementDestination( buffer, &Orientation.x, FLOAT_SIZE );
+	CopyAndIncrementDestination( buffer, &Orientation.y, FLOAT_SIZE );
+	CopyAndIncrementDestination( buffer, &Orientation.z, FLOAT_SIZE );
+	CopyAndIncrementDestination( buffer, &modelFileNameSize, UNSIGNED_INT_SIZE );
+	CopyAndIncrementDestination( buffer, ModelFileName.data(), modelFileNameSize );
+}
+
+void PlaceControlPointMessage::Deserialize( const char*& buffer )
+{
+	unsigned int modelFileNameSize;
+
+	Message::Deserialize( buffer );
+	CopyAndIncrementSource( &ExecutionFrame, buffer, UNSIGNED_INT_SIZE );
+	CopyAndIncrementSource( &PosX, buffer, FLOAT_SIZE );
+	CopyAndIncrementSource( &PosZ, buffer, FLOAT_SIZE );
+	CopyAndIncrementSource( &Scale.x, buffer, FLOAT_SIZE );
+	CopyAndIncrementSource( &Scale.y, buffer, FLOAT_SIZE );
+	CopyAndIncrementSource( &Scale.z, buffer, FLOAT_SIZE );
+	CopyAndIncrementSource( &Orientation.w, buffer, FLOAT_SIZE );
+	CopyAndIncrementSource( &Orientation.x, buffer, FLOAT_SIZE );
+	CopyAndIncrementSource( &Orientation.y, buffer, FLOAT_SIZE );
+	CopyAndIncrementSource( &Orientation.z, buffer, FLOAT_SIZE );
+	CopyAndIncrementSource( &modelFileNameSize, buffer, UNSIGNED_INT_SIZE );
+
+	char* modelFileNameBuffer = tAlloc( char, modelFileNameSize + 1 );
+	CopyAndIncrementSource( modelFileNameBuffer, buffer, modelFileNameSize );
+	modelFileNameBuffer[modelFileNameSize] = '\0';
+	ModelFileName = rString( modelFileNameBuffer );
+	tFree( modelFileNameBuffer );
+}
+
+//**************************MoveObjectMessage**************************
+
+MoveObjectMessage::MoveObjectMessage() : Message( MessageTypes::MOVE_OBJECT )
+{}
+
+MoveObjectMessage::MoveObjectMessage( unsigned int executionFrame, unsigned int entityToMove, float newPosX, float newPosZ ) : Message( MessageTypes::MOVE_OBJECT )
+{
+	this->ExecutionFrame	= executionFrame;
+	this->EntityToMove		= entityToMove;
+	this->NewPosX			= newPosX;
+	this->NewPosZ			= newPosZ;
+}
+
+Message* MoveObjectMessage::Clone() const
+{
+	return tNew( MoveObjectMessage, *this );
+}
+
+unsigned int MoveObjectMessage::GetSerializationSize() const
+{
+	return Message::GetSerializationSize() + UNSIGNED_INT_SIZE + UNSIGNED_INT_SIZE + FLOAT_SIZE + FLOAT_SIZE;
+}
+
+void MoveObjectMessage::Serialize( char*& buffer ) const
+{
+	Message::Serialize( buffer );
+	CopyAndIncrementDestination( buffer, &ExecutionFrame, UNSIGNED_INT_SIZE );
+	CopyAndIncrementDestination( buffer, &EntityToMove, UNSIGNED_INT_SIZE );
+	CopyAndIncrementDestination( buffer, &NewPosX, FLOAT_SIZE );
+	CopyAndIncrementDestination( buffer, &NewPosZ, FLOAT_SIZE );
+}
+
+void MoveObjectMessage::Deserialize( const char*& buffer )
+{
+	Message::Deserialize( buffer );
+	CopyAndIncrementSource( &ExecutionFrame, buffer, UNSIGNED_INT_SIZE );
+	CopyAndIncrementSource( &EntityToMove, buffer, UNSIGNED_INT_SIZE );
+	CopyAndIncrementSource( &NewPosX, buffer, FLOAT_SIZE );
+	CopyAndIncrementSource( &NewPosZ, buffer, FLOAT_SIZE );
+}
+
+//************************** EditorSFXEmitterMessage **************************
+
+EditorSFXEmitterMessage::EditorSFXEmitterMessage() : Message( MessageTypes::EDITOR_SFXEMITTER )
+{}
+
+EditorSFXEmitterMessage::EditorSFXEmitterMessage(unsigned int executionFrame, unsigned int entityID, short playerId, short type, glm::vec3 pos, rString name, rString path, float timeInterval, float distanceMin, float distanceMax) : Message( MessageTypes::EDITOR_SFXEMITTER )
+{
+	this->ExecutionFrame	= executionFrame;
+	this->EntityID			= entityID;
+	this->PlayerId			= playerId;
+	this->Type				= type;
+	this->Pos				= pos;
+	this->Name				= name;
+	this->Path				= path;
+	this->TimeInterval		= timeInterval;
+	this->DistanceMin		= distanceMin;
+	this->DistanceMax		= distanceMax;
+}
+
+Message* EditorSFXEmitterMessage::Clone() const
+{
+	return tNew( EditorSFXEmitterMessage, *this );
+}
+
+unsigned int EditorSFXEmitterMessage::GetSerializationSize() const
+{
+	unsigned int nameSize = static_cast<unsigned int>( Name.size() );
+	unsigned int pathSize = static_cast<unsigned int>( Path.size() );	
+	///																			Frame		EntityID			PlayerID	Type			Pos				Name size			Name		Path size			Path		Time		DistMin			DistMax
+	return Message::GetSerializationSize() + static_cast<unsigned int>(UNSIGNED_INT_SIZE + UNSIGNED_INT_SIZE +SHORT_SIZE + SHORT_SIZE + ( FLOAT_SIZE * 3 ) + UNSIGNED_INT_SIZE + nameSize + UNSIGNED_INT_SIZE + pathSize + FLOAT_SIZE + FLOAT_SIZE + FLOAT_SIZE);
+}
+
+void EditorSFXEmitterMessage::Serialize( char*& buffer ) const
+{
+	unsigned int nameSize = static_cast<unsigned int>( Name.size() );
+	unsigned int pathSize = static_cast<unsigned int>( Path.size() );
+
+	Message::Serialize( buffer );
+	CopyAndIncrementDestination( buffer, &ExecutionFrame, UNSIGNED_INT_SIZE );
+	CopyAndIncrementDestination( buffer, &EntityID, UNSIGNED_INT_SIZE );
+	CopyAndIncrementDestination( buffer, &PlayerId, SHORT_SIZE );
+	CopyAndIncrementDestination( buffer, &Type, SHORT_SIZE );
+	CopyAndIncrementDestination( buffer, &Pos.x, FLOAT_SIZE );
+	CopyAndIncrementDestination( buffer, &Pos.y, FLOAT_SIZE );
+	CopyAndIncrementDestination( buffer, &Pos.z, FLOAT_SIZE );
+	CopyAndIncrementDestination( buffer, &nameSize, UNSIGNED_INT_SIZE );
+	CopyAndIncrementDestination( buffer, Name.data(), nameSize );
+	CopyAndIncrementDestination( buffer, &pathSize, UNSIGNED_INT_SIZE );
+	CopyAndIncrementDestination( buffer, Path.data(), pathSize);
+	CopyAndIncrementDestination( buffer, &TimeInterval, FLOAT_SIZE );
+	CopyAndIncrementDestination( buffer, &DistanceMin, FLOAT_SIZE );
+	CopyAndIncrementDestination( buffer, &DistanceMax, FLOAT_SIZE );
+}
+
+void EditorSFXEmitterMessage::Deserialize( const char*& buffer )
+{
+	unsigned int nameSize, pathSize;
+
+	Message::Deserialize( buffer );
+	CopyAndIncrementSource( &ExecutionFrame, buffer, UNSIGNED_INT_SIZE );
+	CopyAndIncrementSource( &EntityID, buffer, UNSIGNED_INT_SIZE );
+	CopyAndIncrementSource( &PlayerId, buffer, SHORT_SIZE );
+	CopyAndIncrementSource( &Type, buffer, SHORT_SIZE );
+	CopyAndIncrementSource( &Pos.x, buffer, FLOAT_SIZE );
+	CopyAndIncrementSource( &Pos.y, buffer, FLOAT_SIZE );
+	CopyAndIncrementSource( &Pos.z, buffer, FLOAT_SIZE );
+	CopyAndIncrementSource( &nameSize, buffer, UNSIGNED_INT_SIZE);
+
+	char* nameBuffer = tAlloc( char, nameSize + 1 );
+	CopyAndIncrementSource(nameBuffer, buffer, nameSize );
+	nameBuffer[nameSize] = '\0';
+	Name = rString( nameBuffer );
+	tFree( nameBuffer );
+
+	CopyAndIncrementSource( &pathSize, buffer, UNSIGNED_INT_SIZE);
+
+	char* pathBuffer = tAlloc( char, pathSize + 1 );
+	CopyAndIncrementSource(pathBuffer, buffer, pathSize );
+	pathBuffer[pathSize] = '\0';
+	Path = rString( pathBuffer );
+	tFree( pathBuffer );
+
+	CopyAndIncrementSource( &TimeInterval, buffer, FLOAT_SIZE );
+	CopyAndIncrementSource( &DistanceMin, buffer, FLOAT_SIZE );
+	CopyAndIncrementSource(	&DistanceMax, buffer, FLOAT_SIZE);
+}
+
+//************************** UpdateGhostEntityPositionMessage **************************
+
+UpdateGhostEntityPositionMessage::UpdateGhostEntityPositionMessage() : Message( MessageTypes::UPDATE_GHOST_ENTITY_POS, false )
+{}
+
+UpdateGhostEntityPositionMessage::UpdateGhostEntityPositionMessage( short ownerPlayerID, glm::vec3 newPosition ) : Message( MessageTypes::UPDATE_GHOST_ENTITY_POS, false )
+{
+	this->OwnerPlayerID = ownerPlayerID;
+	this->NewPosition	= newPosition;
+}
+
+Message* UpdateGhostEntityPositionMessage::Clone() const
+{
+	return tNew( UpdateGhostEntityPositionMessage, *this );
+}
+
+unsigned int UpdateGhostEntityPositionMessage::GetSerializationSize() const
+{
+	return Message::GetSerializationSize() + SHORT_SIZE + VEC3_SIZE;
+}
+
+void UpdateGhostEntityPositionMessage::Serialize( char*& buffer ) const
+{
+	Message::Serialize( buffer );
+	WriteInt16( OwnerPlayerID, buffer );
+	WriteVec3(	NewPosition, buffer );
+}
+
+void UpdateGhostEntityPositionMessage::Deserialize( const char*& bufer )
+{
+	Message::Deserialize( bufer );
+	ReadInt16(	OwnerPlayerID, bufer );
+	ReadVec3(	NewPosition, bufer );
+}
+
+//************************** UpdateGhostEntityVisibilityMessage **************************
+
+UpdateGhostEntityVisibilityMessage::UpdateGhostEntityVisibilityMessage() : Message( MessageTypes::UPDATE_GHOST_ENTITY_VISIBLILITY )
+{}
+
+UpdateGhostEntityVisibilityMessage::UpdateGhostEntityVisibilityMessage( unsigned int executionFrame, short ownerPlayerID, bool isVisible ) : Message( MessageTypes::UPDATE_GHOST_ENTITY_VISIBLILITY )
+{
+	this->ExecutionFrame	= executionFrame;
+	this->OwnerPlayerID		= ownerPlayerID;
+	this->Isvisible			= isVisible;
+}
+
+Message* UpdateGhostEntityVisibilityMessage::Clone() const
+{
+	return tNew( UpdateGhostEntityVisibilityMessage, *this );
+}
+
+unsigned int UpdateGhostEntityVisibilityMessage::GetSerializationSize() const
+{
+	return Message::GetSerializationSize() + INT_32_SIZE + INT_16_SIZE + BOOL_SIZE;
+}
+
+void UpdateGhostEntityVisibilityMessage::Serialize( char*& buffer ) const
+{
+	Message::Serialize( buffer );
+	WriteUint32( ExecutionFrame, buffer );
+	WriteInt16( OwnerPlayerID, buffer );
+	WriteBool( Isvisible, buffer );
+}
+
+void UpdateGhostEntityVisibilityMessage::Deserialize( const char*& buffer )
+{
+	Message::Deserialize( buffer );
+	ReadUint32( ExecutionFrame, buffer );
+	ReadInt16( OwnerPlayerID, buffer );
+	ReadBool( Isvisible, buffer );
+}
+
+//************************** UpdateGhostEntityModelMessage **************************
+
+UpdateGhostEntityModelMessage::UpdateGhostEntityModelMessage() : Message( MessageTypes::UPDATE_GHOST_ENTITY_MODEL )
+{}
+
+UpdateGhostEntityModelMessage::UpdateGhostEntityModelMessage( unsigned int executionFrame, short ownerPlayerID, const rString& modelName ) : Message( MessageTypes::UPDATE_GHOST_ENTITY_MODEL )
+{
+	this->Executionframe	= executionFrame;
+	this->OwnerPlayerID		= ownerPlayerID;
+	this->ModelName			= modelName;
+}
+
+Message* UpdateGhostEntityModelMessage::Clone() const
+{
+	return tNew( UpdateGhostEntityModelMessage, *this );
+}
+
+unsigned int UpdateGhostEntityModelMessage::GetSerializationSize() const
+{
+	unsigned int modelNameSize = static_cast<unsigned int>( ModelName.size() );
+	return Message::GetSerializationSize() + INT_32_SIZE + INT_16_SIZE + UNSIGNED_INT_SIZE + modelNameSize;
+}
+
+void UpdateGhostEntityModelMessage::Serialize( char*& buffer ) const
+{
+	Message::Serialize( buffer );
+	WriteUint32( Executionframe, buffer );
+	WriteInt16( OwnerPlayerID, buffer );
+	WriteString( ModelName, buffer );
+}
+
+void UpdateGhostEntityModelMessage::Deserialize( const char*& buffer )
+{
+	Message::Deserialize( buffer );
+	ReadUint32( Executionframe, buffer );
+	ReadInt16( OwnerPlayerID, buffer );
+	ReadString( ModelName, buffer );
+}
+
+//************************** EditorCameraPathsMessage **************************
+
+Message* EditorCameraPathsMessage::Clone() const
+{
+	return tNew( EditorCameraPathsMessage, *this );
+}
+
+unsigned int EditorCameraPathsMessage::GetSerializationSize() const
+{
+	return Message::GetSerializationSize()
+		+ INT_64_SIZE						// Event
+		+ INT_32_SIZE						// ExecutionFrame
+		+ INT_32_SIZE						// Spline
+		+ INT_32_SIZE						// Node
+		+ ( unsigned int )SplineName.size()	// SplineName
+		+ VEC3_SIZE							// NodePosition
+		+ QUATERNION_SIZE					// NodeOrientation
+		+ FLOAT_SIZE;						// NodeTime
+}
+
+void EditorCameraPathsMessage::Serialize( char*& buffer ) const
+{
+	Message::Serialize( buffer );
+	WriteUint64( ( uint64_t )Event, buffer );
+	WriteUint32( ExecutionFrame, buffer );
+	WriteUint32( Spline, buffer );
+	WriteUint32( Node, buffer );
+	WriteString( SplineName, buffer );
+	WriteVec3( NodePosition, buffer );
+	WriteQuaternion( NodeOrientation, buffer );
+	WriteFloat( NodeTime, buffer );
+}
+
+void EditorCameraPathsMessage::Deserialize( const char*& buffer )
+{
+	Message::Deserialize( buffer );
+	ReadUint64( ( uint64_t& )Event, buffer );
+	ReadUint32( ExecutionFrame, buffer );
+	ReadUint32( Spline, buffer );
+	ReadUint32( Node, buffer );
+	ReadString( SplineName, buffer );
+	ReadVec3( NodePosition, buffer );
+	ReadQuaternion( NodeOrientation, buffer );
+	ReadFloat( NodeTime, buffer );
+}
+
+EditorCameraPathsMessage EditorCameraPathsMessage::NewSplineMessage( unsigned int executionFrame )
+{
+	EditorCameraPathsMessage message;
+	message.ExecutionFrame	= executionFrame;
+	message.Event			= EventType::NewSpline;
+	return message;
+}
+
+EditorCameraPathsMessage EditorCameraPathsMessage::DeleteSplineMessage( unsigned int executionFrame, unsigned int splineID )
+{
+	EditorCameraPathsMessage message;
+	message.ExecutionFrame	= executionFrame;
+	message.Event			= EventType::DeleteSpline;
+	message.Spline			= splineID;
+	return message;
+}
+
+EditorCameraPathsMessage EditorCameraPathsMessage::RenameSplineMessage( unsigned int executionFrame, unsigned int splineID, const char* newName )
+{
+	EditorCameraPathsMessage message;
+	message.ExecutionFrame	= executionFrame;
+	message.Event			= EventType::RenameSpline;
+	message.Spline			= splineID;
+	message.SplineName		= newName;
+	return message;
+}
+
+EditorCameraPathsMessage EditorCameraPathsMessage::NewNodeMessage( unsigned int executionFrame, unsigned int splineID, glm::vec3 position, glm::quat orientation )
+{
+	EditorCameraPathsMessage message;
+	message.ExecutionFrame	= executionFrame;
+	message.Event			= EventType::NewNode;
+	message.Spline			= splineID;
+	message.NodePosition	= position;
+	message.NodeOrientation	= orientation;
+	return message;
+}
+
+EditorCameraPathsMessage EditorCameraPathsMessage::DeleteNodeMessage( unsigned int executionFrame, unsigned int splineID, unsigned int nodeID )
+{
+	EditorCameraPathsMessage message;
+	message.ExecutionFrame	= executionFrame;
+	message.Event			= EventType::DeleteNode;
+	message.Spline			= splineID;
+	message.Node			= nodeID;
+	return message;
+}
+
+EditorCameraPathsMessage EditorCameraPathsMessage::ChangeNodeTimeMessage( unsigned int executionFrame, unsigned int splineID, unsigned int nodeID, float timeValue )
+{
+	EditorCameraPathsMessage message;
+	message.ExecutionFrame	= executionFrame;
+	message.Event			= EventType::ChangeNodeTime;
+	message.Spline			= splineID;
+	message.Node			= nodeID;
+	message.NodeTime		= timeValue;
+	return message;
+}
+
+//************************** SelectEntityMessage **************************
+
+SelectEntityMessage::SelectEntityMessage() : Message( MessageTypes::SELECT_ENTITY, false )
+{}
+
+SelectEntityMessage::SelectEntityMessage( short selectingPlayerID, unsigned int entityID ) : Message( MessageTypes::SELECT_ENTITY, false )
+{
+	this->SelectingPlayerID = selectingPlayerID;
+	this->EntityID			= entityID;
+}
+
+Message* SelectEntityMessage::Clone() const
+{
+	return tNew( SelectEntityMessage, *this );
+}
+
+unsigned int SelectEntityMessage::GetSerializationSize() const
+{
+	return Message::GetSerializationSize() + INT_16_SIZE + INT_32_SIZE;
+}
+
+void SelectEntityMessage::Serialize( char*& buffer ) const
+{
+	Message::Serialize( buffer );
+	WriteInt16( SelectingPlayerID, buffer );
+	WriteUint32( EntityID, buffer );
+}
+
+void SelectEntityMessage::Deserialize( const char*& buffer )
+{
+	Message::Deserialize( buffer );
+	ReadInt16( SelectingPlayerID, buffer );
+	ReadUint32( EntityID, buffer );
+}
+
+//************************** EditorParticleEmitterMessage **************************
+
+EditorParticleEmitterMessage::EditorParticleEmitterMessage() : Message( MessageTypes::EDITOR_PARTICLE_EMITTER )
+{}
+
+EditorParticleEmitterMessage::EditorParticleEmitterMessage(unsigned int executionFrame, unsigned int entityID, short playerId, short type, short particleType, glm::vec3 pos, glm::vec4 col, rString name) : Message( MessageTypes::EDITOR_PARTICLE_EMITTER )
+{
+	this->ExecutionFrame	= executionFrame;
+	this->EntityID			= entityID;
+	this->PlayerId			= playerId;
+	this->Type				= type;
+	this->ParticleType		= particleType;
+	this->Pos				= pos;
+	this->Col				= col;
+	this->Name				= name;
+}
+
+Message* EditorParticleEmitterMessage::Clone() const
+{
+	return tNew( EditorParticleEmitterMessage, *this );
+}
+
+unsigned int EditorParticleEmitterMessage::GetSerializationSize() const
+{
+	unsigned int nameSize = static_cast<unsigned int>( Name.size() );	
+	///																			Frame		EntityID			PlayerID	Type		ParticleType		Pos					Color			Name
+	return Message::GetSerializationSize() + static_cast<unsigned int>(UNSIGNED_INT_SIZE + UNSIGNED_INT_SIZE + SHORT_SIZE + SHORT_SIZE + SHORT_SIZE + ( FLOAT_SIZE * 3 ) + ( FLOAT_SIZE * 4 ) + UNSIGNED_INT_SIZE + nameSize);
+}
+
+void EditorParticleEmitterMessage::Serialize( char*& buffer ) const
+{
+	unsigned int nameSize = static_cast<unsigned int>( Name.size() );
+
+	Message::Serialize( buffer );
+	CopyAndIncrementDestination( buffer, &ExecutionFrame, UNSIGNED_INT_SIZE );
+	CopyAndIncrementDestination( buffer, &EntityID, UNSIGNED_INT_SIZE );
+	CopyAndIncrementDestination( buffer, &PlayerId, SHORT_SIZE );
+	CopyAndIncrementDestination( buffer, &Type, SHORT_SIZE );
+	CopyAndIncrementDestination( buffer, &ParticleType, SHORT_SIZE );
+	CopyAndIncrementDestination( buffer, &Pos.x, FLOAT_SIZE );
+	CopyAndIncrementDestination( buffer, &Pos.y, FLOAT_SIZE );
+	CopyAndIncrementDestination( buffer, &Pos.z, FLOAT_SIZE );
+	CopyAndIncrementDestination( buffer, &Col.r, FLOAT_SIZE );
+	CopyAndIncrementDestination( buffer, &Col.g, FLOAT_SIZE );
+	CopyAndIncrementDestination( buffer, &Col.b, FLOAT_SIZE );
+	CopyAndIncrementDestination( buffer, &Col.a, FLOAT_SIZE );
+	CopyAndIncrementDestination( buffer, &nameSize, UNSIGNED_INT_SIZE );
+	CopyAndIncrementDestination( buffer, Name.data(), nameSize );
+}
+
+void EditorParticleEmitterMessage::Deserialize( const char*& buffer )
+{
+	unsigned int nameSize;
+
+	Message::Deserialize( buffer );
+	CopyAndIncrementSource( &ExecutionFrame, buffer, UNSIGNED_INT_SIZE );
+	CopyAndIncrementSource( &EntityID, buffer, UNSIGNED_INT_SIZE );
+	CopyAndIncrementSource( &PlayerId, buffer, SHORT_SIZE );
+	CopyAndIncrementSource( &Type, buffer, SHORT_SIZE );
+	CopyAndIncrementSource( &ParticleType, buffer, SHORT_SIZE );
+	CopyAndIncrementSource( &Pos.x, buffer, FLOAT_SIZE );
+	CopyAndIncrementSource( &Pos.y, buffer, FLOAT_SIZE );
+	CopyAndIncrementSource( &Pos.z, buffer, FLOAT_SIZE );
+	CopyAndIncrementSource( &Col.r, buffer, FLOAT_SIZE );
+	CopyAndIncrementSource( &Col.g, buffer, FLOAT_SIZE );
+	CopyAndIncrementSource( &Col.b, buffer, FLOAT_SIZE );
+	CopyAndIncrementSource( &Col.a, buffer, FLOAT_SIZE );
+	CopyAndIncrementSource( &nameSize, buffer, UNSIGNED_INT_SIZE);
+
+	char* nameBuffer = tAlloc( char, nameSize + 1 );
+	CopyAndIncrementSource(nameBuffer, buffer, nameSize );
+	nameBuffer[nameSize] = '\0';
+	Name = rString( nameBuffer );
+	tFree( nameBuffer );
+}
+
+//************************** EditorTerrainBrushMessage **************************
+
+EditorTerrainBrushMessage::EditorTerrainBrushMessage() : Message(MessageTypes::EDITOR_TERRAIN_BRUSH)
+{}
+
+
+EditorTerrainBrushMessage::EditorTerrainBrushMessage(unsigned int executionFrame, glm::vec2 center, float strength, float hardness, float radius) : Message(MessageTypes::EDITOR_TERRAIN_BRUSH)
+{
+	this->ExecutionFrame = executionFrame;
+	this->Center = center;
+	this->Strength = strength;
+	this->Hardness = hardness;
+	this->Radius = radius;
+}
+
+
+Message* EditorTerrainBrushMessage::Clone() const
+{
+	return tNew(EditorTerrainBrushMessage, *this);
+}
+
+unsigned int EditorTerrainBrushMessage::GetSerializationSize() const
+{
+	return Message::GetSerializationSize() + UNSIGNED_INT_SIZE + VEC2_SIZE + FLOAT_SIZE + FLOAT_SIZE + FLOAT_SIZE;
+}
+
+void EditorTerrainBrushMessage::Serialize(char*& buffer) const
+{
+	Message::Serialize(buffer);
+	WriteUint32(ExecutionFrame, buffer);
+	WriteVec2(Center, buffer);
+	WriteFloat(Strength, buffer);
+	WriteFloat(Hardness, buffer);
+	WriteFloat(Radius, buffer);
+}
+
+void EditorTerrainBrushMessage::Deserialize(const char*& buffer)
+{
+	Message::Deserialize(buffer);
+	ReadUint32(ExecutionFrame, buffer);
+	ReadVec2(Center, buffer);
+	ReadFloat(Strength, buffer);
+	ReadFloat(Hardness, buffer);
+	ReadFloat(Radius, buffer);
 }

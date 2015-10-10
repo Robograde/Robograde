@@ -1,9 +1,9 @@
 /**************************************************
-Copyright 2015 Daniel "MonzUn" Bengtsson
+2015 Daniel "MonzUn" Bengtsson
 ***************************************************/
 
 #include "ReplayUtility.h"
-#include <messaging/GameMessages.h>
+#include "../../input/GameMessages.h"
 
 using namespace SerializationUtility;
 ReplayFrame::ReplayFrame( )

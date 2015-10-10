@@ -1,5 +1,5 @@
 /**************************************************
-Copyright 2015 Daniel "MonzUn" Bengtsson
+2015 Daniel "MonzUn" Bengtsson
 ***************************************************/
 
 #pragma once
@@ -24,7 +24,12 @@ private:
 	~SSNetworkInput( ) { };
 	SSNetworkInput& operator=( const SSNetworkInput& rhs );
 
+	void FetchMessages();
+
 	void ForwardToUserLayer( Message& message ) const;
 	void ForwardToSimLayer( Message& message ) const;
 	void ForwardToSimLayer( Message& message, unsigned int executionFrame ) const;
+
+	std::queue<Message*> m_SimMessages;
+	std::queue<Message*> m_UserMessages;
 };

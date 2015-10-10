@@ -1,5 +1,5 @@
 /**************************************************
-Copyright 2015 Johan Melin
+2015 Johan Melin
 ***************************************************/
 
 #include "SSFrameCounter.h"
@@ -34,7 +34,7 @@ void SSFrameCounter::UpdateUserLayer( const float deltaTime )
 	if ( m_Window->IsOpen() )
 	{
 		if( g_GUI.IsWindowOpen( "ConsoleWindow" ) )
-			m_Window->SetPosition( m_Window->GetPosition().x, g_GUI.GetWindowSize( "ConsoleWindow" ).y );
+			m_Window->SetPosition( m_Window->GetPosition().x, g_GUI.GetWindowPos( "ConsoleWindow" ).y + g_GUI.GetWindowSize( "ConsoleWindow" ).y );
 		else
 			m_Window->SetPosition( m_Window->GetPosition().x, 0 );
 				

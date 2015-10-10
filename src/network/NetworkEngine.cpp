@@ -1,5 +1,5 @@
 /**************************************************
-Zlib Copyright <2015> <Daniel "MonzUn" Bengtsson>
+Zlib Copyright 2015 Daniel "MonzUn" Bengtsson
 ***************************************************/
 
 #include "NetworkEngine.h"
@@ -49,10 +49,9 @@ NetworkEngine::~NetworkEngine()
 	while ( m_ConnectionRequests.Consume( destination ) )
 		tDelete( destination );
 
+	// Unfetched game messages
 	Message* message;
-	while ( m_GameUserPackets.Consume( message ) )
-		tDelete( message );
-	while ( m_GameSimulationPackets.Consume( message ) )
+	while ( m_GamePackets.Consume( message ) )
 		tDelete( message );
 }
 
@@ -76,6 +75,8 @@ bool NetworkEngine::Initialize()
 #endif
 		m_IsInitialized = true;
 #endif
+
+		RegisterNetworkMessages();
 	}
 	return m_IsInitialized;
 }
@@ -92,6 +93,16 @@ void NetworkEngine::Terminate()
 #if PLATFORM == PLATFORM_WINDOWS
 		WSACleanup( );
 #endif
+		// Remove all network messages
+		for ( auto networkMessage : m_NetworkMessages )
+			pDelete( networkMessage.second );
+		m_NetworkMessages.clear();
+
+		// Remove all game messages
+		for ( auto gameMessage : m_GameMessages )
+			pDelete( gameMessage.second );
+		m_GameMessages.clear();
+		
 		Logger::Log( "NetworkEngine has been terminated", "NetworkEngine", LogSeverity::INFO_MSG );
 	}
 	else
@@ -135,11 +146,9 @@ void NetworkEngine::Stop()
 		// Disconnect clients
 		Disconnect( DISCONNECT_ALL );
 
-		// Clean the game message queues
+		// Clean the game message queue
 		Message* message;
-		while ( m_GameUserPackets.Consume( message ) )
-			tDelete( message );
-		while ( m_GameSimulationPackets.Consume( message ) )
+		while ( m_GamePackets.Consume( message ) )
 			tDelete( message );
 
 		Logger::Log( "NetworkEngine has stopped", "NetworkEngine", LogSeverity::INFO_MSG );
@@ -229,6 +238,23 @@ bool NetworkEngine::UnRegisterCallback( int callbackHandle )
 	return false;
 }
 
+bool NetworkEngine::RegisterMessage( const Message* message )
+{
+	// Check for duplicates
+	for ( auto registeredMessage : m_GameMessages )
+	{
+		if ( registeredMessage.first == message->Type )
+		{
+			Logger::Log( "Attempted to register duplicate message (Type= " + rToString( message->Type ) + " )", "NetworkEngine", LogSeverity::WARNING_MSG );
+			pDelete( message );
+			return false;
+		}
+	}
+
+	m_GameMessagesToRegister.Produce( message );
+	return true;
+}
+
 bool NetworkEngine::ReserveSlot( short index )
 {
 	bool toReturn = true;
@@ -261,14 +287,9 @@ bool NetworkEngine::UnreserveSlot( short index )
 	return toReturn;
 }
 
-bool NetworkEngine::GetSimulationPacket( Message*& outPacket )
+bool NetworkEngine::GetPacket( Message*& outPacket )
 {
-	return m_GameSimulationPackets.Consume( outPacket );
-}
-
-bool NetworkEngine::GetUserPacket( Message*& outPacket )
-{
-	return m_GameUserPackets.Consume( outPacket );
+	return m_GamePackets.Consume( outPacket );
 }
 
 void NetworkEngine::SetMaxClientCount( short maxClients )
@@ -301,6 +322,7 @@ void NetworkEngine::Update()
 	Logger::Log( "Network thread is starting ", "NetworkEngine", LogSeverity::INFO_MSG );
 	while ( m_IsRunning )
 	{
+		HandleMessageRegistrations();	// Check if there are any new messages registered
 		CheckListener();				// Check for incoming connection attempts
 		HandleConnectionRequests();		// Handle outgoing connection attempts
 		HandleDisconnectionRequests();	// Handle game requests to disconnect clients
@@ -308,7 +330,7 @@ void NetworkEngine::Update()
 		HandleTraffic();				// Handle network traffic from verified sockets
 
 		if ( g_NetworkInfo.AmIHost() )
-			MeasureLatency( );			// Only the host measures latency.
+			MeasureLatency();			// Only the host measures latency.
 	}
 	Logger::Log( "Network thread is terminating gracefully", "NetworkEngine", LogSeverity::INFO_MSG );
 }
@@ -318,6 +340,8 @@ void NetworkEngine::CheckListener()
 	TCPSocket* newConnection;
 	while ( m_Listener.GetConnectionQueue( ).Consume( newConnection ) )
 	{
+		newConnection->SetNetworkMessagesReference( &m_NetworkMessages );
+		newConnection->SetGameMessagesReference( &m_GameMessages );
 		m_UnverifiedSockets.push_back( newConnection );
 
 		Logger::Log( "Attempting to shake hand with newly accepted connection: " + newConnection->GetDestination( ).GetPrintableAdress( ), "NetworkEngine", LogSeverity::INFO_MSG );
@@ -337,8 +361,7 @@ void NetworkEngine::HandleConnectionRequests()
 			if ( *destination == socket.second->GetDestination( ) )
 			{
 				Logger::Log( "Connection request to " + destination->GetPrintableAddressAndPort( ) + " was ignored since a connection to that destination already exists.", "NetworkEngine", LogSeverity::WARNING_MSG );
-				ConnectionData connectionData( -1, *destination );
-				CallCallbacks( NetworkCallbackEvent::ConnectionAttemptFail, &connectionData);
+				CallCallbacks( NetworkCallbackEvent::ConnectionAttemptFail, &ConnectionData( -1, *destination ) );
 				tDelete( destination );
 				return;
 			}
@@ -352,20 +375,20 @@ void NetworkEngine::HandleConnectionRequests()
 			bool result = socket->Connect( *destination );	// If the attempt is successfull the socket saves a copy of the inputed IPv4Adress
 			if ( result )
 			{
+				socket->SetNetworkMessagesReference( &m_NetworkMessages );
+				socket->SetGameMessagesReference( &m_GameMessages );
 				m_UnverifiedSockets.push_back( socket );	// If the connection was OK we now need to perform handshake
 			}
 			else
 			{
 				pDelete( socket );
-				ConnectionData connectionData( -1, *destination );
-				CallCallbacks( NetworkCallbackEvent::ConnectionAttemptFail, &connectionData);
+				CallCallbacks( NetworkCallbackEvent::ConnectionAttemptFail, &ConnectionData( -1, *destination ) );
 			}
 		}
 		else
 		{
 			Logger::Log( "Attempted to connect to another client after maximum client count had been reached", "NetworkEngine", LogSeverity::WARNING_MSG );
-			ConnectionData connectionData( -1, *destination );
-			CallCallbacks( NetworkCallbackEvent::ConnectionAttemptFail, &connectionData);
+			CallCallbacks( NetworkCallbackEvent::ConnectionAttemptFail, &ConnectionData( -1, *destination ) );
 		}
 		tDelete( destination );
 	}
@@ -424,6 +447,13 @@ void NetworkEngine::HandleDisconnectionRequests()
 		}
 	}
 	while ( networkIDToDisconnect != INVALID_NETWORK_ID );
+}
+
+void NetworkEngine::HandleMessageRegistrations()
+{
+	const Message* message;
+	while ( m_GameMessagesToRegister.Consume( message ) )
+		m_GameMessages.emplace( message->Type, message );
 }
 
 void NetworkEngine::MeasureLatency()
@@ -501,8 +531,7 @@ void NetworkEngine::HandleUnverifiedSockets()
 								// Start pinging the verified client
 								m_PingTargets.emplace( std::pair<short, Pinger>( networkID, Pinger( networkID ) ) );
 
-								ConnectionData connectionData( networkID, m_Sockets.at( networkID )->GetDestination() );
-								CallCallbacks( NetworkCallbackEvent::IncomingConnection, &connectionData );
+								CallCallbacks( NetworkCallbackEvent::IncomingConnection, &ConnectionData( networkID, m_Sockets.at( networkID )->GetDestination() ) );
 
 								i--;
 								socketDone = true; // Break the while loop. We are done reading from this client
@@ -545,8 +574,7 @@ void NetworkEngine::HandleUnverifiedSockets()
 						m_Sockets.emplace( std::pair<short, TCPSocket*>( IDpacket->SenderID, m_UnverifiedSockets[i] ) );
 						m_UnverifiedSockets.erase( m_UnverifiedSockets.begin() + i );
 
-						ConnectionData connectionData( IDpacket->NetworkID, m_Sockets.at( IDpacket->SenderID )->GetDestination() );
-						CallCallbacks( NetworkCallbackEvent::ConnectionAttemptSuccess, &connectionData);
+						CallCallbacks( NetworkCallbackEvent::ConnectionAttemptSuccess, &ConnectionData( IDpacket->NetworkID, m_Sockets.at( IDpacket->SenderID )->GetDestination() ) );
 
 						i--;
 						socketDone = true;
@@ -597,7 +625,7 @@ void NetworkEngine::HandleTraffic()
 		while ( (packet = it.second->Receive()) != nullptr )
 		{
 			bool messageForwarded = false; // TODODB This variable can be removed by refactoring into the forwarding
-			if ( packet->Type == 0 )
+			if ( packet->Type == 0ULL )
 			{
 				NetworkMessage* networkMessage = static_cast<NetworkMessage*>( packet );
 				switch ( networkMessage->NetworkMessageType )
@@ -653,13 +681,11 @@ void NetworkEngine::HandleTraffic()
 							if ( connectionStatusPacket->ConnectionStatus == ConnectionStatusChanges::CONNECTED )
 							{
 								g_NetworkInfo.RegisterConnection( ConnectionInfo( connectionStatusPacket->NetworkID, ConnectionSlotTypes::PLAYER ) );
-								ConnectionData connectionData( connectionStatusPacket->NetworkID, IPv4Address() );
-								CallCallbacks( NetworkCallbackEvent::IncomingConnection, &connectionData); // TODODB: Handle propagation of connection info outside of the network engine
+								CallCallbacks( NetworkCallbackEvent::IncomingConnection, &ConnectionData( connectionStatusPacket->NetworkID, IPv4Address() ) ); // TODODB: Handle propagation of connection info outside of the network engine
 							}
 							else if ( connectionStatusPacket->ConnectionStatus == ConnectionStatusChanges::DISCONNECTED )
 							{
-								ConnectionData connectionData(connectionStatusPacket->NetworkID, IPv4Address() );
-								CallCallbacks( NetworkCallbackEvent::Disconnection, &connectionData ); // TODODB: Handle propagation of connection info outside of the network engine
+								CallCallbacks( NetworkCallbackEvent::Disconnection, &ConnectionData(connectionStatusPacket->NetworkID, IPv4Address() ) ); // TODODB: Handle propagation of connection info outside of the network engine
 							}
 							else
 								Logger::Log( "Received connection status message with unknown connection status", "NetworkEngine", LogSeverity::WARNING_MSG );
@@ -668,16 +694,15 @@ void NetworkEngine::HandleTraffic()
 							Logger::Log( "Received connection status packet as host", "NetworkEngine", LogSeverity::WARNING_MSG );
 					} break;
 
-
 					default:
 					{
-						
+						Logger::Log( "Network engine received packet of unrecognized type (" + rToString( networkMessage->NetworkMessageType ) + ")", "NetworkEngine", LogSeverity::WARNING_MSG );
 					} break;
 				}
 			}
 			else
 			{
-				packet->IsSimulation ? m_GameSimulationPackets.Produce( packet ) : m_GameUserPackets.Produce( packet );
+				m_GamePackets.Produce( packet );
 				messageForwarded = true;
 			}
 			if ( !messageForwarded )
@@ -727,8 +752,7 @@ void NetworkEngine::Disconnect( const short networkIDToDisconnect )
 			g_PacketPump.RemoveQueue( networkIDToDisconnect );
 			Logger::Log( "Client on " + toDisconnect->GetDestination().GetPrintableAddressAndPort( ) + " has been disconnected", "NetworkEngine", LogSeverity::INFO_MSG );
 
-			ConnectionData connectionData(networkIDToDisconnect, toDisconnect->GetDestination() );
-			CallCallbacks( NetworkCallbackEvent::Disconnection, &connectionData );
+			CallCallbacks( NetworkCallbackEvent::Disconnection, &ConnectionData(networkIDToDisconnect, toDisconnect->GetDestination() ) );
 
 			pDelete( toDisconnect );
 			m_Sockets.erase( networkIDToDisconnect );
@@ -742,8 +766,7 @@ void NetworkEngine::Disconnect( const short networkIDToDisconnect )
 		{
 			socket.second->Disconnect();
 
-			ConnectionData connectionData(networkIDToDisconnect, socket.second->GetDestination() );
-			CallCallbacks( NetworkCallbackEvent::Disconnection, &connectionData );
+			CallCallbacks( NetworkCallbackEvent::Disconnection, &ConnectionData(networkIDToDisconnect, socket.second->GetDestination() ) );
 
 			g_NetworkInfo.UnRegisterConnection( socket.first );
 			g_PacketPump.RemoveQueue( socket.first );
@@ -761,4 +784,13 @@ void NetworkEngine::CallCallbacks( NetworkCallbackEvent callbackEvent, const voi
 
 	for ( auto callbackFunction : m_Callbacks[static_cast<int>( callbackEvent )] )
 		callbackFunction.second( arg );
+}
+
+void NetworkEngine::RegisterNetworkMessages()
+{
+	m_NetworkMessages.emplace( NetworkMessageType::PING, pNew( PingMessage ) );
+	m_NetworkMessages.emplace( NetworkMessageType::HANDSHAKE, pNew( HandshakeMessage ) );
+	m_NetworkMessages.emplace( NetworkMessageType::NETWORKIDMESSAGE, pNew( NetworkIDMessage ) );
+	m_NetworkMessages.emplace( NetworkMessageType::CONNECTION_STATUS_MESSAGE, pNew( ConnectionStatusMessage ) );
+	m_NetworkMessages.emplace( NetworkMessageType::LATENCY_UPDATE_MESSAGE, pNew( LatencyUpdateMessage ) );
 }

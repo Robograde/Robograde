@@ -1,5 +1,5 @@
 /**************************************************
-Copyright 2015 Ola Enberg & Johan Melin
+2015 Ola Enberg & Johan Melin
 ***************************************************/
 
 #include "SSCamera.h"
@@ -67,33 +67,36 @@ void SSCamera::Startup( )
 	m_RTS.GetEditableLens().Near = 1.0f;
 	m_RTS.SetPosition( startPosition );
 
-	float terrainmax = gfx::g_GFXTerrain.GetMaxHeight();
-	float terrainmin = gfx::g_GFXTerrain.GetMinHeight();
-	float maxheight = terrainmax * 1.5f;
-	float minheight = terrainmax - terrainmax;
-
-	float avgHeight = g_SSControlPoint.GetAverageHeight();
-
-	if ( g_GameModeSelector.GetCurrentGameMode().Type != GameModeType::Replay && g_GameModeSelector.GetCurrentGameMode().Type != GameModeType::AIOnly )
+	if ( g_GameModeSelector.GetCurrentGameMode().Type != GameModeType::Editor )
 	{
-		m_MaxZoom = terrainmax * 0.5f;
-		m_MinZoom = terrainmax * 1.2f;
-	}
-	else
-	{
-		m_MaxZoom = terrainmax - avgHeight;
-		m_MinZoom = terrainmax + 120;
-	}
-	m_RTS.SetMovementBounds( glm::vec3( 0.0f, m_MaxZoom, 0.0f ), glm::vec3( m_MapSizeX, m_MinZoom, m_MapSizeZ ) );
+		float terrainmax = gfx::g_GFXTerrain.GetMaxHeight();
+		float terrainmin = gfx::g_GFXTerrain.GetMinHeight();
+		float maxheight = terrainmax * 1.5f;
+		float minheight = terrainmax - terrainmax;
 
-	m_FirstPerson.GetEditableLens().WindowWidth = m_WindowWidth;
-	m_FirstPerson.GetEditableLens().WindowHeight = m_WindowHeight;
-	if ( gameModeType != GameModeType::AIOnly && gameModeType != GameModeType::Replay )
-		m_FirstPerson.GetEditableLens().Far = 500.0f;
-	else
-		m_FirstPerson.GetEditableLens().Far = 1000.0f;
-	m_FirstPerson.GetEditableLens().Near = 1.0f;
-	m_FirstPerson.SetPosition( startPosition );
+		float avgHeight = g_SSControlPoint.GetAverageHeight();
+
+		if ( g_GameModeSelector.GetCurrentGameMode().Type != GameModeType::Replay && g_GameModeSelector.GetCurrentGameMode().Type != GameModeType::AIOnly )
+		{
+			m_MaxZoom = terrainmax * 0.5f;
+			m_MinZoom = terrainmax * 1.2f;
+		}
+		else
+		{
+			m_MaxZoom = terrainmax - avgHeight;
+			m_MinZoom = terrainmax + 120;
+		}
+		m_RTS.SetMovementBounds( glm::vec3( 0.0f, m_MaxZoom, 0.0f ), glm::vec3( m_MapSizeX, m_MinZoom, m_MapSizeZ ) );
+
+		m_FirstPerson.GetEditableLens().WindowWidth = m_WindowWidth;
+		m_FirstPerson.GetEditableLens().WindowHeight = m_WindowHeight;
+		if ( gameModeType != GameModeType::AIOnly && gameModeType != GameModeType::Replay )
+			m_FirstPerson.GetEditableLens().Far = 500.0f;
+		else
+			m_FirstPerson.GetEditableLens().Far = 1000.0f;
+		m_FirstPerson.GetEditableLens().Near = 1.0f;
+		m_FirstPerson.SetPosition( startPosition );
+	}
 
 	m_Active = &m_RTS;
 
@@ -102,52 +105,63 @@ void SSCamera::Startup( )
 
 void SSCamera::UpdateUserLayer( const float deltaTime )
 {
-	DEV(
-	if ( g_SSKeyBinding.ActionUpDown( ACTION_TOGGLE_CAMERA ) )
+	if ( m_Spline.Running( ) )
 	{
-		this->ToggleCamera();
+		m_Active = &m_Spline;
+		m_Active->Update( deltaTime );
 	}
-	);
-
-	if ( g_SSKeyBinding.ActionDown( ACTION_JUMP_TO_SELECTION ) )
+	else
 	{
-		if ( g_PlayerData.GetSelectedSquads().empty() )
-		{
-			if ( !g_PlayerData.GetSelectedEntities().empty() )
+		if ( m_Active == &m_Spline )
+			m_Active = &m_RTS;
+
+		DEV(
+			if ( g_SSKeyBinding.ActionUpDown( ACTION_TOGGLE_CAMERA ) )
 			{
-				const glm::vec3& position = GetDenseComponent<PlacementComponent>( g_PlayerData.GetSelectedEntities()[0] )->Position;
-				m_RTS.LookAtPosition( position );
+			this->ToggleCamera( );
+			}
+		);
+
+		if ( g_SSKeyBinding.ActionDown( ACTION_JUMP_TO_SELECTION ) )
+		{
+			if ( g_PlayerData.GetSelectedSquads( ).empty( ) )
+			{
+				if ( !g_PlayerData.GetSelectedEntities( ).empty( ) )
+				{
+					const glm::vec3& position = GetDenseComponent<PlacementComponent>( g_PlayerData.GetSelectedEntities( )[0] )->Position;
+					m_RTS.LookAtPosition( position );
+				}
+			}
+			else
+			{
+				const glm::vec2& squadPosition = g_SSAI.GetSquadWithID( g_PlayerData.GetPlayerID( ), g_PlayerData.GetSelectedSquads( )[0] )->GetPosition( );
+				m_RTS.LookAtPosition( glm::vec3( squadPosition.x, gfx::g_GFXTerrain.GetHeightAtWorldCoord( squadPosition.x, squadPosition.y ), squadPosition.y ) );
+			}
+		}
+
+		if ( m_TransitionTimer > 0.0f )
+		{
+			m_TransitionTimer -= deltaTime;
+			if ( m_TransitionTimer > 0.0f )
+			{
+				float transitionLeft	= 1.0f - m_TransitionTimer / CAMERA_SUBSYSTEM_TRANSITION_TIME;
+				glm::vec3 cameraPos		= m_TransitionPosBase + transitionLeft * m_TransitionPosChange;
+				m_FirstPerson.SetPosition( cameraPos );
+
+				glm::quat cameraRot		= m_TransitionRotBase + transitionLeft * m_TransitionRotChange;
+				m_FirstPerson.SetOrientation( glm::normalize( cameraRot ) );
+			}
+			else
+			{
+				m_Active = &m_RTS;
 			}
 		}
 		else
 		{
-			const glm::vec2& squadPosition = g_SSAI.GetSquadWithID( g_PlayerData.GetPlayerID(), g_PlayerData.GetSelectedSquads()[0] )->GetPosition();
-			m_RTS.LookAtPosition( glm::vec3( squadPosition.x, gfx::g_GFXTerrain.GetHeightAtWorldCoord( squadPosition.x, squadPosition.y ), squadPosition.y ) );
-		}
-	}
-
-	if ( m_TransitionTimer > 0.0f )
-	{
-		m_TransitionTimer -= deltaTime;
-		if ( m_TransitionTimer > 0.0f )
-		{
-			float transitionLeft	= 1.0f - m_TransitionTimer / CAMERA_SUBSYSTEM_TRANSITION_TIME;
-			glm::vec3 cameraPos		= m_TransitionPosBase + transitionLeft * m_TransitionPosChange;
-			m_FirstPerson.SetPosition( cameraPos );
-
-			glm::quat cameraRot		= m_TransitionRotBase + transitionLeft * m_TransitionRotChange;
-			m_FirstPerson.SetOrientation( glm::normalize( cameraRot ) );
-		}
-		else
-		{
-			m_Active = &m_RTS;
-		}
-	}
-	else
-	{
-		if ( !m_BlockMovement )
-		{
-			m_Active->Update( deltaTime );
+			if ( !m_BlockMovement )
+			{
+				m_Active->Update( deltaTime );
+			}
 		}
 	}
 
@@ -180,6 +194,18 @@ void SSCamera::ToggleCamera()
 	}
 }
 
+void SSCamera::UseFPSCamera( )
+{
+	if ( m_Active == &m_RTS )
+		ToggleCamera( );
+}
+
+void SSCamera::UseRTSCamera( )
+{
+	if ( m_Active == &m_FirstPerson )
+		ToggleCamera( );
+}
+
 Camera* SSCamera::GetActiveCamera()
 {
 	return m_Active;
@@ -188,6 +214,11 @@ Camera* SSCamera::GetActiveCamera()
 CameraRTS* SSCamera::GetRTSCamera()
 {
 	return &m_RTS;
+}
+
+CameraSpline* SSCamera::GetSplineCamera()
+{
+	return &m_Spline;
 }
 
 void SSCamera::SetWindowSize( int width, int height )

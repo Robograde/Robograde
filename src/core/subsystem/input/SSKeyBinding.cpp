@@ -1,5 +1,5 @@
 /**************************************************
-Copyright 2015 Johan Melin
+2015 Johan Melin
 ***************************************************/
 
 #include "SSKeyBinding.h"
@@ -8,8 +8,8 @@ Copyright 2015 Johan Melin
 #include <input/KeyBindings.h>
 #include <utility/ConfigManager.h>
 #include <utility/Logger.h>
-#include <messaging/GameMessages.h>
 #include "../utility/SSMail.h"
+#include "../../input/GameMessages.h"
 #include "../../utility/GameModeSelector.h"
 #include "../../utility/PlayerData.h"
 #include "../../input/Action.h"

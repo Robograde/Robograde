@@ -1,5 +1,5 @@
 /**************************************************
-Copyright 2015 Daniel "MonzUn" Bengtsson & Johan Melin
+2015 Daniel "MonzUn" Bengtsson & Johan Melin
 ***************************************************/
 
 #pragma once

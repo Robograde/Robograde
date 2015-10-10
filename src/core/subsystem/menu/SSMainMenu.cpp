@@ -1,5 +1,5 @@
 /**************************************************
-Copyright 2015 Isak Almgren
+2015 Isak Almgren
 ***************************************************/
 
 #include "SSMainMenu.h"
@@ -8,6 +8,7 @@ Copyright 2015 Isak Almgren
 #include "../input/SSKeyBinding.h"
 #include "../audio/SSMusicManager.h"
 #include "SSReplaySelectMenu.h"
+#include "SSGameLobby.h"
 
 SSMainMenu& SSMainMenu::GetInstance()
 {
@@ -17,6 +18,12 @@ SSMainMenu& SSMainMenu::GetInstance()
 
 void SSMainMenu::Startup()
 {
+	g_Script.Register( "SetEditorMode", [] ( IScriptEngine* scriptEngine ) -> int
+	{
+		g_SSGameLobby.SetEditorMode( true );
+		return 0;
+	} );
+
 	g_GUI.BringWindowToFront( "DebugWindow" );
 
 	glm::ivec2 windowSize = g_GUI.GetWindowSize( "RootWindow" );
@@ -29,7 +36,7 @@ void SSMainMenu::Startup()
 	int btnWidth = 256;
 	int btnHeight = 64;
 	int btnSpacing = btnHeight + 10;
-	int numButtons = 6;
+	int numButtons = 8;
 	
 	int x = m_LeftOffset; //( windowSize.x / 2 ) - ( btnWidth / 2 );
 	int y = ( windowSize.y / 2 ) - ( ( btnSpacing * numButtons ) - 10 ) / 2;
@@ -59,12 +66,14 @@ void SSMainMenu::Startup()
 	};
 
 	//Add the menu buttons here
-	m_SinglePlayerButton	= addMenuButton( "Singleplayer", "SwitchGameMode( 'singleplayerlobby' )" );
-	m_MultiPlayerButton		= addMenuButton( "Multiplayer", "SwitchGameMode( 'netlob' )" );
+							addMenuButton( "Singleplayer", "SwitchGameMode( 'singleplayerlobby' )" );
+							addMenuButton( "Multiplayer", "SwitchGameMode( 'netlob' )" );
 	m_ReplayButton			= addMenuButton( "Replay", "OpenWindow('ReplaySelectWindow'); CloseWindow( 'MainMenu' )" );
-	m_OptionsButton			= addMenuButton( "How to play", "OpenWindow('HowTo'); CloseWindow( 'MainMenu' )" );
-	m_OptionsButton			= addMenuButton( "Options", "OpenWindow('Options'); CloseWindow( 'MainMenu' )" );
-	m_ExitButton			= addMenuButton( "Exit", "GE_Exit()" );
+							addMenuButton( "How to play", "OpenWindow('HowTo'); CloseWindow( 'MainMenu' )" );
+							addMenuButton( "Options", "OpenWindow('Options'); CloseWindow( 'MainMenu' )" );
+							addMenuButton( "Level Editor(MP)", "SetEditorMode(); SwitchGameMode( 'netlob' )" );
+							addMenuButton( "Level Editor(SP)", "SwitchGameMode( 'editor' ); GE_PlayAs( 0 )" );
+							addMenuButton( "Exit", "GE_Exit()" );
 	
 	//Script functions that are to be called by buttons
 	g_Script.Register( "GE_Exit", [] ( IScriptEngine* ) -> int { SDL_Event event; event.type = SDL_QUIT; SDL_PushEvent( &event ); return 0; } );

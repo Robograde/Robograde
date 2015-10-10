@@ -59,6 +59,7 @@ namespace GUI
 	
 	void Button::Update( float deltaTime , glm::ivec2 parentPos )
 	{
+		Object::Update( deltaTime, parentPos );
 		m_BoundingBox.Origin = parentPos;
 		if( m_BoundingBox.Intersects( g_Input->GetMousePosX(), g_Input->GetMousePosY() )  && g_GUI.IsInputEnabled() )
 		{
@@ -258,6 +259,18 @@ namespace GUI
 	SpriteDefinition& Button::GetImageRef()
 	{
 		return m_Image;
+	}
+
+	glm::vec4& Button::GetColour()
+	{
+		if( m_Background.Colour.r > 1.0f )
+			m_Background.Colour.r = 1.0f;
+		if( m_Background.Colour.g > 1.0f )
+			m_Background.Colour.g = 1.0f;
+		if( m_Background.Colour.b > 1.0f )
+			m_Background.Colour.b = 1;
+
+		return m_Background.Colour;
 	}
 	
 	void Button::SetText( const rString& text )

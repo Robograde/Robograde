@@ -1,5 +1,5 @@
 /**************************************************
-Copyright 2015 Isak Almgren
+2015 Isak Almgren
 ***************************************************/
 
 #include "SSConsole.h"
@@ -33,7 +33,7 @@ void SSConsole::Startup( )
 	glm::ivec2 windowSize = g_GUI.GetWindowSize( "RootWindow" );
 	int consoleHeight = 417;
 	int consolePosY = 0;
-	g_GUI.AddWindow( "ConsoleWindow", GUI::Rectangle( 0, 0, windowSize.x, consoleHeight + 27 ), "RootWindow", true );
+	m_Window = g_GUI.AddWindow( "ConsoleWindow", GUI::Rectangle( 0, 0, windowSize.x, consoleHeight + 27 ), "RootWindow", true );
 	g_GUI.SetWindowClickThrough( "ConsoleWindow", true );
 	
 	//Set the background
@@ -42,7 +42,12 @@ void SSConsole::Startup( )
 	
 	m_TextBox = g_GUI.AddTextBox( "ConsoleInput", GUI::Rectangle( 15, consoleHeight + 5, windowSize.x - 15, 22 ), "ConsoleWindow" );
 	g_GUI.AddText( "ConsoleInputChar", GUI::TextDefinition(">", 5, consoleHeight + 10 ), "ConsoleWindow" );
-	
+
+	GUI::Button* btn = g_GUI.AddButton( "", GUI::Rectangle(  windowSize.x - 160, consoleHeight + 5 - 32, 160, 32 ), "ConsoleWindow" );
+	btn->SetClickScript( "ToggleWindow('DebugWindow')" );
+	btn->SetBackgroundImage( "Button_128x32.png" );
+	btn->SetText( "Toggle Debug info" );
+
 	m_ScrollOffset = 0;
 	m_HistoryIndex = 0;
 	
@@ -208,17 +213,15 @@ bool SSConsole::Toggle( )
 	
 	if( !g_GUI.IsWindowOpen( "ConsoleWindow" ) )
 	{
-		g_GUI.OpenWindow( "ConsoleWindow" );
+		m_Window->SlideOpen( glm::ivec2( 0, -m_Window->GetSize().y ), glm::ivec2( 0, 0 ), 1000 );
 		m_TextBox->StartInput();
-		//g_Input->PauseKeyInput();
 		m_TextBox->SetText( "" );
 		return true;
 	}
 	else
 	{
-		g_GUI.CloseWindow( "ConsoleWindow" );
+		m_Window->SlideClose( glm::ivec2( 0, 0 ), glm::ivec2( 0, -m_Window->GetSize().y ), 1000 );
 		m_TextBox->StopInput();
-		//g_Input->UnPauseKeyInput();
 		return false;
 	}
 }

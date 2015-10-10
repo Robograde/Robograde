@@ -217,7 +217,7 @@ void main()
 	//FogOfWar
 	vec2 fogPos = vec2(posW.x / gWorldSize.x, posW.z / gWorldSize.y);
 	float fog = clamp( 1.0f - texture(gFogTex, fogPos).a, 0.0f, 1.0f );
-
+	fog = 1.0f;
 	vec4 shadowPos = gShadowMat * vec4(posW.xyz,1);
 
 	float shadow = CalcShadowFactor(shadowPos);

@@ -1,5 +1,5 @@
 /**************************************************
-Copyright 2015 Mostafa Hassan & Richard Pettersson
+2015 Mostafa Hassan & Richard Pettersson
 ***************************************************/
 
 # pragma once

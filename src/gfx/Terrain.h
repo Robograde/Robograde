@@ -33,10 +33,13 @@ namespace gfx
 		GFX_API ~Terrain();
 
 		GFX_API bool				LoadFromFile( const rString& TerrainFilename, const Terrain::Config& config );
+		GFX_API bool				LoadEmptyMap(const Terrain::Config& config);
 		GFX_API float				GetHeightAtWorldCoord( const float x, const float z ) const;
 		GFX_API void				Draw(const glm::mat4& Lightmat, GLuint ShadowMap ); //TODOHJ: Make the input for the terrain better
 		GFX_API void				DrawDepth();
 		GFX_API void				DrawDeferred( const glm::mat4& Lightmat, GLuint ShadowMap );
+		GFX_API void				ChangeHeight(const glm::vec2 xz, const float dY);
+		GFX_API void				ApplyHeightbrush(const glm::vec2 center, const float strength, const float hardness, float radius); // Oh so haxy
 		//GFX_API void				AddToHeightPoints(const rVector<float> grid, const Terrain::Config& config);
 
 		// Plain Getters & Setters
@@ -54,7 +57,8 @@ namespace gfx
 		std::pair<float, float> WorldToImageCoordinates( const float& worldX, const float& worldZ ) const;
 		void					FilterHeightMap(int filterpasses);
 		void					GenerateNormalMap(int resolution, glm::vec2 worldSize);
-
+		void					RebuildHeightMap();
+		void					ChangeHeightAt(const int x, const int z, const float dy);
 		rVector<VertexPosNormalTexTexel> m_TerrVertices;
 		rVector<unsigned int>		m_TerrIndices;
 
@@ -95,6 +99,7 @@ namespace gfx
 		Texture				m_Albedo4;
 		Texture				m_BlendMap;
 		glm::vec2			m_WorldSize;
+		Terrain::Config*		m_LoadedConfig;
 	};
 
 	struct Terrain::Config

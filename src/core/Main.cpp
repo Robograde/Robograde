@@ -1,5 +1,5 @@
 /**************************************************
-Copyright 2015 Robograde Development Team
+2015 Robograde Development Team
 ***************************************************/
 
 #include <utility/PlatformDefinitions.h>
@@ -77,7 +77,6 @@ void RegisterLogger( )
 		{ "EntityFactory",			"" },
 		{ "GameData",				"" },
 		{ "Randomizer",				"" },
-
 		{ "ComponentCollection",	"" },
 		{ "SubsystemManager",		"" },
 		{ "Subsystem",				"" },
@@ -101,7 +100,6 @@ void RegisterLogger( )
 		{ "SSMusicManager",			"Subsystem" },
 		{ "SSSceneLoader",			"Subsystem" },
 		{ "SSGameLobby",			"Subsystem" },
-		
 		{ "Input", 					"" },
 		{ "KeyBindings",			"Input" },
 		{ "GameSpeedController",	"" },
@@ -110,7 +108,9 @@ void RegisterLogger( )
 		{ "Config",					"" },
 		{ "CallbackConfig",			"" },
 		{ "ConfigManager",			"" },
-
+		{ "Editor",					"" },
+		{ "EditorPicking",			"Editor" },
+		{ "EditorObjectPlacer",		"Editor" },
 	};
 
 	for ( auto& entry : loggerRegisters )

@@ -12,7 +12,7 @@ namespace gfx
     class GFX_API IGraphics
     {
     public:
-        virtual void InitializeWindow(int width, int height,int msaa , bool fullscreen, bool vsync) = 0;
+        virtual void InitializeWindow(int width, int height,int msaa , bool fullscreen, bool vsync, bool useFogOfWar) = 0;
         virtual void Swap() = 0;
         virtual SDL_Window* GetWindow() = 0;
         virtual void Draw() = 0;

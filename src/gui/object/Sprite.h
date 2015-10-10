@@ -25,6 +25,8 @@ namespace GUI
 
 		GUI_API void			SetPosition( int x, int y );
 
+		GUI_API glm::ivec2		GetPosition( ) override;
+
 	private:
 		SpriteDefinition		m_SpriteDefinition;
 	};

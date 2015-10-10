@@ -1,5 +1,5 @@
 /**************************************************
-Copyright 2015 Isak Almgren
+2015 Isak Almgren
 ***************************************************/
 
 #include "SSSquadFlag.h"
@@ -14,7 +14,7 @@ Copyright 2015 Isak Almgren
 #include "../input/SSPicking.h"
 #include "../utility/SSMail.h"
 
-#include <messaging/GameMessages.h>
+#include "../../input/GameMessages.h"
 
 #include "../../component/ColourComponent.h"
 #include "../../component/PlacementComponent.h"

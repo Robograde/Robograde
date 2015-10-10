@@ -5,6 +5,8 @@ Zlib Copyright 2015 Isak Almgren
 #include "GUIEngine.h"
 #include <GL/glew.h>
 #include <utility/Logger.h>
+#include <input/Input.h>
+#include "object/ComboBox.h"
 
 namespace GUI
 {
@@ -35,6 +37,10 @@ namespace GUI
 		m_ScriptFunctions.RegisterFunctions();
 		
 		m_CurrentFontID = FONT_ID_DEFAULT_12;
+
+		m_ToolTipBackground = SpriteDefinition( "", 0, 0, 128, 32, glm::vec4( 0.9f ) );
+		m_ToolTipBackground.BorderSize = 1;
+		m_ToolTipText = TextDefinition( "", 0, 0, glm::vec4( 0.0f, 0.0f, 0.0f, 1.0f ) );
 	}
 	
 	void GUIEngine::InitializeRoot(int windowWidth, int windowHeight)
@@ -55,6 +61,9 @@ namespace GUI
 	{
 		m_RootWindow->SetSize( windowWidth, windowHeight );
 		m_RootWindow->Render( glm::ivec2 ( 0, 0 ) );
+
+		RenderToolTip();
+
 		g_Graphics2D.Render( windowWidth, windowHeight );
 	}
 
@@ -65,6 +74,7 @@ namespace GUI
 
 	void GUIEngine::Update( float deltaTime )
 	{
+		SetToolTipText( "" );
 		m_RootWindow->Update( deltaTime, glm::ivec2 ( 0, 0 ) );
 	}
 
@@ -181,6 +191,13 @@ namespace GUI
 		AddChild( name, progressBar, parent );
 		return progressBar;
 	}
+
+	CircularSlider* GUIEngine::AddCircularSlider( const rString& name, glm::ivec2 position, const rString& parent )
+	{
+		CircularSlider* circularSlider = pNew( CircularSlider, name, parent, position );
+		AddChild( name, circularSlider, parent );
+		return circularSlider;
+	}
 	
 	Text* GUIEngine::AddText( const rString& name, TextDefinition textDefinition, const rString& parent )
 	{
@@ -256,6 +273,12 @@ namespace GUI
 			Logger::Log( "Couldn't get window: " + name + ", it doesn't exist.", "GUIEngine", LogSeverity::ERROR_MSG  );
 		
 		return false;
+	}
+
+
+	Object*	GUIEngine::GetObject(  const rString& name, const rString& parent )
+	{
+		return GetChild( name, parent );
 	}
 	
 	void GUIEngine::BringWindowToFront( const rString& name )
@@ -368,11 +391,13 @@ namespace GUI
 		if( windowGroupIt != m_ToggleWindowGroups.end() )
 		{
 			for( Window* window : windowGroupIt->second )
+				if( window->IsOpen() )
+					window->Close();
+
+			for( Window* window : windowGroupIt->second )
 			{
 				if( window->GetName() == windowName )
 					window->Open();
-				else
-					window->Close();
 			}
 		}
 	}
@@ -393,6 +418,11 @@ namespace GUI
 	bool GUIEngine::IsInputEnabled()
 	{
 		return m_InputEnabled;
+	}
+
+	void GUIEngine::SetToolTipText ( const rString& text )
+	{
+		m_ToolTipText.Text = text;
 	}
 	
 	//Private
@@ -418,7 +448,7 @@ namespace GUI
 			m_ObjectNameIndex++;
 	}
 	
-	Object*GUIEngine::GetChild( const rString& name, const rString& parent )
+	Object* GUIEngine::GetChild( const rString& name, const rString& parent )
 	{
 		for( auto& windowIt : m_Windows )
 		{
@@ -428,5 +458,42 @@ namespace GUI
 		
 		Logger::Log( "Failed to find window: " + parent, "GUIEngine", LogSeverity::ERROR_MSG );
 		return nullptr;
+	}
+
+
+
+	void GUIEngine::RenderToolTip()
+	{
+		if( m_ToolTipText.Text != "" )
+		{
+			glm::ivec2 mousePos = glm::ivec2( g_Input->GetMousePosX(), g_Input->GetMousePosY() );
+
+			glm::ivec2 textSize = g_Graphics2D.GetTextSize( &m_ToolTipText );
+
+			int margin = 4;
+			int doubleMargin = 8;
+
+			m_ToolTipBackground.Width = textSize.x + doubleMargin;
+			m_ToolTipBackground.Height = textSize.y + doubleMargin;
+
+			glm::ivec2 toolTipOffset = glm::ivec2( 0, 24 ); //Cursor size offset
+			glm::ivec2 screenSize =  m_RootWindow->GetSize();
+
+			if( m_ToolTipBackground.Width + mousePos.x + toolTipOffset.x > screenSize.x )
+				m_ToolTipBackground.Position.x = screenSize.x - m_ToolTipBackground.Width;
+			else
+				m_ToolTipBackground.Position.x = mousePos.x;
+
+			if( m_ToolTipBackground.Height + mousePos.y + toolTipOffset.y > screenSize.y )
+				m_ToolTipBackground.Position.y = screenSize.y - m_ToolTipBackground.Height;
+			else
+				m_ToolTipBackground.Position.y = mousePos.y + toolTipOffset.y;
+
+			m_ToolTipText.Origin = m_ToolTipBackground.Position;
+			m_ToolTipText.Position = glm::ivec2( margin );
+
+			g_Graphics2D.EnqueueSprite( &m_ToolTipBackground );
+			g_Graphics2D.EnqueueText( &m_ToolTipText );
+		}
 	}
 }

@@ -1,5 +1,5 @@
 /**************************************************
-Copyright 2015 Daniel "MonzUn" Bengtsson
+2015 Daniel "MonzUn" Bengtsson
 ***************************************************/
 
 #pragma once
@@ -37,16 +37,16 @@ private:
 	~SSMail( ) { };
 	SSMail& operator=( const SSMail & rhs );
 
-	bool							PopSimulationQueue( const Message*& outMessage );
-	bool							PopUserQueue(		const Message*& outMessage );
-	void							CalculateInterests( );
+	bool								PopSimulationQueue( const Message*& outMessage );
+	bool								PopUserQueue(		const Message*& outMessage );
+	void								CalculateInterests( );
 
-	rVector<Subscriber*>			m_Subscribers; // TODODB: Make this const when the STL allocator can handle it
-	rVector<const Message*>			m_DeliveredSimMessages;
-	rVector<const Message*>			m_DeliveredUserMessages;
-	LocklessQueue<const Message*>	m_UserMessageQueue;
-	int								m_TotalSimInterests	 = 0;
-	int								m_TotalUserInterests = 0;
+	rVector<Subscriber*>				m_Subscribers; // TODODB: Make this const when the STL allocator can handle it
+	rVector<const Message*>				m_DeliveredSimMessages;
+	rVector<const Message*>				m_DeliveredUserMessages;
+	LocklessQueue<const Message*>		m_UserMessageQueue;
+	MESSAGE_TYPE_ENUM_UNDELYING_TYPE	m_TotalSimInterests	 = 0;
+	MESSAGE_TYPE_ENUM_UNDELYING_TYPE	m_TotalUserInterests = 0;
 
 	struct GreaterThanOperator
 	{

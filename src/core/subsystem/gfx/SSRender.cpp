@@ -1,5 +1,5 @@
 /**************************************************
-Copyright 2015 Robograde Development Team
+2015 Robograde Development Team
 ***************************************************/
 
 #include "SSRender.h"
@@ -84,6 +84,9 @@ void SSRender::UpdateUserLayer( const float dt )
 	{
 		EntityMask entityMask = EntityManager::GetInstance().GetEntityMask( entityID );
 		if ( !( ( entityMask & placementAndModelFlag ) == placementAndModelFlag ) )
+			continue;
+
+		if ( GetDenseComponent<ModelComponent>( entityID )->IsVisible == false )
 			continue;
 
 		glm::vec4 colour;

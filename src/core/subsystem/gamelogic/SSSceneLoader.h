@@ -1,5 +1,5 @@
 /**************************************************
-Copyright 2015 Daniel "MonzUn" Bengtsson
+2015 Daniel "MonzUn" Bengtsson
 ***************************************************/
 
 #pragma once
@@ -24,7 +24,7 @@ public:
 	
 private:
 	// No external instancing allowed
-	SSSceneLoader() : Subsystem( "SceneLoader" , "Scene Loader" ) { m_SceneToBeLoaded = "RoboWar"; }
+	SSSceneLoader() : Subsystem( "SceneLoader" , "Scene Loader" ) { m_SceneToBeLoaded = "Duel"; }
 	SSSceneLoader( const SSSceneLoader& rhs );
 	~SSSceneLoader() {};
 	SSSceneLoader& operator=( const SSSceneLoader& rhs );

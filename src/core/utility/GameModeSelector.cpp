@@ -1,5 +1,5 @@
 /**************************************************
-Copyright 2015 Daniel "MonzUn" Bengtsson
+2015 Daniel "MonzUn" Bengtsson
 ***************************************************/
 
 #include "GameModeSelector.h"
@@ -27,7 +27,7 @@ GameModeSelector& GameModeSelector::GetInstance()
 	return instance;
 }
 
-void GameModeSelector::Initialize() // TODODB: Document the bools
+void GameModeSelector::Initialize()
 {
 	// Create game modes (Names must be in lower case)											Sim		Net		Menu
 	m_GameModes.push_back( GameMode( GameModeType::ConsoleOnly,			"console",				false,	false,	false	) );
@@ -40,6 +40,7 @@ void GameModeSelector::Initialize() // TODODB: Document the bools
 	m_GameModes.push_back( GameMode( GameModeType::Replay,				"replay",				true,	false,	false	) );
 	m_GameModes.push_back( GameMode( GameModeType::MainMenu,			"mainmenu",				false,	false,	true	) );
 	m_GameModes.push_back( GameMode( GameModeType::DedicatedServer,		"dedicatedserver",		true,	true,	false	) );
+	m_GameModes.push_back( GameMode( GameModeType::Editor,				"editor",				true,	true,	false	) );
 	
 	// Add the game modes to the game mode map
 	for ( auto& gameMode : m_GameModes )
@@ -53,7 +54,8 @@ void GameModeSelector::Initialize() // TODODB: Document the bools
 	m_GameModeNames.emplace( "splob", GameModeType::SinglePlayerLobby );
 	m_GameModeNames.emplace( "c", GameModeType::ConsoleOnly );
 	m_GameModeNames.emplace( "rep", GameModeType::Replay );
-	m_GameModeNames.emplace(  "mm", GameModeType::MainMenu );
+	m_GameModeNames.emplace( "mm", GameModeType::MainMenu );
+	m_GameModeNames.emplace( "edit", GameModeType::Editor );
 
 	g_SubsystemManager.Startup();
 
@@ -112,8 +114,10 @@ void GameModeSelector::AddSubsystemToGameModes( Subsystem* subsystem, std::initi
 		if ( gameModeType != GameModeType::Unknown )
 		{
 			GameMode* gameMode = GetEditableGameModeFromType( gameModeType );
-			if ( gameMode != nullptr ) // TODODB: Log if this happens
+			if ( gameMode != nullptr )
 				gameMode->Subsystems.push_back( subsystem );
+			else
+				Logger::Log( "Failed to register subsystem since no game mode was found for type " + rToString( static_cast<int>( gameModeType ) ), "GameModeSelector", LogSeverity::WARNING_MSG );
 		}
 		else
 			Logger::Log( "Attempted to register subsystem to illegal game mode", "GameModeSelector", LogSeverity::WARNING_MSG );
@@ -207,6 +211,7 @@ void GameModeSelector::StopCurrentMode()
 	if ( m_CurrentGameMode.IsSimulation && !m_NextGameMode.IsSimulation )
 	{
 		g_GameData.Reset();
+		g_PlayerData.Reset();
 		g_GameSpeedController.SetGameStarted( false );
 		g_Alliances.Clear();
 		g_SSMusicManager.Reset();
@@ -219,8 +224,6 @@ void GameModeSelector::StopCurrentMode()
 
 	if ( m_CurrentGameMode.IsSimulation ) // TODODB: Shouldn't this also check if the next mode is not simulated?
 		g_GameSpeedController.Reset();
-
-	g_PlayerData.Reset();
 }
 
 void GameModeSelector::StartMode( const GameMode& gameMode )

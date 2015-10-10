@@ -19,12 +19,12 @@ bool Subscriber::operator==( const Subscriber& rhs )
 	return this->m_Name == rhs.m_Name;
 }
 
-const int Subscriber::GetUserInterests( ) const
+const MESSAGE_TYPE_ENUM_UNDELYING_TYPE Subscriber::GetUserInterests() const
 {
 	return m_UserInterests;
 }
 
-const int Subscriber::GetSimInterests( ) const
+const MESSAGE_TYPE_ENUM_UNDELYING_TYPE Subscriber::GetSimInterests() const
 {
 	return m_SimInterests;
 }

@@ -5,8 +5,9 @@ Zlib Copyright <2015> <Daniel "MonzUn" Bengtsson>
 #pragma once
 
 #include "MessageLibraryDefine.h"
+#include <stdint.h>
 
-#define MESSAGE_TYPE_ENUM_UNDELYING_TYPE int
+#define MESSAGE_TYPE_ENUM_UNDELYING_TYPE uint64_t
 
 struct Message
 {

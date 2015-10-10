@@ -1,5 +1,5 @@
 /**************************************************
-Copyright 2015 Robograde Development Team
+2015 Robograde Development Team
 ***************************************************/
 
 #include "Engine.h"
@@ -27,12 +27,14 @@ Copyright 2015 Robograde Development Team
 #include "component/ParentComponent.h"
 #include "component/ControlPointComponent.h"
 #include "component/SFXEmitterComponent.h"
+#include "component/ParticleEmitterComponent.h"
 #include "component/UpgradeComponent.h"
 #include "component/VisionComponent.h"
 #include "component/AnimationComponent.h"
 #include "component/TerrainFollowComponent.h"
 #include "component/DecalComponent.h"
 #include "component/StealthComponent.h"
+#include "component/FollowMouseComponent.h"
 
 #include "subsystem/SubsystemManager.h"
 #include "subsystem/SubsystemManagerScriptBinder.h"
@@ -179,8 +181,9 @@ bool Engine::InitializeGFX()
 {
 	g_GameData.ReadGraphicsConfig();
 	// GFX needs to be initialized before the render manager
+	bool useFogOfWar = !(g_GameModeSelector.GetCurrentGameMode().Type == GameModeType::Editor);
 	gfx::g_GFXEngine.InitializeWindow( g_GameData.GetWindowWidth(), g_GameData.GetWindowHeight(), g_GameData.m_MSAA, g_GameData.m_Fullscreen,
-									   g_GameData.m_Vsync );
+		g_GameData.m_Vsync, useFogOfWar);
 	m_debugRenderer.Initialize();
 
 	return true;
@@ -212,7 +215,9 @@ bool Engine::InitializeSubsystems()
 											AnimationComponent,			// 17
 											TerrainFollowComponent,		// 18
 											DecalComponent,				// 19
-											StealthComponent			// 20
+											StealthComponent,			// 20
+											FollowMouseComponent,		// 21
+											ParticleEmitterComponent	// 22
 											> ( );
 
 	g_EntityManager.SetCollectionVector( collections );

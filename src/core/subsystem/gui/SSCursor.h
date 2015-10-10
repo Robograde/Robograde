@@ -1,5 +1,5 @@
 /**************************************************
-Copyright 2015 Isak Almgren
+2015 Isak Almgren
 ***************************************************/
 
 #pragma once
@@ -31,6 +31,7 @@ private:
 	
 	GUI::Sprite*			m_MouseCursor;
 	GUI::SpriteDefinition	m_StandardDef;
+	GUI::SpriteDefinition	m_MoveDef;
 	GUI::SpriteDefinition	m_AttackDef;
 	GUI::SpriteDefinition	m_PingDef;
 	GUI::SpriteDefinition	m_PanDefs[ CAMERA_PAN_DIRECTION_SIZE ];

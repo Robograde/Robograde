@@ -1,5 +1,5 @@
 /**************************************************
-Copyright 2015 Robograde Development Team
+2015 Robograde Development Team
 ***************************************************/
 
 #pragma once
@@ -8,7 +8,7 @@ Copyright 2015 Robograde Development Team
 
 #include <gfx/RenderJobManager.h>
 #include <gfx/DebugRenderer.h>
-#include "../input/SSPicking.h"
+#include "../../picking/Picking.h"
 
 #define g_SSRender SSRender::GetInstance()
 

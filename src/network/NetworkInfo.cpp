@@ -1,5 +1,5 @@
 /**************************************************
-Zlib Copyright <2015> <Daniel "MonzUn" Bengtsson>
+Zlib Copyright 2015 Daniel "MonzUn" Bengtsson
 ***************************************************/
 
 #include "NetworkInfo.h"
@@ -11,8 +11,6 @@ NetworkInfo::NetworkInfo()
 {
 	m_NetworkID				= DEFAULT_NETWORK_ID;
 	m_HostID				= DEFAULT_HOST_ID;
-	m_FramesToRun			= 0;
-	m_LatestHostStep		= 0;
 }
 
 NetworkInfo::~NetworkInfo()
@@ -22,12 +20,6 @@ void NetworkInfo::Reset()
 {
 	m_NetworkID = DEFAULT_NETWORK_ID;
 	m_HostID	= DEFAULT_HOST_ID;
-
-	m_HostHashQueue.Clear();
-	m_HostRandomCountsQueue.Clear();
-
-	m_FramesToRun = 0;
-	m_LatestHostStep = 0;
 }
 
 bool NetworkInfo::AmIHost() const
@@ -49,12 +41,6 @@ short NetworkInfo::GetHostID() const
 {
 	return m_HostID;
 }
-
-unsigned int NetworkInfo::GetHostStep() const
-{
-	return m_LatestHostStep;
-}
-
 
 const rMap<short, ConnectionInfo> NetworkInfo::GetConnections()
 {
@@ -121,48 +107,11 @@ void NetworkInfo::SetHostID( const short newHostID )
 	m_HostID = newHostID;
 }
 
-void NetworkInfo::SetHostStep( const unsigned int latestHostStep )
-{
-	m_LatestHostStep = latestHostStep;
-}
-
 void NetworkInfo::SetClientLatency( const short networkID, const double latency )
 {
 	m_ConnectionsLock.lock( );
 	m_Connections.at( networkID ).Latency = latency;
 	m_ConnectionsLock.unlock();
-}
-
-void NetworkInfo::PushHostHash( const unsigned int hash )
-{
-	m_HostHashQueue.Produce( hash );
-}
-
-unsigned int NetworkInfo::PopHostHash()
-{
-	unsigned int toReturn;
-	if ( !m_HostHashQueue.Consume( toReturn ) )
-	{
-		Logger::Log( "Attempted to pop hash from host but there were none left. Are we out of sync?", "NetworkInfo", LogSeverity::WARNING_MSG );
-		return 0;
-	}
-	return toReturn;
-}
-
-void NetworkInfo::PushHostRandomCount( const unsigned int randomCount )
-{
-	m_HostRandomCountsQueue.Produce( randomCount );
-}
-
-unsigned int NetworkInfo::PopHostRandomCount()
-{
-	unsigned int toReturn;
-	if ( !m_HostRandomCountsQueue.Consume( toReturn ) )
-	{
-		Logger::Log( "Attempted to pop randomCount from host but there were none left. Are we out of sync?", "NetworkInfo", LogSeverity::WARNING_MSG );
-		return 0;
-	}
-	return toReturn;
 }
 
 bool NetworkInfo::IsConnectedTo( const rString& address, const rString& port )
@@ -230,19 +179,4 @@ void NetworkInfo::UnRegisterConnection( const short networkID )
 		Logger::Log( "Attempted to unregister a non registered connection", "NetworkInfo", LogSeverity::WARNING_MSG );
 
 	m_ConnectionsLock.unlock();
-}
-
-void NetworkInfo::IncrementFramesToRun()
-{
-	++m_FramesToRun;
-}
-
-bool NetworkInfo::DecrementFramesToRun()
-{
-	if ( m_FramesToRun > 0 )
-	{
-		--m_FramesToRun;
-		return true;
-	}
-	return false;
 }

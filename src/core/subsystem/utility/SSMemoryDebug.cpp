@@ -1,5 +1,5 @@
 /**************************************************
-Copyright 2015 David Pejtersen
+2015 David Pejtersen
 ***************************************************/
 
 #include "SSMemoryDebug.h"
@@ -69,7 +69,7 @@ void SSMemoryDebug::UpdateUserLayer( const float deltaTime )
 	if ( g_GUI.IsWindowOpen( "MemoryWindow" ) )
 	{
 		if( g_GUI.IsWindowOpen( "ConsoleWindow" ) )
-			m_Window->SetPosition( m_Window->GetPosition().x, g_GUI.GetWindowSize( "ConsoleWindow" ).y );
+			m_Window->SetPosition( m_Window->GetPosition().x, g_GUI.GetWindowPos( "ConsoleWindow" ).y + g_GUI.GetWindowSize( "ConsoleWindow" ).y );
 		else
 			m_Window->SetPosition( m_Window->GetPosition().x, 0 );
 		

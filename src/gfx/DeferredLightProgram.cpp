@@ -22,8 +22,18 @@ gfx::DeferredLightProgram::~DeferredLightProgram()
 
 void gfx::DeferredLightProgram::Init(RenderJobManager* jobManager)
 {
-
-	m_ProgramHandle = g_ShaderBank.LoadShaderProgram("../../../shader/DeferredLight.glsl");
+	Init(jobManager, true);
+}
+void gfx::DeferredLightProgram::Init(RenderJobManager* jobManager, bool useFogOfWar)
+{
+	if (useFogOfWar)
+	{
+		m_ProgramHandle = g_ShaderBank.LoadShaderProgram("../../../shader/DeferredLight.glsl");
+	}
+	else
+	{
+		m_ProgramHandle = g_ShaderBank.LoadShaderProgram("../../../shader/DeferredLightNoFog.glsl");
+	}
 	m_RenderJobManager = jobManager;
 	jobManager->BindBuffers(g_ShaderBank.GetProgramFromHandle(m_ProgramHandle));
 	g_LightEngine.BindBuffer(m_ProgramHandle);

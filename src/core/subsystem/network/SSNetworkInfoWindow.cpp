@@ -1,5 +1,5 @@
 /**************************************************
-Copyright 2015 Daniel "MonzUn" Bengtsson
+2015 Daniel "MonzUn" Bengtsson
 ***************************************************/
 
 #include "SSNetworkInfoWindow.h"
@@ -78,7 +78,7 @@ void SSNetworkInfoWindow::UpdateUserLayer( const float deltaTime )
 		m_DebugTextServerIP->SetText( g_NetworkInfo.GetHostIPString( ) );
 
 		unsigned int hostStep;
-		g_NetworkInfo.AmIHost() ? hostStep = g_GameData.GetFrameCount() : hostStep = g_NetworkInfo.GetHostStep();
+		g_NetworkInfo.AmIHost( ) ? hostStep = g_GameData.GetFrameCount( ) : hostStep = g_SSNetworkController.GetHostStep( );
 		if ( !g_NetworkInfo.AmIHost() )
 		{
 			m_DebugTextStepsBehind->SetText( rToString( hostStep - g_GameData.GetFrameCount() + 1 ) ); // TODODB: Investigate why it becomes a negative number

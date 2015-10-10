@@ -1,10 +1,9 @@
 /**************************************************
-Copyright 2015 Robograde Development Team
+2015 Robograde Development Team
 ***************************************************/
 
 #include "PlayerData.h"
 #include "../CompileFlags.h"
-#include "GlobalDefinitions.h"
 #include "../datadriven/EntityManager.h"
 #include "../datadriven/DenseComponentCollection.h"
 #include "../component/OwnerComponent.h"
@@ -23,6 +22,7 @@ void PlayerData::Reset()
 
 	m_PlayerID			= PLAYER_ID_INVALID;
 	m_PlayerCount		= MAX_PLAYERS;
+
 
 	for ( int i = 0; i < MAX_CONTROL_GROUPS; ++i )
 		m_ControlGroups[i].clear();

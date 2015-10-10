@@ -29,6 +29,12 @@ namespace GUI
 		}
 		
 		m_IsWindow = true;
+
+
+		m_SlideOpen = false;
+		m_SlideClose = false;
+
+		m_SlideSpeed = 500;
 	}
 	
 	Window::~Window()
@@ -56,6 +62,39 @@ namespace GUI
 	void Window::Update( float deltaTime, glm::ivec2 parentPos )
 	{
 		m_BoundingBox.Origin = parentPos;
+		
+		//Functionality for sliding open and closing windows
+		if( m_SlideOpen || m_SlideClose )
+		{
+			glm::vec2 direction = m_SlideEnd - m_BoundingBox.GetPosition();
+			float distance = glm::length( direction );
+		
+
+			direction = glm::normalize( direction );
+
+			if( distance <= deltaTime * m_SlideSpeed )
+			{
+				m_BoundingBox.X = m_SlideEnd.x;
+				m_BoundingBox.Y = m_SlideEnd.y;
+
+				if( m_SlideClose )
+					Close();
+
+				m_SlideOpen = false;
+				m_SlideClose = false;
+			}
+			else
+			{
+				m_SlidePos.x += direction.x * deltaTime * m_SlideSpeed;
+				m_SlidePos.y += direction.y * deltaTime * m_SlideSpeed;
+
+				m_BoundingBox.X = static_cast<int>( m_SlidePos.x );
+				m_BoundingBox.Y = static_cast<int>( m_SlidePos.y );
+			}
+		}
+
+
+
 		if( m_Open )
 		{
 			//The following code controls the "bring to front" behaviour of windows
@@ -259,6 +298,9 @@ namespace GUI
 			child.second->OnWindowOpen();
 			
 		m_Open = true;
+
+		if( m_OnOpenScript != "" )
+			g_Script.Perform( m_OnOpenScript.c_str() );
 	}
 	
 	void Window::Close()
@@ -267,6 +309,9 @@ namespace GUI
 			child.second->OnWindowClose();
 			
 		m_Open = false;
+
+		if( m_OnCloseScript != "" )
+			g_Script.Perform( m_OnCloseScript.c_str() );
 	}
 	
 	void Window::ToggleOpen()
@@ -282,6 +327,42 @@ namespace GUI
 		m_ToggleGroup = groupName;
 		m_InGroup = true;
 		g_GUI.AddWindowToGroup( this, groupName );
+	}
+
+	void Window::SetOnOpenScript( const rString& script )
+	{
+		m_OnOpenScript = script;
+	}
+
+	void Window::SetOnCloseScript( const rString& script )
+	{
+		m_OnCloseScript = script;
+	}
+
+	void Window::SlideOpen( glm::ivec2 start, glm::ivec2 end, int pixelsPerSecond )
+	{
+		m_SlideStart = start;
+		m_SlideEnd = end;
+		m_SlideOpen = true;
+		m_SlideClose = false;
+		m_BoundingBox.X = start.x;
+		m_BoundingBox.Y = start.y;
+		m_SlidePos = start;
+		m_SlideSpeed = pixelsPerSecond;
+		Open();
+	}
+
+	void Window::SlideClose( glm::ivec2 start, glm::ivec2 end, int pixelsPerSecond )
+	{
+		m_SlideStart = start;
+		m_SlideEnd = end;
+		m_SlideClose = true;
+		m_SlideOpen = false;
+		//m_BoundingBox.X = start.x;
+		//m_BoundingBox.Y = start.y;
+		m_SlidePos.x = (float)m_BoundingBox.X;
+		m_SlidePos.y = (float)m_BoundingBox.Y;
+		m_SlideSpeed = pixelsPerSecond;
 	}
 
 	void Window::SetBackgroundColour( glm::vec4 colour )

@@ -1,5 +1,5 @@
 /**************************************************
-Copyright 2015 Henrik Johansson
+2015 Henrik Johansson
 ***************************************************/
 
 #pragma once
@@ -8,7 +8,8 @@ Copyright 2015 Henrik Johansson
 
 struct ModelComponent
 {
-	int ModelHandle = -1;
-	glm::vec3 Min	= glm::vec3(0.0f);
-	glm::vec3 Max	= glm::vec3(0.0f);
+	int			ModelHandle = -1;
+	glm::vec3	Min	= glm::vec3(0.0f);
+	glm::vec3	Max	= glm::vec3(0.0f);
+	bool		IsVisible = true;
 };

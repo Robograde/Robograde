@@ -1,5 +1,5 @@
 /**************************************************
-Copyright 2015 Johan Melin
+2015 Johan Melin
 ***************************************************/
 
 #include "SSDecaling.h"
@@ -22,7 +22,7 @@ Copyright 2015 Johan Melin
 #include "../gfx/SSFogOfWar.h"
 #include "../../EntityFactory.h"
 #include "../utility/SSMail.h"
-#include <messaging/GameMessages.h>
+#include "../../input/GameMessages.h"
 
 SSDecaling& SSDecaling::GetInstance( )
 {
@@ -108,10 +108,10 @@ void SSDecaling::UpdateUserLayer( const float deltaTime )
 					}
 				}
 			}
-			//else
-			//{
-			//	g_DecalManager.AddToQueue( decal->Decal );
-			//}
+			else if (decal->AlwaysDraw)
+			{
+				g_DecalManager.AddToQueue( decal->Decal );
+			}
 			if(mask & childFlag)
 			{
 				//since its the spinning bit on top of the controlpoint that have the decal we have to check if the parent of the entity is a controlpoint

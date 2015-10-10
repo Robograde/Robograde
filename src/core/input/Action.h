@@ -1,5 +1,5 @@
 /**************************************************
-Copyright 2015 Johan Melin
+2015 Johan Melin
 ***************************************************/
 
 #pragma once
@@ -74,6 +74,9 @@ enum ACTION : unsigned int
 	ACTION_CONTEXT_8,
 
 	ACTION_OPEN_CHAT,
+
+	//Editor
+	ACTION_EDITOR_MOVE,
 
 	// Must be kept last, tracks number of elements in enum
 	ACTION_SIZE,

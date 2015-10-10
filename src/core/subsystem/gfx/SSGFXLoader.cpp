@@ -1,5 +1,5 @@
 /**************************************************
-Copyright 2015 Robograde Development Team
+2015 Robograde Development Team
 ***************************************************/
 
 #include "SSGFXLoader.h"
@@ -73,6 +73,20 @@ void SSGFXLoader::Startup()
 	gfx::g_ModelBank.LoadModel( "Radar1Shape.robo" );
 	gfx::g_ModelBank.LoadModel( "ImprovedSensor.robo" );
 	gfx::g_ModelBank.LoadModel( "ResourceRadarShape1.robo" );
+
+	gfx::g_ModelBank.LoadModel( "RockShape1.robo" );
+	gfx::g_ModelBank.LoadModel( "RockShape2.robo" );
+	gfx::g_ModelBank.LoadModel( "RockShape3.robo" );
+	gfx::g_ModelBank.LoadModel( "RockShape4.robo" );
+	gfx::g_ModelBank.LoadModel( "RockShape5.robo" );
+	gfx::g_ModelBank.LoadModel( "RockShape6.robo" );
+
+	gfx::g_ModelBank.LoadModel( "OldTVShape.robo" );
+	gfx::g_ModelBank.LoadModel( "CardboardBoxShape.robo" );
+	gfx::g_ModelBank.LoadModel( "dirtyWheelsShape.robo" );
+	gfx::g_ModelBank.LoadModel( "oldBicycleShape.robo" );
+	gfx::g_ModelBank.LoadModel( "OldChairShape.robo" );
+	gfx::g_ModelBank.LoadModel( "ResearchBottomShape.robo" );
 
 	gfx::g_ModelBank.BuildBuffers();
 	gfx::g_MaterialBank.BuildMaterialBuffer();

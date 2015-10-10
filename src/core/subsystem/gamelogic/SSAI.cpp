@@ -1,5 +1,5 @@
 /**************************************************
-Copyright 2015 Viktor Kelkkanen
+2015 Viktor Kelkkanen
 ***************************************************/
 
 #include "SSAI.h"
@@ -7,7 +7,7 @@ Copyright 2015 Viktor Kelkkanen
 #include <input/Input.h>
 #include <utility/Logger.h>
 #include <utility/Randomizer.h>
-#include <messaging/GameMessages.h>
+#include "../../input/GameMessages.h"
 #include "../../ai/Terrain.h"
 #include "../../datadriven/DenseComponentCollection.h"
 #include "../../component/AgentComponent.h"

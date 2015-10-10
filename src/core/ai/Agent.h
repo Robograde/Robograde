@@ -1,3 +1,7 @@
+/**************************************************
+2015 Viktor Kelkkanen & Ola Enberg
+***************************************************/
+
 #pragma once
 #include "stdafx.h"
 #include <glm/glm.hpp>

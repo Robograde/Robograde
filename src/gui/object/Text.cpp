@@ -75,8 +75,13 @@ namespace GUI
 		m_TextDefinition.Position = glm::ivec2( x, y );
 	}
 
-		void Text::SetPosition( const glm::ivec2& position )
+	void Text::SetPosition( const glm::ivec2& position )
 	{
 		m_TextDefinition.Position = position;
+	}
+
+	glm::ivec2 Text::GetTextSize()
+	{
+		return g_Graphics2D.GetTextSize( &m_TextDefinition );
 	}
 }

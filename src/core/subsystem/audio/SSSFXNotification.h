@@ -1,15 +1,15 @@
 /**************************************************
-Copyright 2015 Jens Stjernkvist
+2015 Jens Stjernkvist
 ***************************************************/
 
 #pragma once
 #include "../Subsystem.h"
 #include <messaging/Subscriber.h>
-#include <messaging/GameMessages.h>
 
 #include <memory/Alloc.h>
 
 #include "SSAudio.h"
+#include "../../input/GameMessages.h"
 
 #define g_SSSFXNotification SSSFXNotification::GetInstance()
 

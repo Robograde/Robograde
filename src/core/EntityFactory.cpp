@@ -1,5 +1,5 @@
 /**************************************************
-Copyright 2015 Robograde Development Team
+2015 Robograde Development Team
 ***************************************************/
 
 #include "EntityFactory.h"
@@ -10,12 +10,14 @@ Copyright 2015 Robograde Development Team
 #include <gfx/GraphicsEngine.h>
 #include <utility/Colours.h>
 #include <utility/Logger.h>
+#include "utility/GameModeSelector.h"
 #include "datadriven/EntityManager.h"
 #include "datadriven/DenseComponentCollection.h"
 #include "subsystem/gamelogic/SSAI.h"
 #include "subsystem/gamelogic/SSControlPoint.h"
 #include "subsystem/audio/SSSFXEmitter.h"
 #include "subsystem/gamelogic/SSUpgrades.h"
+#include "subsystem/gamelogic/SSControlPoint.h"
 #include "component/AgentComponent.h"
 #include "component/PlacementComponent.h"
 #include "component/ModelComponent.h"
@@ -33,7 +35,8 @@ Copyright 2015 Robograde Development Team
 #include "component/TerrainFollowComponent.h"
 #include "component/DecalComponent.h"
 #include "component/StealthComponent.h"
-#include "subsystem/gamelogic/SSControlPoint.h"
+#include "component/FollowMouseComponent.h"
+#include "component/ParticleEmitterComponent.h"
 
 #include "picking/PickingType.h"
 #include "utility/GameData.h"
@@ -111,8 +114,8 @@ Entity EntityFactory::CreateSquadUnit(float posX, float posZ, int squadID, int o
 	// SFXEmitter - add all the triggers
 	SFXEmitterComponent* sfxEmitter = GetDenseComponent<SFXEmitterComponent>(entity);
 
-	g_SSSFXEmitter.AddSFXTrigger(sfxEmitter, "../../../asset/audio/collection/weapon/weapon_cutter.sfxc", SFXTriggerType::WHILE_EATING, 1, 1.0f, 50.0f, 150.0f);
-	g_SSSFXEmitter.AddSFXTrigger(sfxEmitter, "../../../asset/audio/collection/robot/robot_eating.sfxc", SFXTriggerType::WHILE_EATING, 1, 0.5f, 50.0f, 150.0f);
+	g_SSSFXEmitter.AddSFXTrigger(sfxEmitter, "nom0", "../../../asset/audio/collection/weapon/weapon_cutter.sfxc", SFXTriggerType::WHILE_EATING, false, 1.0f, 50.0f, 150.0f);
+	g_SSSFXEmitter.AddSFXTrigger(sfxEmitter, "nom1", "../../../asset/audio/collection/robot/robot_eating.sfxc", SFXTriggerType::WHILE_EATING, false, 0.5f, 50.0f, 150.0f);
 
 	TerrainFollowComponent* terrainFollowComponent = GetDenseComponent<TerrainFollowComponent>(entity);
 	terrainFollowComponent->Offset = -modelcomp->Min.y;
@@ -209,7 +212,7 @@ Entity EntityFactory::CreateSquadUnitModule( Entity parent, int ownerID, int upg
 				agent->AddWeapon(wc);
 	
 			///Get sfxpath from weapon component and add a trigger to activate when the weapon is used
-			g_SSSFXEmitter.AddSFXTrigger(sfxEmitter, wc->SfxPath, SFXTriggerType::WHILE_ATTACKING, 1, 0.0f, 0.0f, 250.0f);
+			g_SSSFXEmitter.AddSFXTrigger(sfxEmitter, "weaponSFX",wc->SfxPath, SFXTriggerType::WHILE_ATTACKING, false, 0.0f, 0.0f, 250.0f);
 		}
 		break;
 
@@ -287,18 +290,19 @@ Entity EntityFactory::CreateResource( float posX, float posZ, const glm::vec3& s
 {
 	Entity entity = g_EntityManager.CreateEntity();
 
-	g_EntityManager.AddComponent(entity, GetDenseComponentTypeIndex<PlacementComponent>());
-	g_EntityManager.AddComponent(entity, GetDenseComponentTypeIndex<ModelComponent>());
-	g_EntityManager.AddComponent(entity, GetDenseComponentTypeIndex<ResourceComponent>());
-	g_EntityManager.AddComponent(entity, GetDenseComponentTypeIndex<CollisionComponent>());
-	g_EntityManager.AddComponent(entity, GetDenseComponentTypeIndex<HealthComponent>());
-	g_EntityManager.AddComponent(entity, GetDenseComponentTypeIndex<SFXEmitterComponent>());
-	g_EntityManager.AddComponent(entity, GetDenseComponentTypeIndex<SelectionComponent>());
-	g_EntityManager.AddComponent(entity, GetDenseComponentTypeIndex<DoodadComponent>());
-	g_EntityManager.AddComponent(entity, GetDenseComponentTypeIndex<TerrainFollowComponent>());
-	g_EntityManager.AddComponent(entity, GetDenseComponentTypeIndex<DecalComponent>());
+	g_EntityManager.AddComponent( entity, GetDenseComponentTypeIndex<PlacementComponent>());
+	g_EntityManager.AddComponent( entity, GetDenseComponentTypeIndex<ModelComponent>());
+	g_EntityManager.AddComponent( entity, GetDenseComponentTypeIndex<ResourceComponent>());
+	g_EntityManager.AddComponent( entity, GetDenseComponentTypeIndex<CollisionComponent>());
+	g_EntityManager.AddComponent( entity, GetDenseComponentTypeIndex<HealthComponent>());
+	g_EntityManager.AddComponent( entity, GetDenseComponentTypeIndex<SFXEmitterComponent>());
+	g_EntityManager.AddComponent( entity, GetDenseComponentTypeIndex<SelectionComponent>());
+	g_EntityManager.AddComponent( entity, GetDenseComponentTypeIndex<DoodadComponent>());
+	g_EntityManager.AddComponent( entity, GetDenseComponentTypeIndex<TerrainFollowComponent>());
+	g_EntityManager.AddComponent( entity, GetDenseComponentTypeIndex<DecalComponent>());
+	g_EntityManager.AddComponent( entity, GetDenseComponentTypeIndex<ColourComponent>() );
 
-	ModelComponent* mc = GetDenseComponent<ModelComponent>(entity);
+	ModelComponent* mc = GetDenseComponent<ModelComponent>( entity );
 	mc->ModelHandle = gfx::g_ModelBank.LoadModel( modelFileName.c_str() );
 	mc->Min = gfx::g_ModelBank.FetchModel(mc->ModelHandle).Min;
 	mc->Max = gfx::g_ModelBank.FetchModel(mc->ModelHandle).Max;
@@ -334,14 +338,14 @@ Entity EntityFactory::CreateResource( float posX, float posZ, const glm::vec3& s
 	collisionEntity->SetUserData( entity );
 	collisionEntity->SetGroupID( PICKING_TYPE_RESOURCE );
 	g_CollisionDetection.AddCollisionVolumeSphere( collisionEntity, glm::vec3(0.0f), hitboxRadius );
-	GetDenseComponent<CollisionComponent>(entity)->CollisionEntity = collisionEntity;
+	GetDenseComponent<CollisionComponent>( entity )->CollisionEntity = collisionEntity;
 
-	SelectionComponent* selectionComponent = GetDenseComponent<SelectionComponent>(entity);
+	SelectionComponent* selectionComponent = GetDenseComponent<SelectionComponent>( entity );
 	selectionComponent->Radius		= hitboxRadius;
 	selectionComponent->Selected	= false;
 	selectionComponent->MouseOvered	= false;
 
-	TerrainFollowComponent* terrainFollowComponent = GetDenseComponent<TerrainFollowComponent>(entity);
+	TerrainFollowComponent* terrainFollowComponent = GetDenseComponent<TerrainFollowComponent>( entity );
 	terrainFollowComponent->Offset = -mc->Min.y;
 
 	const unsigned int sensorOffset = 1;
@@ -354,12 +358,13 @@ Entity EntityFactory::CreateProp(float posX, float posZ, const glm::vec3& scale,
 {
 	Entity entity = g_EntityManager.CreateEntity();
 
-	g_EntityManager.AddComponent(entity, GetDenseComponentTypeIndex<PlacementComponent>());
-	g_EntityManager.AddComponent(entity, GetDenseComponentTypeIndex<ModelComponent>());
-	g_EntityManager.AddComponent(entity, GetDenseComponentTypeIndex<DoodadComponent>());
-	g_EntityManager.AddComponent(entity, GetDenseComponentTypeIndex<CollisionComponent>());
-	g_EntityManager.AddComponent( entity, GetDenseComponentTypeIndex<TerrainFollowComponent>( ) );
-	g_EntityManager.AddComponent( entity, GetDenseComponentTypeIndex<SelectionComponent>( ) );
+	g_EntityManager.AddComponent( entity, GetDenseComponentTypeIndex<PlacementComponent>() );
+	g_EntityManager.AddComponent( entity, GetDenseComponentTypeIndex<ModelComponent>() );
+	g_EntityManager.AddComponent( entity, GetDenseComponentTypeIndex<DoodadComponent>() );
+	g_EntityManager.AddComponent( entity, GetDenseComponentTypeIndex<CollisionComponent>() );
+	g_EntityManager.AddComponent( entity, GetDenseComponentTypeIndex<TerrainFollowComponent>() );
+	g_EntityManager.AddComponent( entity, GetDenseComponentTypeIndex<SelectionComponent>() );
+	g_EntityManager.AddComponent( entity, GetDenseComponentTypeIndex<ColourComponent>() );
 
 	ModelComponent* mc = GetDenseComponent<ModelComponent>(entity);
 	mc->ModelHandle = gfx::g_ModelBank.LoadModel(modelPath.c_str());
@@ -400,9 +405,9 @@ Entity EntityFactory::CreateProp(float posX, float posZ, const glm::vec3& scale,
 
 	TerrainFollowComponent* terrainFollowComponent = GetDenseComponent<TerrainFollowComponent>(entity);
 	terrainFollowComponent->Offset = -mc->Min.y;
-	
+
 	const unsigned int sensorOffset = 1;
-	g_SSAI.AddToSensor( entity, ( int ) posX, ( int ) posZ, static_cast<unsigned int>( ceilf( ( scale.x + scale.z ) / 2 ) ) + sensorOffset );
+	g_SSAI.AddToSensor( entity, ( int )posX, ( int )posZ, static_cast< unsigned int >( ceilf( ( scale.x + scale.z ) / 2 ) ) + sensorOffset );
 
 	return entity;
 }
@@ -540,8 +545,6 @@ Entity EntityFactory::CreateControlPoint( float posX, float posZ, const glm::vec
 	placement->Scale	= scale;
 	placement->Orientation = orientation;
 
-
-
 	ModelComponent* modelComponent = GetDenseComponent<ModelComponent>( entity );
 	modelComponent->ModelHandle = gfx::g_ModelBank.LoadModel( modelFileName.c_str( ) );
 	modelComponent->Min = gfx::g_ModelBank.FetchModel(modelComponent->ModelHandle).Min;
@@ -593,63 +596,163 @@ Entity EntityFactory::CreateControlPoint( float posX, float posZ, const glm::vec
 	g_SSControlPoint.RegisterControlPoint( entity );
 
 	//TURRET ON CONTROL POINTS
-
 	Entity childEntity = g_EntityManager.CreateEntity();
 
-	g_EntityManager.AddComponent(childEntity, GetDenseComponentTypeIndex<ChildComponent>());
-	g_EntityManager.AddComponent(childEntity, GetDenseComponentTypeIndex<PlacementComponent>());
-	g_EntityManager.AddComponent(childEntity, GetDenseComponentTypeIndex<ModelComponent>());
-	g_EntityManager.AddComponent(childEntity, GetDenseComponentTypeIndex<ColourComponent>());
-	g_EntityManager.AddComponent(childEntity, GetDenseComponentTypeIndex<CollisionComponent>());
-	g_EntityManager.AddComponent(childEntity, GetDenseComponentTypeIndex<UpgradeComponent>());
-	g_EntityManager.AddComponent(childEntity, GetDenseComponentTypeIndex<SFXEmitterComponent>());
-	g_EntityManager.AddComponent(childEntity, GetDenseComponentTypeIndex<WeaponComponent>());
-	g_EntityManager.AddComponent( childEntity, GetDenseComponentTypeIndex<DecalComponent>());
+	g_EntityManager.AddComponent( childEntity, GetDenseComponentTypeIndex<ChildComponent>() );
+	g_EntityManager.AddComponent( childEntity, GetDenseComponentTypeIndex<PlacementComponent>() );
+	g_EntityManager.AddComponent( childEntity, GetDenseComponentTypeIndex<ModelComponent>() );
+	g_EntityManager.AddComponent( childEntity, GetDenseComponentTypeIndex<ColourComponent>() );
+	g_EntityManager.AddComponent( childEntity, GetDenseComponentTypeIndex<CollisionComponent>() );
+	g_EntityManager.AddComponent( childEntity, GetDenseComponentTypeIndex<UpgradeComponent>() );
+	g_EntityManager.AddComponent( childEntity, GetDenseComponentTypeIndex<SFXEmitterComponent>() );
+	g_EntityManager.AddComponent( childEntity, GetDenseComponentTypeIndex<WeaponComponent>() );
+	g_EntityManager.AddComponent( childEntity, GetDenseComponentTypeIndex<DecalComponent>() );
 
-	SFXEmitterComponent* sfxEmitter = GetDenseComponent<SFXEmitterComponent>(childEntity);
-	g_EntityManager.AddComponent(childEntity, GetDenseComponentTypeIndex<WeaponComponent>());
-	WeaponComponent* wc = GetDenseComponent<WeaponComponent>(childEntity);
-	wc->LoadComponentStats(childEntity, g_SSUpgrades.GetUpgrade(WEAPON_PIERCING_LASER));
+	if ( g_GameModeSelector.GetCurrentGameMode().Type != GameModeType::Editor )
+	{
+		SFXEmitterComponent* sfxEmitter = GetDenseComponent<SFXEmitterComponent>( childEntity );
+		g_EntityManager.AddComponent( childEntity, GetDenseComponentTypeIndex<WeaponComponent>() );
+		WeaponComponent* wc = GetDenseComponent<WeaponComponent>( childEntity );
+		wc->LoadComponentStats( childEntity, g_SSUpgrades.GetUpgrade( WEAPON_PIERCING_LASER ) );
+	
+		///Get sfxpath from weapon component and add a trigger to activate when the weapon is used
+		g_SSSFXEmitter.AddSFXTrigger( sfxEmitter, "cpWeaponSFX", wc->SfxPath, SFXTriggerType::WHILE_ATTACKING, false, 0.0f, 0.0f, 250.0f );
+	}
 
-	///Get sfxpath from weapon component and add a trigger to activate when the weapon is used
-	g_SSSFXEmitter.AddSFXTrigger(sfxEmitter, wc->SfxPath, SFXTriggerType::WHILE_ATTACKING, 1, 0.0f, 0.0f, 250.0f);
-
-	UpgradeComponent* upgradeComponent = GetDenseComponent<UpgradeComponent>(childEntity);
+	UpgradeComponent* upgradeComponent = GetDenseComponent<UpgradeComponent>( childEntity );
 	upgradeComponent->UpgradeDataID = WEAPON_PIERCING_LASER;
 	upgradeComponent->Changed = true;
 
-	ChildComponent* childComponent = GetDenseComponent<ChildComponent>(childEntity);
+	ChildComponent* childComponent = GetDenseComponent<ChildComponent>( childEntity );
 	childComponent->Parent = entity;
-	ParentComponent* parentComponent = GetDenseComponent<ParentComponent>(entity);
-	PlacementComponent* pc = GetDenseComponent<PlacementComponent>(entity);
+	ParentComponent* parentComponent = GetDenseComponent<ParentComponent>( entity );
+	PlacementComponent* pc = GetDenseComponent<PlacementComponent>( entity );
 
-	pc->Position = glm::vec3(posX, 0.0f, posZ);
+	pc->Position = glm::vec3( posX, 0.0f, posZ );
 	pc->Scale = scale;
 
-	childComponent->Offset = glm::vec3(0, 0.0f, 0.0f);
+	childComponent->Offset = glm::vec3( 0, 0.0f, 0.0f );
 	parentComponent->Children[MODULE_SLOT_TOP] = childEntity;
 
-	ModelComponent* modelcomp = GetDenseComponent<ModelComponent>(childEntity);
-	modelcomp->ModelHandle = gfx::g_ModelBank.LoadModel("ResearchTopShape.robo");
-	modelcomp->Min = gfx::g_ModelBank.FetchModel(modelcomp->ModelHandle).Min;
-	modelcomp->Max = gfx::g_ModelBank.FetchModel(modelcomp->ModelHandle).Max;
+	ModelComponent* modelcomp = GetDenseComponent<ModelComponent>( childEntity );
+	modelcomp->ModelHandle = gfx::g_ModelBank.LoadModel( "ResearchTopShape.robo" );
+	modelcomp->Min = gfx::g_ModelBank.FetchModel( modelcomp->ModelHandle ).Min;
+	modelcomp->Max = gfx::g_ModelBank.FetchModel( modelcomp->ModelHandle ).Max;
 
 	DecalComponent* decal = GetDenseComponent<DecalComponent>( childEntity );
-	decal->Decal.Texture = g_DecalManager.GetTextureAtlas()->GetHandle("circle.png");
-	decal->Decal.Tint = glm::vec4(1, 1, 1, 1);
-	decal->Scale = CONTROL_POINT_RADIUS; 
-	glm::mat4 w = glm::translate(placement->Position) * glm::rotate(3.14f * 0.5f ,vec3(1,0,0)) * glm::scale( vec3( decal->Scale ) );
+	decal->Decal.Texture = g_DecalManager.GetTextureAtlas()->GetHandle( "circle.png" );
+	decal->Decal.Tint = glm::vec4( 1, 1, 1, 1 );
+	decal->Scale = CONTROL_POINT_RADIUS;
+	glm::mat4 w = glm::translate( placement->Position ) * glm::rotate( 3.14f * 0.5f, vec3( 1, 0, 0 ) ) * glm::scale( vec3( decal->Scale ) );
 	decal->Decal.World = w;
 	decal->AlwaysDraw = true;
 
 	ICollisionEntity* childCollisionEntity = g_CollisionDetection.CreateEntity();
-	childCollisionEntity->SetUserData(childEntity);
-	childCollisionEntity->SetGroupID(PICKING_TYPE_PROP);
-	g_CollisionDetection.AddCollisionVolumeSphere(childCollisionEntity, glm::vec3( 0.0f), CONTROL_POINT_RADIUS / scale.x); //adjust hitbox so we still render decal when we have the control point outside window
-	GetDenseComponent<CollisionComponent>(childEntity)->CollisionEntity = childCollisionEntity;
+	childCollisionEntity->SetUserData( childEntity );
+	childCollisionEntity->SetGroupID( PICKING_TYPE_PROP );
+	g_CollisionDetection.AddCollisionVolumeSphere( childCollisionEntity, glm::vec3( 0.0f ), CONTROL_POINT_RADIUS / scale.x ); //adjust hitbox so we still render decal when we have the control point outside window
+	GetDenseComponent<CollisionComponent>( childEntity )->CollisionEntity = childCollisionEntity;
 
-	colourComponent = GetDenseComponent<ColourComponent>(childEntity);
-	colourComponent->Colour = g_GameData.GetPlayerColour(ownerID);
+	colourComponent = GetDenseComponent<ColourComponent>( childEntity );
+	colourComponent->Colour = g_GameData.GetPlayerColour( ownerID );
+
+	return entity;
+}
+
+Entity EntityFactory::CreateSoundEmitterObject(const glm::vec3& pos, rString name, const float distanceMin, const float distanceMax, const bool looping, const float timeInterval, const bool editor)
+{
+	Entity entity = g_EntityManager.CreateEntity();
+
+	g_EntityManager.AddComponent(entity, GetDenseComponentTypeIndex<PlacementComponent>());
+	g_EntityManager.AddComponent(entity, GetDenseComponentTypeIndex<SFXEmitterComponent>());
+
+	PlacementComponent* placement = GetDenseComponent<PlacementComponent>(entity);
+	placement->Position = pos;
+	placement->Scale = glm::vec3(1.0f);
+	placement->Orientation = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
+
+	if(editor)
+	{
+		g_EntityManager.AddComponent(entity, GetDenseComponentTypeIndex<ColourComponent>() );
+		g_EntityManager.AddComponent(entity, GetDenseComponentTypeIndex<ModelComponent>());
+		g_EntityManager.AddComponent(entity, GetDenseComponentTypeIndex<CollisionComponent>());
+
+		ModelComponent* modelCompoent = GetDenseComponent<ModelComponent>(entity);
+		modelCompoent->IsVisible = true;
+		modelCompoent->ModelHandle = gfx::g_ModelBank.LoadModel("projectileCone.robo");
+		modelCompoent->Min = gfx::g_ModelBank.FetchModel(modelCompoent->ModelHandle).Min;
+		modelCompoent->Max = gfx::g_ModelBank.FetchModel(modelCompoent->ModelHandle).Max;
+
+		ICollisionEntity* collisionEntity = g_CollisionDetection.CreateEntity();
+		collisionEntity->SetUserData(entity);
+		collisionEntity->SetGroupID(PICKING_TYPE_SFX_EMITTER);
+		g_CollisionDetection.AddCollisionVolumeSphere(collisionEntity, glm::vec3(0.0f), 1);
+		GetDenseComponent<CollisionComponent>(entity)->CollisionEntity = collisionEntity;
+	}
+	
+	SFXEmitterComponent* sfxEmitter = GetDenseComponent<SFXEmitterComponent>(entity);
+	g_EntityManager.AddComponent(entity, GetDenseComponentTypeIndex<WeaponComponent>());
+	g_SSSFXEmitter.AddSFXTrigger(sfxEmitter, "defaultSFX", name, SFXTriggerType::AT_CREATION, looping, timeInterval, distanceMin, distanceMax);
+
+	return entity;
+}
+
+Entity EntityFactory::CreateParticleEmitterObject(const glm::vec3& pos, rString name, const short particleType, glm::vec4 color)
+{
+	Entity entity = g_EntityManager.CreateEntity();
+
+	g_EntityManager.AddComponent(entity, GetDenseComponentTypeIndex<PlacementComponent>());
+	g_EntityManager.AddComponent(entity, GetDenseComponentTypeIndex<ParticleEmitterComponent>());
+
+	PlacementComponent* placement = GetDenseComponent<PlacementComponent>(entity);
+	placement->Position = pos;
+	placement->Scale = glm::vec3(1.0f);
+	placement->Orientation = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
+
+	g_EntityManager.AddComponent(entity, GetDenseComponentTypeIndex<ColourComponent>() );
+	g_EntityManager.AddComponent(entity, GetDenseComponentTypeIndex<ModelComponent>());
+	g_EntityManager.AddComponent(entity, GetDenseComponentTypeIndex<CollisionComponent>());
+
+	ModelComponent* modelCompoent = GetDenseComponent<ModelComponent>(entity);
+	modelCompoent->IsVisible = true;
+	modelCompoent->ModelHandle = gfx::g_ModelBank.LoadModel("projectileCone.robo");
+	modelCompoent->Min = gfx::g_ModelBank.FetchModel(modelCompoent->ModelHandle).Min;
+	modelCompoent->Max = gfx::g_ModelBank.FetchModel(modelCompoent->ModelHandle).Max;
+
+	ICollisionEntity* collisionEntity = g_CollisionDetection.CreateEntity();
+	collisionEntity->SetUserData(entity);
+	collisionEntity->SetGroupID(PICKING_TYPE_PARTICLE_EMITTER);
+	g_CollisionDetection.AddCollisionVolumeSphere(collisionEntity, glm::vec3(0.0f), 1);
+	GetDenseComponent<CollisionComponent>(entity)->CollisionEntity = collisionEntity;
+
+	ParticleEmitterComponent* emitter = GetDenseComponent<ParticleEmitterComponent>(entity);
+	emitter->Pos = pos;
+	emitter->Name = name;
+	emitter->ParticleType = static_cast<ParticleEmitterType>(particleType);
+	emitter->Col = color;
+		
+	return entity;
+}
+
+Entity EntityFactory::CreatePlacementGhostObject()
+{
+	Entity entity = g_EntityManager.CreateEntity();
+
+	g_EntityManager.AddComponent( entity, GetDenseComponentTypeIndex<PlacementComponent>() );
+	g_EntityManager.AddComponent( entity, GetDenseComponentTypeIndex<ModelComponent>() );
+	g_EntityManager.AddComponent( entity, GetDenseComponentTypeIndex<FollowMouseComponent>() );
+	g_EntityManager.AddComponent( entity, GetDenseComponentTypeIndex<ColourComponent>() );
+	g_EntityManager.AddComponent( entity, GetDenseComponentTypeIndex<CollisionComponent>() );
+
+	// Model component
+	GetDenseComponent<ModelComponent>( entity )->IsVisible = false;
+
+	// Collision component
+	ICollisionEntity* collisionEntity = g_CollisionDetection.CreateEntity();
+	collisionEntity->SetUserData( entity );
+	collisionEntity->SetGroupID( PICKING_TYPE_GHOST_PLACEMENT_OBJECT );
+	g_CollisionDetection.AddCollisionVolumeSphere( collisionEntity, glm::vec3( 0.0f ), 1 );
+	GetDenseComponent<CollisionComponent>( entity )->CollisionEntity = collisionEntity;
 
 	return entity;
 }

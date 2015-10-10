@@ -27,6 +27,7 @@ namespace GUI
 
 		GUI_API void			SetPosition( int x, int y );
 		GUI_API void			SetPosition( const glm::ivec2& position );
+		GUI_API glm::ivec2		GetTextSize();
 		
 	private:
 		TextDefinition	m_TextDefinition;

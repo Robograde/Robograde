@@ -1,5 +1,5 @@
 /**************************************************
-Copyright 2015 Robograde Development Team
+2015 Robograde Development Team
 ***************************************************/
 
 #pragma once
@@ -10,6 +10,7 @@ Copyright 2015 Robograde Development Team
 #include "datadriven/ComponentTypes.h"
 #include "component/WeaponComponent.h"
 #include "component/OwnerComponent.h"
+#include "component/SFXEmitterComponent.h"
 
 #define DEFAULT_ORIENTATION	glm::quat(1.0f, 0.0f, 0.0f, 0.0f)
 #define DEFAULT_SCALE		glm::vec3(1.0f)
@@ -28,7 +29,9 @@ class EntityFactory
 		static Entity CreateAnimatedProp			( float posX , float posZ , const glm::vec3& scale , const glm::quat& orientation , bool blockPath , const rString& bindMeshFileName , const rString& animFileName , const int radius );
 		static Entity CreateCombinedProp			( float posX , float posY , float posZ , const glm::vec3& scale , const glm::quat& orientation , const rString& modelFileName );
 		static Entity CreateControlPoint			( float posX , float posZ , const glm::vec3& scale , const glm::quat& orientation , short OwnerID , const rString& modelFileName );
-		
+		static Entity CreateSoundEmitterObject		( const glm::vec3& pos, rString name, const float distanceMin, const float distanceMax, const bool looping, const float timeInterval, const bool editor);
+		static Entity CreateParticleEmitterObject	(const glm::vec3& pos, rString name, const short particleType, glm::vec4 color);
+		static Entity CreatePlacementGhostObject	();
 		static void ScriptInitializeBindings();
 
 	private:

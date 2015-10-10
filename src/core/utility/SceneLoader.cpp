@@ -1,5 +1,5 @@
 /**************************************************
-Copyright 2015 Mostafa Hassan & Richard Pettersson
+2015 Mostafa Hassan & Richard Pettersson
 ***************************************************/
 
 #include "SceneLoader.h"
@@ -11,6 +11,7 @@ Copyright 2015 Mostafa Hassan & Richard Pettersson
 #include "../subsystem/gamelogic/SSResourceManager.h"
 #include "../subsystem/audio/SSMusicManager.h"
 #include "../ai/Terrain.h"
+#include "GameModeSelector.h"
 
 bool SceneLoader::LoadScene( const rString& sceneName )
 {
@@ -55,9 +56,9 @@ bool SceneLoader::LoadScene( const rString& sceneName )
 		c.BlendmapTexture = scene.BlendmapTexture;
 
 
-		c.TessellationFactor = 16;
-		c.VertexGranularityX = 8;
-		c.VertexGranularityZ = 8;
+		c.TessellationFactor = 1;
+		c.VertexGranularityX = 256;
+		c.VertexGranularityZ = 256;
 		gfx::g_GFXTerrain.SetWireframeMode( false );
 
 		c.Position = { 0, 0, 0 };
@@ -73,6 +74,9 @@ bool SceneLoader::LoadScene( const rString& sceneName )
 			if( !result )
 				return false;
 		}
+
+		if (g_GameModeSelector.GetCurrentGameMode().Type == GameModeType::Editor)
+			return true;
 
 		// Fetch the objects
 		rVector <gfx::EntityObj>	controlPoints;

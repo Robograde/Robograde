@@ -1,10 +1,10 @@
 /**************************************************
-Viktor Kelkkanen
+2015 Viktor Kelkkanen
 ***************************************************/
 
 #include "AIPlayer.h"
 #include <utility/Randomizer.h>
-#include <messaging/GameMessages.h>
+#include "../input/GameMessages.h"
 #include "Terrain.h"
 #include "../component/ResourceComponent.h"
 #include "../component/OwnerComponent.h"

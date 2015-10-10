@@ -1,5 +1,5 @@
 /**************************************************
-Copyright 2015 Ola Enberg & Daniel Bengtsson
+2015 Ola Enberg & Daniel Bengtsson
 ***************************************************/
 
 #pragma once

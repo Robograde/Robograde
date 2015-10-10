@@ -1,12 +1,12 @@
 /**************************************************
-Copyright 2015 Robograde Development Team
+2015 Robograde Development Team
 ***************************************************/
 
 #include "SSControlPoint.h"
 #include "../../CompileFlags.h"
 #include <utility/Logger.h>
 #include <utility/Colours.h>
-#include <messaging/GameMessages.h>
+#include "../../input/GameMessages.h"
 #include <gfx/GraphicsEngine.h>
 #include <gfx/Terrain.h>
 #include "../../datadriven/DenseComponentCollection.h"
@@ -96,7 +96,7 @@ void SSControlPoint::UpdateSimLayer( const float timestep )
 		float rotationAmount = 0.05f*timestep;
 		glm::quat rotation(glm::cos(rotationAmount), glm::vec3(0,1,0) * glm::sin(rotationAmount));
 		childComponent->Orientation = glm::normalize(rotation * childComponent->Orientation);
-
+		
 		OwnerComponent* ownerComponent = GetDenseComponent<OwnerComponent>( controlPoint );
 		short ownerID = ownerComponent->OwnerID;
 		if (ownerID != NO_OWNER_ID)
@@ -301,7 +301,7 @@ float SSControlPoint::GetAverageHeight()
 	EntityMask modelMask = GetDenseComponentFlag<ModelComponent>();
 	EntityMask entityMask;
 	float h = 0,c = 0;
-	float scale;
+	float scale = 1;
 	for(int i = 0; i < m_ControlPoints.size(); i++)
 	{
 		entityMask = g_EntityManager.GetEntityMask(m_ControlPoints[i]);

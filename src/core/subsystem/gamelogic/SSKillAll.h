@@ -1,5 +1,5 @@
 /**************************************************
-Copyright 2015 Johan Melin & Viktor Kelkannen
+2015 Johan Melin & Viktor Kelkannen
 ***************************************************/
 
 #pragma once

@@ -1,5 +1,5 @@
 /**************************************************
-Copyright 2015 Daniel "MonzUn" Bengtsson & Johan Melin
+2015 Daniel "MonzUn" Bengtsson & Johan Melin
 ***************************************************/
 
 #include "SSInput.h"
@@ -9,7 +9,7 @@ Copyright 2015 Daniel "MonzUn" Bengtsson & Johan Melin
 #include <input/Input.h>
 #include <input/KeyBindings.h>
 #include <utility/NeatFunctions.h>
-#include <messaging/GameMessages.h>
+#include "../../input/GameMessages.h"
 #include <gfx/GraphicsEngine.h>
 #include "SSButtonInput.h"
 #include "../gui/SSSquadControlGUI.h"

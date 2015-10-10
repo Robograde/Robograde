@@ -1,6 +1,6 @@
- 
-
- 
+/**************************************************
+2015 Daniel "MonzUn" Bengtsson
+***************************************************/
 
 #include "SSNetworkController.h"
 #include <functional>
@@ -9,14 +9,14 @@
 #include <network/NetworkEngine.h>
 #include <utility/ConfigManager.h>
 #include <utility/NeatFunctions.h>
-#include <messaging/GameMessages.h>
 #include "../menu/SSGameLobby.h"
+#include "../gui/SSGUIInfo.h"
+#include "../hashing/SSHashGenerator.h"
+#include "../../input/GameMessages.h"
 #include "../../utility/GlobalDefinitions.h"
 #include "../../utility/GameData.h"
 #include "../../utility/PlayerData.h"
 #include "../../utility/GameModeSelector.h"
-#include "../gui/SSGUIInfo.h"
-#include "../hashing/SSHashGenerator.h"
 
 SSNetworkController& SSNetworkController::GetInstance()
 {
@@ -51,16 +51,16 @@ void SSNetworkController::Startup()
 		return 0;
 	} );
 
+	// Register callbacks
 	int callbackHandle;
 	callbackHandle = g_NetworkEngine.RegisterCallback( NetworkCallbackEvent::IncomingConnection, std::bind( &SSNetworkController::EnqueueIncomingConnection, this, std::placeholders::_1 ) );
-	if ( callbackHandle != -1 )
-		m_NetworkCallbackHandles.push_back( callbackHandle );
-	callbackHandle = g_NetworkEngine.RegisterCallback( NetworkCallbackEvent::ConnectionAttemptSuccess, std::bind( &SSNetworkController::EnqueueOutgoingConnection, this, std::placeholders::_1 ) );
 	if ( callbackHandle != -1 )
 		m_NetworkCallbackHandles.push_back( callbackHandle );
 	callbackHandle = g_NetworkEngine.RegisterCallback( NetworkCallbackEvent::Disconnection, std::bind( &SSNetworkController::EnqueueDisconnection, this, std::placeholders::_1 ) );
 	if ( callbackHandle != -1 )
 		m_NetworkCallbackHandles.push_back( callbackHandle );
+
+	RegisterMessages();
 }
 
 void SSNetworkController::Shutdown()
@@ -81,7 +81,7 @@ void SSNetworkController::UpdateUserLayer( const float deltaTime )
 
 void SSNetworkController::UpdateSimLayer( const float timeStep )
 {
-	if ( g_GameModeSelector.GetCurrentGameMode().Type == GameModeType::Multiplayer )
+	if ( g_GameModeSelector.GetCurrentGameMode().Type == GameModeType::Multiplayer || g_GameModeSelector.GetCurrentGameMode().Type == GameModeType::Editor )
 	{
 		if ( !g_NetworkInfo.AmIHost() && g_NetworkInfo.GetConnectedPlayerCount() == 0 ) // TODODB: Check if host has disconnected instead
 		{
@@ -89,7 +89,7 @@ void SSNetworkController::UpdateSimLayer( const float timeStep )
 			g_GameModeSelector.SwitchToGameMode( GameModeType::MainMenu );
 		}
 
-		if ( g_NetworkInfo.AmIHost() )
+		if ( g_NetworkInfo.AmIHost() && g_NetworkInfo.GetConnectedPlayerCount() > 0 )
 			g_PacketPump.SendToAll( StepMessage( g_GameData.GetFrameCount(), g_SSHashGenerator.GetHash(), g_Randomizer.GetRandomizationCounter() ) );
 	}
 }
@@ -100,6 +100,13 @@ void SSNetworkController::Reset()
 	m_IncomingConnectionQueue.Clear();
 	m_OutgoingConnectionQueue.Clear();
 	m_DisconnectionQueue.Clear();
+	m_HostStep		= 0;
+	m_FramesToRun	= 0;
+
+	while ( !m_HostHashQueue.empty() )
+		m_HostHashQueue.pop();
+	while ( !m_HostRandomCountQueue.empty() )
+		m_HostRandomCountQueue.pop();
 }
 
 bool SSNetworkController::MakeHost( unsigned short port )
@@ -124,12 +131,12 @@ bool SSNetworkController::MakeHost( unsigned short port )
 
 			int playerID = g_GameData.IsDedicatedServer() ? PLAYER_ID_INVALID : 0;
 			g_NetworkInfo.SetNetworkID( playerID );
-			g_NetworkInfo.SetHostID( playerID ); // TODODB: This should be moved when lobby has been implemented
+			g_NetworkInfo.SetHostID( playerID );
 			g_PlayerData.SetPlayerID( playerID );
 
 			if ( !g_GameData.IsDedicatedServer() )
 			{
-				NetworkPlayer localPlayer = NetworkPlayer( g_NetworkInfo.GetNetworkID(), g_NetworkInfo.GetNetworkID(), g_PlayerData.GetPlayerName() ); // TODODB: Stop relying on playerID being = networkID
+				NetworkPlayer localPlayer = NetworkPlayer( g_NetworkInfo.GetNetworkID(), g_NetworkInfo.GetNetworkID(), PlayerType::Player, g_PlayerData.GetPlayerName() );
 				g_SSNetworkController.AddPlayer(localPlayer);
 			}
 			return true;
@@ -215,6 +222,11 @@ unsigned short SSNetworkController::GetDefaultListeningPort() const
 	return m_DefaultListeningPort;
 }
 
+unsigned int SSNetworkController::GetHostStep() const
+{
+	return m_HostStep;
+}
+
 void SSNetworkController::SetPlayerName( short playerID, const rString& newPlayerName )
 {
 	if ( m_NetworkPlayers.find( playerID ) != m_NetworkPlayers.end() )
@@ -229,6 +241,11 @@ void SSNetworkController::SetPlayerFinishedLoading( short playerID )
 		m_NetworkPlayers.at( playerID ).HasFinishedLoading = true;
 	else
 		Logger::Log( "Attempted to set loading finished of non existent player (ID = " + rToString( playerID ) + ")", "SSNetworkController", LogSeverity::WARNING_MSG );
+}
+
+void SSNetworkController::SetHostStep( unsigned int hostStep )
+{
+	m_HostStep = hostStep;
 }
 
 bool SSNetworkController::DoesPlayerExist( short playerID ) const
@@ -250,6 +267,57 @@ bool SSNetworkController::AllFinishedLoading() const
 	return toReturn;
 }
 
+void SSNetworkController::IncrementFramesToRun()
+{
+	++m_FramesToRun;
+}
+
+bool SSNetworkController::DecrementFramesToRun()
+{
+	if ( m_FramesToRun > 0 )
+	{
+		--m_FramesToRun;
+		return true;
+	}
+	return false;
+}
+
+void SSNetworkController::PushHostHash( unsigned int hash )
+{
+	m_HostHashQueue.push( hash );
+}
+
+unsigned int SSNetworkController::PopHostHash( )
+{
+	unsigned int toReturn;
+	if ( m_HostHashQueue.empty() )
+	{
+		Logger::Log( "Attempted to pop hash from host but there were none left. Are we out of sync?", "NetworkInfo", LogSeverity::WARNING_MSG );
+		return 0;
+	}
+	toReturn = m_HostHashQueue.front();
+	m_HostHashQueue.pop();
+	return toReturn;
+}
+
+void SSNetworkController::PushHostRandomCount( unsigned int randomCount )
+{
+	m_HostRandomCountQueue.push( randomCount );
+}
+
+unsigned int SSNetworkController::PopHostRandomCount( )
+{
+	unsigned int toReturn;
+	if ( m_HostRandomCountQueue.empty() )
+	{
+		Logger::Log( "Attempted to pop randomCount from host but there were none left. Are we out of sync?", "NetworkInfo", LogSeverity::WARNING_MSG );
+		return 0;
+	}
+	toReturn = m_HostRandomCountQueue.front();
+	m_HostRandomCountQueue.pop();
+	return toReturn;
+}
+
 void SSNetworkController::CheckCallbacks()
 {
 	short networkID;
@@ -257,55 +325,48 @@ void SSNetworkController::CheckCallbacks()
 	{
 		if ( g_NetworkInfo.AmIHost() )
 		{
+			PlayerType playerType;
+
+			short playerID = FindUnusedPlayerID();
+			playerID != PLAYER_ID_INVALID ? playerType = PlayerType::Player : playerType = PlayerType::Observer;
+
 			rVector<short>		playerIDs;
 			rVector<rString>	names;
-
 			for ( auto& networkPlayer : m_NetworkPlayers )
 			{
 				playerIDs.push_back( networkPlayer.first );
 				names.push_back( networkPlayer.second.Name );
 			}
 
+			short hostID = g_NetworkInfo.GetNetworkID();
+			NetworkPlayer hostPlayer = m_NetworkPlayers.at( hostID );
+			g_PacketPump.Send( PlayerTypeMessage( static_cast<short>( hostPlayer.Type ), hostPlayer.PlayerID, hostID ), networkID );
+			g_PacketPump.Send( PlayerTypeMessage( static_cast<short>( playerType ), playerID, networkID ), networkID );
 			g_PacketPump.Send( NameUpdateMessage( names, playerIDs ), networkID );
 			g_PacketPump.Send( RandomSeedMessage( g_Randomizer.GetSeed() ), networkID );
-			ShareHostFile( BESTWEIGHTS_FILE_PATH );
-			ShareHostFile( GENES0_FILE_PATH );
-			ShareHostFile( GENES1_FILE_PATH );
-			ShareHostFile( GENES2_FILE_PATH );
-			ShareHostFile( GENES3_FILE_PATH );
+
+			if ( !g_SSGameLobby.IsEditorLobby() )
+			{
+				ShareHostFile( BESTWEIGHTS_FILE_PATH );
+				ShareHostFile( GENES0_FILE_PATH );
+				ShareHostFile( GENES1_FILE_PATH );
+				ShareHostFile( GENES2_FILE_PATH );
+				ShareHostFile( GENES3_FILE_PATH );
+			}
 
 			g_SSGameLobby.OnNewClientConnect( networkID );
-		}
 
-		NetworkPlayer newPlayer = NetworkPlayer( networkID, networkID ); // TODODB: Stop relying on all connections to be players
-		m_NetworkPlayers.emplace( networkID, newPlayer );
+			NetworkPlayer newPlayer = NetworkPlayer( playerID, networkID, playerType );
+			m_NetworkPlayers.emplace( networkID, newPlayer );
 
-		if ( g_NetworkInfo.AmIHost() )
-		{
 			for ( auto& networkPlayer : m_NetworkPlayers )
 			{
 				if ( g_SSGameLobby.IsPlayerReady( networkPlayer.first ) )
 					g_PacketPump.Send( UserSignalMessage( UserSignalType::READY_TOGGLE, networkPlayer.first ), networkID );
 			}
 		}
-	}
-
-	while ( m_OutgoingConnectionQueue.Consume( networkID ) )
-	{
-		rVector<short>		playerIDs;
-		rVector<rString>	names;
-
-		NetworkPlayer localPlayer = NetworkPlayer( networkID, networkID ); // TODODB: Stop relying on all connections to be players
-		m_NetworkPlayers.emplace( networkID, localPlayer );
-
-		short hostID = g_NetworkInfo.GetHostID();
-		NetworkPlayer hostPlayer = NetworkPlayer( hostID, hostID ); // TODODB: Stop relying on all connections to be players
-		m_NetworkPlayers.emplace( hostID, hostPlayer );
-
-		g_PlayerData.SetPlayerID( networkID );
-		playerIDs.push_back( networkID );
-		names.push_back( g_PlayerData.GetPlayerName() );
-		g_PacketPump.Send( NameUpdateMessage( names, playerIDs ), g_NetworkInfo.GetHostID() );
+		else
+			Logger::Log( "Received incoming connection as client", "NetworkController", LogSeverity::WARNING_MSG );
 	}
 
 	while ( m_DisconnectionQueue.Consume( networkID ) )
@@ -322,16 +383,16 @@ void SSNetworkController::CheckCallbacks()
 
 		if ( foundID >= 0 )
 		{
-			RemovePlayer( foundID );
-
 			if ( g_NetworkInfo.AmIHost() )
 			{
 				for ( auto networkPlayer : m_NetworkPlayers )
 				{
 					if ( networkPlayer.second.NetworkID != g_NetworkInfo.GetHostID() )
-						g_PacketPump.Send( ConnectionStatusUpdateMessage( networkID, ConnectionStatusUpdates::DISCONNECTED ), networkPlayer.second.NetworkID ); // TODODB: Stop relying on all connections to be players
+						g_PacketPump.Send( ConnectionStatusUpdateMessage( m_NetworkPlayers.at(foundID).PlayerID, ConnectionStatusUpdates::DISCONNECTED ), networkPlayer.second.NetworkID );
 				}
 			}
+
+			RemovePlayer( foundID );
 		}
 	}
 }
@@ -399,4 +460,62 @@ void SSNetworkController::EnqueueDisconnection( const void* const connectionData
 {
 	const ConnectionData* const connection = reinterpret_cast<const ConnectionData* const>( connectionData );
 	m_DisconnectionQueue.Produce( connection->NetworkID );
+}
+
+int	SSNetworkController::FindUnusedPlayerID() const
+{
+	int toReturn = PLAYER_ID_INVALID;
+
+	for ( int i = 0; i < MAX_PLAYERS; ++i )
+	{
+		bool playerIDUsed = false;
+		for ( auto networkPlayer : m_NetworkPlayers )
+		{
+			if ( networkPlayer.second.PlayerID == i )
+			{
+				playerIDUsed = true;
+				break;
+			}
+		}
+
+		if ( !playerIDUsed )
+			return i;
+	}
+
+	return PLAYER_ID_INVALID;
+}
+
+void SSNetworkController::RegisterMessages()
+{
+	g_NetworkEngine.RegisterMessage( pNew( OrderUnitsMessage ) );
+	g_NetworkEngine.RegisterMessage( pNew( OrderInvokeMessage ) );
+	g_NetworkEngine.RegisterMessage( pNew( UpgradeMessage ) );
+	g_NetworkEngine.RegisterMessage( pNew( RandomSeedMessage ) );
+	g_NetworkEngine.RegisterMessage( pNew( UserSignalMessage ) );
+	g_NetworkEngine.RegisterMessage( pNew( StepMessage ) );
+	g_NetworkEngine.RegisterMessage( pNew( StepResponseMessage ) );
+	g_NetworkEngine.RegisterMessage( pNew( NameUpdateMessage ) );
+	g_NetworkEngine.RegisterMessage( pNew( WriteFileMessage ) );
+	g_NetworkEngine.RegisterMessage( pNew( ChatMessage ) );
+	g_NetworkEngine.RegisterMessage( pNew( ConnectionStatusUpdateMessage ) );
+	g_NetworkEngine.RegisterMessage( pNew( LevelSelectionChangeMessage ) );
+	g_NetworkEngine.RegisterMessage( pNew( ColourChangeMessage ) );
+	g_NetworkEngine.RegisterMessage( pNew( TeamChangeMessage ) );
+	g_NetworkEngine.RegisterMessage( pNew( SpawnPointChangeMessage ) );
+	g_NetworkEngine.RegisterMessage( pNew( SpawnCountChangeMessage ) );
+	g_NetworkEngine.RegisterMessage( pNew( ReserveAIMessage ) );
+	g_NetworkEngine.RegisterMessage( pNew( UserPingMessage ) );
+	g_NetworkEngine.RegisterMessage( pNew( PlayerTypeMessage ) );
+	g_NetworkEngine.RegisterMessage( pNew( PlacePropMessage ) );
+	g_NetworkEngine.RegisterMessage( pNew( PlaceResourceMessage ) );
+	g_NetworkEngine.RegisterMessage( pNew( PlaceControlPointMessage ) );
+	g_NetworkEngine.RegisterMessage( pNew( MoveObjectMessage ) );
+	g_NetworkEngine.RegisterMessage( pNew( EditorSFXEmitterMessage ) );
+	g_NetworkEngine.RegisterMessage( pNew( UpdateGhostEntityPositionMessage ) );
+	g_NetworkEngine.RegisterMessage( pNew( UpdateGhostEntityVisibilityMessage ) );
+	g_NetworkEngine.RegisterMessage( pNew( UpdateGhostEntityModelMessage ) );
+	g_NetworkEngine.RegisterMessage( pNew( SelectEntityMessage ) );
+	g_NetworkEngine.RegisterMessage( pNew( EditorCameraPathsMessage ) );
+	g_NetworkEngine.RegisterMessage( pNew(EditorParticleEmitterMessage));
+	g_NetworkEngine.RegisterMessage( pNew(EditorTerrainBrushMessage));
 }

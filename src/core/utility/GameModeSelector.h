@@ -1,5 +1,5 @@
 /**************************************************
-Copyright 2015 Daniel "MonzUn" Bengtsson
+2015 Daniel "MonzUn" Bengtsson
 ***************************************************/
 
 #pragma once
@@ -23,6 +23,7 @@ enum class GameModeType
 	Replay,
 	DedicatedServer,
 	MainMenu,
+	Editor,
 };
 
 struct GameMode

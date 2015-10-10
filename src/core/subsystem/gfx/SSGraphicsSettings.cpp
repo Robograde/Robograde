@@ -1,5 +1,5 @@
 /**************************************************
-Copyright 2015 Isak Almgren
+2015 Isak Almgren
 ***************************************************/
 
 #include "SSGraphicsSettings.h"
@@ -9,6 +9,7 @@ Copyright 2015 Isak Almgren
 #include "../gamelogic/SSCamera.h"
 #include "../SubsystemManager.h"
 #include <gui/GUIEngine.h>
+#include <core\utility\GameModeSelector.h>
 
 SSGraphicsSettings& SSGraphicsSettings::GetInstance( )
 {
@@ -32,9 +33,11 @@ void SSGraphicsSettings::Shutdown( )
 
 void SSGraphicsSettings::GraphicsConfigChangeCallback( CallbackConfig* cfg )
 {
+	bool useFogOfWar = !(g_GameModeSelector.GetCurrentGameMode().Type == GameModeType::Editor);
+
 	g_GameData.ReadGraphicsConfig( );
 	gfx::g_GFXEngine.ReinitializeWindow( g_GameData.GetWindowWidth( ), g_GameData.GetWindowHeight( ), g_GameData.m_MSAA,
-										 g_GameData.m_Fullscreen, g_GameData.m_Vsync );
+		g_GameData.m_Fullscreen, g_GameData.m_Vsync, useFogOfWar);
 
 	g_SSCamera.SetWindowSize( g_GameData.GetWindowWidth( ), g_GameData.GetWindowHeight( ) );
 	g_GUI.GetWindow( "RootWindow" 	)->SetSize( g_GameData.GetWindowWidth( ), g_GameData.GetWindowHeight( ) );

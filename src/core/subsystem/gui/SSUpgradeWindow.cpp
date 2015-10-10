@@ -1,11 +1,11 @@
 /**************************************************
-Copyright 2015 Isak Almgren
+2015 Isak Almgren
 ***************************************************/
 
 #include "SSUpgradeWindow.h"
 #include <network/NetworkInfo.h>
 #include <network/PacketPump.h>
-#include <messaging/GameMessages.h>
+#include "../../input/GameMessages.h"
 #include <input/Input.h>
 #include "../gamelogic/SSResearch.h"
 #include "../gamelogic/SSUpgrades.h"

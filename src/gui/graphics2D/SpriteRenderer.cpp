@@ -5,6 +5,7 @@ Zlib Copyright 2015 Isak Almgren
 #include "SpriteRenderer.h"
 #include <utility/Logger.h>
 #include <profiler/AutoGPUProfiler.h>
+#include <input/Input.h>
 
 GUI::SpriteRenderer::SpriteRenderer()
 {
@@ -58,6 +59,9 @@ void GUI::SpriteRenderer::Initialize()
 
 void GUI::SpriteRenderer::Render( int windowWidth, int windowHeight, gfx::ShaderProgram* shaderProg )
 {
+	if( g_Input->KeyDownUp( SDL_SCANCODE_L ) )
+		m_SpriteAtlas.LoadFile( "../../../asset/gui/sprites.json" );
+
 	int numSprites = 0;
 
 	for( SpriteDefinition* spriteDef : m_SpriteQueue )

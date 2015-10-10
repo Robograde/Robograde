@@ -1,5 +1,5 @@
 /**************************************************
-Copyright 2015 Daniel "MonzUn" Bengtsson
+2015 Daniel "MonzUn" Bengtsson
 ***************************************************/
 
 #include "SSReplayRecorder.h"
@@ -9,12 +9,12 @@ Copyright 2015 Daniel "MonzUn" Bengtsson
 #include <utility/Randomizer.h>
 #include <utility/FileUtility.h>
 #include <utility/DataSizes.h>
-#include <messaging/GameMessages.h>
 #include "../gamelogic/SSAI.h"
 #include "../gamelogic/SSSceneLoader.h"
 #include "../gui/SSMiniMap.h"
 #include "../hashing/SSHashGenerator.h"
 #include "../utility/SSMail.h"
+#include "../../input/GameMessages.h"
 #include "../../utility/GameData.h"
 #include "../../utility/PlayerData.h"
 #include "../../utility/Alliances.h"

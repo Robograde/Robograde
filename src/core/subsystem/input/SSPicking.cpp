@@ -1,5 +1,5 @@
 /**************************************************
-Copyright 2015 Ola Enberg & Daniel Bengtsson
+2015 Ola Enberg & Daniel Bengtsson
 ***************************************************/
 
 #include "SSPicking.h"
@@ -11,10 +11,10 @@ Copyright 2015 Ola Enberg & Daniel Bengtsson
 #include <input/Input.h>
 #include <glm/gtx/transform.hpp>
 #include <gui/GUIEngine.h>
-#include <messaging/GameMessages.h>
 #include "../gamelogic/SSCamera.h"
 #include "../gamelogic/SSAI.h"
 #include "../utility/SSMail.h"
+#include "../../input/GameMessages.h"
 #include "../../utility/GameData.h"
 #include "../../utility/PlayerData.h"
 #include "../../datadriven/DenseComponentCollection.h"

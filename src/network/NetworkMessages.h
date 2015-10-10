@@ -40,7 +40,7 @@ public:
 	NetworkMessage( NetworkMessageTypes::NetworkMessageType networkMessageType, unsigned short senderID );
 	virtual ~NetworkMessage() {};
 
-	virtual Message* Clone() const override;
+	virtual Message* Clone() const override = 0;
 	virtual unsigned int GetSerializationSize() const override;
 	virtual void Serialize( char*& buffer ) const override;
 	virtual void Deserialize( const char*& buffer ) override;
@@ -114,28 +114,3 @@ public:
 	short NetworkID;
 	CONNECTION_STATUS_ENUM_UNDERLYING_TYPE ConnectionStatus;
 };
-
-namespace NetworkMessages
-{
-	static Message* GetDefaultMessage( const NetworkMessageTypes::NetworkMessageType type )
-	{
-		switch ( type )
-		{
-			case NetworkMessageTypes::BAD:
-				return nullptr;
-			case NetworkMessageTypes::PING:
-				return tNew( PingMessage );
-			case NetworkMessageTypes::LATENCY_UPDATE_MESSAGE:
-				return tNew( LatencyUpdateMessage );
-			case NetworkMessageTypes::HANDSHAKE:
-				return tNew( HandshakeMessage );
-			case NetworkMessageTypes::NETWORKIDMESSAGE:
-				return tNew( NetworkIDMessage );
-			case NetworkMessageTypes::CONNECTION_STATUS_MESSAGE:
-				return tNew( ConnectionStatusMessage );
-			default:
-				return nullptr;
-				break;
-		}
-	}
-}

@@ -51,3 +51,8 @@ void GUI::Sprite::SetPosition( int x, int y )
 {
 	m_SpriteDefinition.Position = glm::ivec2( x, y );
 }
+
+glm::ivec2 GUI::Sprite::GetPosition( )
+{
+	return m_SpriteDefinition.Position;
+}

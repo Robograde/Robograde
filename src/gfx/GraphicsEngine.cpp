@@ -29,7 +29,7 @@ gfx::GraphicsEngine& gfx::GraphicsEngine::GetInstance()
 	return m_Instance;
 }
 
-void gfx::GraphicsEngine::InitializeWindow( int width, int height, int msaa, bool fullscreen, bool vsync )
+void gfx::GraphicsEngine::InitializeWindow( int width, int height, int msaa, bool fullscreen, bool vsync, bool useFogOfWar )
 {
 	m_WindowWidth = width;
 	m_WindowHeight = height;
@@ -83,7 +83,7 @@ void gfx::GraphicsEngine::InitializeWindow( int width, int height, int msaa, boo
 
 	g_DecalManager.Initialize();
 	m_DeferredGeometryProgram.Init( m_RenderJobs );
-	m_DeferredLightProgram.Init( m_RenderJobs );
+	m_DeferredLightProgram.Init( m_RenderJobs, useFogOfWar );
 	m_DecalProgram.Init( m_RenderJobs );
 	m_DownSample = 0.5f;
 	m_BlurProgram.Init( glm::vec2( m_WindowWidth, m_WindowHeight ), m_DownSample );
@@ -120,7 +120,7 @@ void gfx::GraphicsEngine::InitializeWindow( int width, int height, int msaa, boo
 	//m_BasicRender.Init( m_RenderJobs );
 }
 
-void gfx::GraphicsEngine::ReinitializeWindow( int width, int height, int msaa, bool fullscreen, bool vsync )
+void gfx::GraphicsEngine::ReinitializeWindow(int width, int height, int msaa, bool fullscreen, bool vsync, bool useFogOfWar)
 {
 	//Fullscreen off
 	m_Fullscreen = fullscreen;
@@ -195,6 +195,9 @@ void gfx::GraphicsEngine::Draw()
 	DrawGeometry();
 	DrawLight();
 	DrawPostFX();
+
+	//Draw Lines here as well
+	m_LineRenderProgram.Draw( );
 
 	m_RenderJobs->ClearLists();
 	g_DecalManager.Clear();
@@ -317,8 +320,6 @@ void  gfx::GraphicsEngine::DrawGeometry()
 	DrawData data;
 	data.ExtraData = &dd;
 	m_DecalProgram.Draw( &data );
-	//Draw Lines here as well
-	m_LineRenderProgram.Draw();
 	//draw models
 	m_GBuffer.ApplyGeometryStage();
 	g_ModelBank.ApplyBuffers( POS_NORMAL_TEX_TANGENT_JOINTS_WEIGHTS );

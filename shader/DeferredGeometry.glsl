@@ -216,7 +216,8 @@ void main()
   }
 
   //texture + tint + fog
-  FragmentColor = pow((textureColor).xyz, vec3(1.0 / 2.2));
+  FragmentColor = pow(textureColor.xyz, vec3(1.0 / 2.2));
+  FragmentColor *= ColorOut.xyz;
   FragmentNormal = normal;
   FragmentMatID = MatID;
   FragmentRoughMetal.x = Roughness;

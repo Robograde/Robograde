@@ -36,10 +36,16 @@ namespace GUI
 		GUI_API void		Close();
 		GUI_API void		ToggleOpen();
 		GUI_API void		SetToggleGroup( const rString& groupName );
+
+		GUI_API void		SetOnOpenScript( const rString& script );
+		GUI_API void		SetOnCloseScript( const rString& script );
+
+		GUI_API void		SlideOpen( glm::ivec2 start, glm::ivec2 end, int pixelsPerSecond );
+		GUI_API void		SlideClose( glm::ivec2 start, glm::ivec2 end, int pixelsPerSecond );
 		
 		GUI_API bool		IsOpen() { return m_Open; }
 		
-		SpriteDefinition& GetBackgroundRef() { return m_Background; }
+		SpriteDefinition&	GetBackgroundRef() { return m_Background; }
 
 		GUI_API	void		SetBackgroundColour( glm::vec4 colour );
 		
@@ -49,6 +55,9 @@ namespace GUI
 		pMap<rString, Object*>	m_Children;
 		std::list<Object*>		m_OrderedChildren;
 		bool					m_Open = false;
+
+		rString					m_OnOpenScript;
+		rString					m_OnCloseScript;
 		
 		SpriteDefinition		m_Background;
 		glm::vec4				m_BackgroundColour;
@@ -68,5 +77,14 @@ namespace GUI
 		bool					m_Scrollable = false;
 		
 		bool					m_CullContent = false;
+
+
+		glm::ivec2				m_SlideStart;
+		glm::ivec2				m_SlideEnd;
+		bool					m_SlideOpen = false;
+		bool					m_SlideClose = false;
+		glm::vec2				m_SlidePos;
+
+		int						m_SlideSpeed;
 	};
 }

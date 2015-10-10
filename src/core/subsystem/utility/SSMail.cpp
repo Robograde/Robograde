@@ -1,5 +1,5 @@
 /**************************************************
-Copyright 2015 Daniel "MonzUn" Bengtsson
+2015 Daniel "MonzUn" Bengtsson
 ***************************************************/
 
 #include "SSMail.h"
@@ -110,6 +110,9 @@ void SSMail::Shutdown( )
 	// Delete the messages that were delivered last frame
 	for ( int i = 0; i < m_DeliveredSimMessages.size( ); ++i )
 		tDelete( m_DeliveredSimMessages[i] );
+
+	for ( int i = 0; i < m_DeliveredUserMessages.size(); ++i )
+		tDelete( m_DeliveredUserMessages[i] );
 
 	Subsystem::Shutdown();
 }

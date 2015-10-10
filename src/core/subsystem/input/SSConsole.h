@@ -1,5 +1,5 @@
 /**************************************************
-Copyright 2015 Isak Almgren
+2015 Isak Almgren
 ***************************************************/
 
 #pragma once
@@ -83,6 +83,7 @@ private:
 	
 	pMap<rString, Command> m_Commands;
 	
+	GUI::Window*	m_Window;
 	GUI::TextBox*	m_TextBox;
 	
 	//bool			m_Shown = false;

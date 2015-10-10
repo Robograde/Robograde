@@ -1,13 +1,13 @@
 /**************************************************
-Copyright 2015 Jens Stjernkvist
+2015 Jens Stjernkvist
 ***************************************************/
 
 #include "SSSFXNotification.h"
 
 #include <utility/Logger.h>
-#include <messaging/GameMessages.h>
 
 #include "../utility/SSMail.h"
+#include "../../input/GameMessages.h"
 #include "../../ai/Squad.h"
 #include "../../utility/PlayerData.h"
 #include "../gamelogic/SSControlPoint.h"

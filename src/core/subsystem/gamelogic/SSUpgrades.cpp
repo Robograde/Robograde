@@ -1,5 +1,5 @@
 /**************************************************
-Copyright 2015 David Pejtersen
+2015 David Pejtersen
 ***************************************************/
 
 #include "SSUpgrades.h"
@@ -8,7 +8,7 @@ Copyright 2015 David Pejtersen
 
 #include <script/ScriptEngine.h>
 #include <utility/Logger.h>
-#include <messaging/GameMessages.h>
+#include "../../input/GameMessages.h"
 
 #include "../../utility/PlayerData.h"
 #include "../utility/SSMail.h"

@@ -1,10 +1,10 @@
 /**************************************************
-Copyright 2015 Daniel Bengtsson
+2015 Daniel Bengtsson
 ***************************************************/
 
 #include "SSInGameMenu.h"
 #include <SDL2/SDL.h>
-#include <messaging/GameMessages.h>
+#include "../../input/GameMessages.h"
 #include <input/KeyBindings.h>
 #include <network/NetworkEngine.h>
 #include "../../utility/GameSpeedController.h"

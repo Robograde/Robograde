@@ -1,5 +1,5 @@
 /**************************************************
-Copyright 2015 David Pejtersen
+2015 David Pejtersen
 ***************************************************/
 
 #include <script/ScriptEngine.h>

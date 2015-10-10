@@ -1,5 +1,5 @@
 /**************************************************
-Copyright 2015 Jens Stjernkvist
+2015 Jens Stjernkvist
 ***************************************************/
 
 #pragma once
@@ -247,6 +247,7 @@ public:
 	bool					SetSFXStop(SFX_HANDLE handle);
 
 	///Getters
+	const bool				GetIsLoaded(rString path);
 	const float				GetVolumeMaster(void) const;
 	const float				GetVolumeMusic(void) const;
 	const float				GetVolumeSFX(void) const;

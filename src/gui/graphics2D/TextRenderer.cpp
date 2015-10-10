@@ -52,6 +52,7 @@ namespace GUI
 		m_TempColourText.reserve( 50 );
 
 		m_Lines.reserve( 20 );
+		m_Lines2.reserve( 20 );
 
 		m_Fonts[FONT_ID_CONSOLE_11] = LoadFont( "SourceCodePro-Regular.otf", 11 );
 		m_Fonts[FONT_ID_CONSOLE_14] = LoadFont( "SourceCodePro-Regular.otf", 14 );
@@ -76,6 +77,18 @@ namespace GUI
 		{
 			result.push_back( line );
 		}
+	}
+
+	int GetNumLines( const rString &s )
+	{
+		int num = 0;
+		rStringStream ss( s.c_str() );
+		rString line;
+		while( std::getline( ss, line ) )
+		{
+			num++;
+		}
+		return num;
 	}
 
 	void TextRenderer::Render( int windowWidth, int windowHeight, gfx::ShaderProgram* shaderProg )
@@ -282,8 +295,6 @@ namespace GUI
 	{
 		int width = 0;
 		int height = 0;
-		int x = 0;
-		int y = 0;
 
 		auto fontIt = m_Fonts.find( fontID );
 		Font* font = fontIt->second;
@@ -296,18 +307,38 @@ namespace GUI
 			return glm::ivec2( 0, 0 );
 		}
 
-		int ax = 0;
-		CharacterInfo* c = fontIt->second->GetCharInfo();
-		for( const char *p = text.c_str(); *p; p++ )
-		{
-			width = c[*p].bl + ax + c[*p].bw;
-			ax += c[*p].ax;
+		//Handle linebreaks
+		m_Lines2.clear();
+		SplitIntoLines( m_Lines2, text );
 
-			if( c[*p].bh > height )
-				height = c[*p].bh;
+		int numLines =  static_cast<int>( m_Lines2.size() );
+		if( numLines > 1 )
+		{
+			int lineSpacing = static_cast<int>( font->GetAtlasHeight() / 4 );
+			height = numLines * (font->GetFontHeight() + lineSpacing) - lineSpacing;
 		}
 
-		height = font->GetFontHeight(); //TODIA: Figure out if I can get away with this.
+		
+		CharacterInfo* c = fontIt->second->GetCharInfo();
+
+		for( rString& lineText : m_Lines2 )
+		{
+			int tWidth = 0;
+			int ax = 0;
+			for( const char *p = lineText.c_str(); *p; p++ )
+			{
+				tWidth = c[*p].bl + ax + c[*p].bw;
+				ax += c[*p].ax;
+
+				//if( c[*p].bh > height )
+				//	height = c[*p].bh;
+			}
+			if( tWidth > width )
+				width = tWidth;
+		}
+
+		if( height == 0 )
+			height = font->GetFontHeight(); //TODIA: Figure out if I can get away with this.
 		
 		return glm::ivec2( width, height );
 	}

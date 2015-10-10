@@ -15,8 +15,8 @@ namespace gfx
 	public:
 		DeferredLightProgram();
 		~DeferredLightProgram();
-
 		virtual void Init(RenderJobManager* jobManager);
+		virtual void Init(RenderJobManager* jobManager, bool useFogOfWar);
 		virtual void Draw(DrawData* data);
 		virtual void Shutdown();
 		//struct for all the data that is needed for the shader

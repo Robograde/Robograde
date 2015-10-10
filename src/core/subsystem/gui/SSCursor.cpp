@@ -1,5 +1,5 @@
 /**************************************************
-Copyright 2015 Isak Almgren
+2015 Isak Almgren
 ***************************************************/
 
 #include "SSCursor.h"
@@ -22,6 +22,7 @@ void SSCursor::Startup()
 	g_GUI.OpenWindow( "CursorWindow" );
 
 	m_StandardDef	= GUI::SpriteDefinition( "cursor/CursorBlank.png", 0, 0, CURSOR_SPRITE_SIZE, CURSOR_SPRITE_SIZE );
+	m_MoveDef		= GUI::SpriteDefinition( "cursor/CursorMove.png", 0, 0, CURSOR_SPRITE_SIZE, CURSOR_SPRITE_SIZE );
 	m_AttackDef		= GUI::SpriteDefinition( "cursor/CursorBlank.png", 0, 0, CURSOR_SPRITE_SIZE, CURSOR_SPRITE_SIZE, m_AttackColour );
 	m_PingDef		= GUI::SpriteDefinition( "cursor/CursorBlank.png", 0, 0, CURSOR_SPRITE_SIZE, CURSOR_SPRITE_SIZE, m_PingColour );
 
@@ -73,6 +74,11 @@ void SSCursor::UpdateUserLayer( const float deltaTime )
 		{
 			m_MouseCursor->GetSpriteDefinitionRef( ).Texture = m_PingDef.Texture;
 			m_MouseCursor->GetSpriteDefinitionRef( ).Colour = m_PingDef.Colour;
+		}
+		else if ( g_PlayerData.GetLastActionPressed( ) == ACTION::ACTION_EDITOR_MOVE )
+		{
+			m_MouseCursor->GetSpriteDefinitionRef( ).Texture = m_MoveDef.Texture;
+			m_MouseCursor->GetSpriteDefinitionRef( ).Colour = m_MoveDef.Colour;
 		}
 		else
 		{

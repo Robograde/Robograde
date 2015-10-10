@@ -10,6 +10,7 @@ file(GLOB_RECURSE UtilitySources
 	"FrameCounter.h"
 	"FrameCounter.cpp"
 	"Colors.h"
+	"ColourConversion.h"
 	"UtilityLibraryDefine.h"
 	"ThreadingUtility.h"
 	"PlatformDefinitions.h"

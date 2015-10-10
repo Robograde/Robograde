@@ -34,7 +34,7 @@ namespace GUI
 		//Getters
 		GUI_API TextDefinition&	GetTextDefinitionRef();
 		GUI_API SpriteDefinition& GetBackgroundRef();
-		GUI_API int				GetSelectedIndex();
+		GUI_API unsigned int	GetSelectedIndex();
 		GUI_API int				GetNumItems();
 		
 		//Setters
@@ -54,8 +54,11 @@ namespace GUI
 		GUI_API void			SetClickScript( const rString& script );
 		
 		GUI_API void			AddItem( const rString& item );
+		GUI_API void			ClearItems();
 
 		GUI_API ComboBoxItem&	GetItem( unsigned int index );
+
+		GUI_API void			SetDirectionUp( );
 		
 	private:
 		TextDefinition				m_TextDefinition;
@@ -71,6 +74,7 @@ namespace GUI
 		
 		
 		SpriteDefinition			m_Background;
+		SpriteDefinition			m_ArrowIcon;
 		
 		SpriteDefinition			m_ScrollBarBackground;
 		SpriteDefinition			m_ScrollBar;
@@ -88,6 +92,8 @@ namespace GUI
 		unsigned int				m_SelectedIndex;
 		bool						m_IsOpen = false;
 		bool						m_KeepOpen = false;
+
+		bool						m_OverrideDirection = false;
 		
 		FONT_ID						m_FontID;
 		

@@ -1,5 +1,5 @@
 /**************************************************
-Copyright 2015 Johan Melin
+2015 Johan Melin
 ***************************************************/
 
 #include "SSGameLobby.h"
@@ -14,8 +14,8 @@ Copyright 2015 Johan Melin
 #include <network/NetworkInfo.h>
 #include <network/PacketPump.h>
 #include <input/Input.h>
-#include <messaging/GameMessages.h>
 #include <gfx/GraphicsEngine.h>
+#include "../../input/GameMessages.h"
 #include "../../EntityFactory.h"
 #include "../gamelogic/SSSceneLoader.h"
 #include "../../utility/GameModeSelector.h"
@@ -31,6 +31,7 @@ Copyright 2015 Johan Melin
 #include "../gamelogic/SSAI.h"
 #include "../gamelogic/SSResourceManager.h"
 
+
 SSGameLobby& SSGameLobby::GetInstance()
 {
 	static SSGameLobby instance;
@@ -45,9 +46,9 @@ void SSGameLobby::Startup()
 
 	// Register subscriber
 	g_SSMail.RegisterSubscriber( this );
-	m_UserInterests = MessageTypes::COLOUR_CHANGE 
-		| MessageTypes::TEAM_CHANGE 
-		| MessageTypes::SPAWN_POINT_CHANGE 
+	m_UserInterests = MessageTypes::COLOUR_CHANGE
+		| MessageTypes::TEAM_CHANGE
+		| MessageTypes::SPAWN_POINT_CHANGE
 		| MessageTypes::CHANGE_SPAWN_COUNT
 		| MessageTypes::RESERVE_AI_PLAYER;
 
@@ -59,14 +60,14 @@ void SSGameLobby::Startup()
 	m_NetworkCallbackHandle = g_NetworkEngine.RegisterCallback( NetworkCallbackEvent::Disconnection, std::bind( &SSGameLobby::OnDisconnection, this, std::placeholders::_1 ) );
 
 	// Player colours
-	m_ColourEntries.push_back( ColourEntry	{ "Green",	Colours::KINDA_GREEN, Colours::KINDA_GREEN	, -1 } );
-	m_ColourEntries.push_back( ColourEntry	{ "Red", 	Colours::KINDA_RED 	, Colours::KINDA_RED	, -1 } );
-	m_ColourEntries.push_back( ColourEntry	{ "Blue", 	Colours::KINDA_BLUE	, Colours::KINDA_BLUE	, -1 } );
-	m_ColourEntries.push_back( ColourEntry	{ "Pink",	Colours::KINDA_PINK	, Colours::KINDA_PINK	, -1 } );
-	m_ColourEntries.push_back( ColourEntry	{ "Yellow", Colours::VERY_YELLOW, Colours::VERY_YELLOW	, -1 } );
-	m_ColourEntries.push_back( ColourEntry	{ "Cyan",	Colours::LTBLUE		, Colours::LTBLUE		, -1 } );
+	m_ColourEntries.push_back( ColourEntry { "Green", Colours::KINDA_GREEN, Colours::KINDA_GREEN, -1 } );
+	m_ColourEntries.push_back( ColourEntry { "Red", Colours::KINDA_RED, Colours::KINDA_RED, -1 } );
+	m_ColourEntries.push_back( ColourEntry { "Blue", Colours::KINDA_BLUE, Colours::KINDA_BLUE, -1 } );
+	m_ColourEntries.push_back( ColourEntry { "Pink", Colours::KINDA_PINK, Colours::KINDA_PINK, -1 } );
+	m_ColourEntries.push_back( ColourEntry { "Yellow", Colours::VERY_YELLOW, Colours::VERY_YELLOW, -1 } );
+	m_ColourEntries.push_back( ColourEntry { "Cyan", Colours::LTBLUE, Colours::LTBLUE, -1 } );
 	// Text colour modified
-	m_ColourEntries.push_back( ColourEntry	{ "Black",	Colours::BLACK		, glm::vec4(0.4f, 0.4f, 0.4f, 1.0f), -1 } );
+	m_ColourEntries.push_back( ColourEntry { "Black", Colours::BLACK, glm::vec4( 0.4f, 0.4f, 0.4f, 1.0f ), -1 } );
 
 	g_GameData.SetPlayerColour( 0, Colours::KINDA_GREEN );
 	g_GameData.SetPlayerColour( 1, Colours::KINDA_RED );
@@ -84,37 +85,37 @@ void SSGameLobby::Startup()
 	// Button scripts
 	g_Script.Register( m_ScriptNameReady.c_str(), [&] ( IScriptEngine* ) -> int { OnReadyButtonClicked(); return 0; } );
 	g_Script.Register( m_ScriptNameStartGame.c_str(), [&] ( IScriptEngine* ) -> int { StartGame(); return 0; } );
-	g_Script.Register(m_ScriptChangeGameSetting.c_str(), [this](IScriptEngine* script) -> int
+	g_Script.Register( m_ScriptChangeGameSetting.c_str(), [this] ( IScriptEngine* script ) -> int
 	{
 		m_NumberOfSpawns += script->PopInt();
-		if (m_NumberOfSpawns < 1)
+		if ( m_NumberOfSpawns < 1 )
 			m_NumberOfSpawns = 1;
-		if (m_NumberOfSpawns > SQUAD_MAXIMUM_UNIT_COUNT)
+		if ( m_NumberOfSpawns > SQUAD_MAXIMUM_UNIT_COUNT )
 			m_NumberOfSpawns = SQUAD_MAXIMUM_UNIT_COUNT;
 		ChangeSpawnCount( m_NumberOfSpawns );
 		return 0;
 	} );
 
 	GUI::Window* parentWindow = g_GUI.GetWindow( m_WindowNameParent );
-	glm::ivec2 middleParent = glm::ivec2(parentWindow->GetBoundingBoxRef().X, parentWindow->GetBoundingBoxRef().Y) + parentWindow->GetSize() / 2;
-	glm::ivec2 sizeParent = parentWindow->GetSize( );
+	glm::ivec2 middleParent = glm::ivec2( parentWindow->GetBoundingBoxRef().X, parentWindow->GetBoundingBoxRef().Y ) + parentWindow->GetSize() / 2;
+	glm::ivec2 sizeParent = parentWindow->GetSize();
 
 	{ // Enter ip
 		m_WindowEnterIP = g_GUI.AddWindow( m_WindowNameEnterIP, GUI::Rectangle( middleParent.x - m_WidthEnterIP / 2, middleParent.y - m_HeightEnterIP / 2, m_WidthEnterIP, m_HeightEnterIP ), m_WindowNameParent, true );
 
-		m_TextBoxEnterIP = g_GUI.AddTextBox( "", GUI::Rectangle( m_WidthButton, m_HeightEnterIP - m_HeightTextBox, m_WidthTextBox, m_HeightTextBox) , m_WindowNameEnterIP);
+		m_TextBoxEnterIP = g_GUI.AddTextBox( "", GUI::Rectangle( m_WidthButton, m_HeightEnterIP - m_HeightTextBox, m_WidthTextBox, m_HeightTextBox ), m_WindowNameEnterIP );
 
 		// Connect
-		m_ButtonConnect = g_GUI.AddButton( "", GUI::Rectangle( m_WidthEnterIP - m_WidthButton * 2, m_HeightEnterIP - m_HeightButton, m_WidthButton, m_HeightButton), m_WindowNameEnterIP );
+		m_ButtonConnect = g_GUI.AddButton( "", GUI::Rectangle( m_WidthEnterIP - m_WidthButton * 2, m_HeightEnterIP - m_HeightButton, m_WidthButton, m_HeightButton ), m_WindowNameEnterIP );
 		m_ButtonConnect->SetText( "Connect" );
-		g_Script.Register( m_ScriptNameConnect.c_str(), [this](IScriptEngine*){ ConnectToGame(m_TextBoxEnterIP->GetText()); return 0; } );
+		g_Script.Register( m_ScriptNameConnect.c_str(), [this] ( IScriptEngine* ) { ConnectToGame( m_TextBoxEnterIP->GetText() ); return 0; } );
 		m_ButtonConnect->SetClickScript( m_ScriptNameConnect + "()" );
 		m_ButtonConnect->GetBackgroundRef().Texture = m_TextureNameButtons;
 
 		// Host
-		m_ButtonHost = g_GUI.AddButton( "", GUI::Rectangle( m_WidthEnterIP - m_WidthButton, m_HeightEnterIP - m_HeightButton, m_WidthButton, m_HeightButton), m_WindowNameEnterIP );
+		m_ButtonHost = g_GUI.AddButton( "", GUI::Rectangle( m_WidthEnterIP - m_WidthButton, m_HeightEnterIP - m_HeightButton, m_WidthButton, m_HeightButton ), m_WindowNameEnterIP );
 		m_ButtonHost->SetText( "Host" );
-		g_Script.Register( m_ScriptNameHost.c_str(), [this](IScriptEngine*){ HostGame(); return 0; } );
+		g_Script.Register( m_ScriptNameHost.c_str(), [this] ( IScriptEngine* ) { HostGame(); return 0; } );
 		m_ButtonHost->SetClickScript( m_ScriptNameHost + "()" );
 		m_ButtonHost->GetBackgroundRef().Texture = m_TextureNameButtons;
 
@@ -124,8 +125,8 @@ void SSGameLobby::Startup()
 		m_TextError = g_GUI.AddText( "", GUI::TextDefinition( "", 0, m_TopPadding + m_HeightInfoText, m_WidthEnterIP, m_HeightErrorText ), m_WindowNameEnterIP );
 
 		// Back button
-		m_ButtonBackEnterIP = g_GUI.AddButton( "", GUI::Rectangle( 0, m_WindowEnterIP->GetSize( ).y - m_HeightButton, m_WidthButton, m_HeightButton ), m_WindowNameEnterIP );
-		g_Script.Register( m_ScriptNameBackEnterIP.c_str(), [this](IScriptEngine*){ BackFromEnterIP( ); return 0; } );
+		m_ButtonBackEnterIP = g_GUI.AddButton( "", GUI::Rectangle( 0, m_WindowEnterIP->GetSize().y - m_HeightButton, m_WidthButton, m_HeightButton ), m_WindowNameEnterIP );
+		g_Script.Register( m_ScriptNameBackEnterIP.c_str(), [this] ( IScriptEngine* ) { BackFromEnterIP(); return 0; } );
 		m_ButtonBackEnterIP->SetClickScript( m_ScriptNameBackEnterIP + "()" );
 		m_ButtonBackEnterIP->SetText( "Back" );
 		m_ButtonBackEnterIP->GetBackgroundRef().Texture = m_TextureNameButtons;
@@ -142,7 +143,7 @@ void SSGameLobby::Startup()
 	}
 	{ // Lobby
 		m_WindowLobby = g_GUI.AddWindow( m_WindowNameLobby, parentWindow->GetBoundingBoxRef(), m_WindowNameParent );
-		glm::ivec2 sizeLobby = m_WindowLobby->GetSize( );
+		glm::ivec2 sizeLobby = m_WindowLobby->GetSize();
 		// Start game (host)
 		m_ButtonStartGame = g_GUI.AddButton( "", GUI::Rectangle( sizeLobby.x - m_WidthButton * 2, sizeLobby.y - m_HeightButton, m_WidthButton, m_HeightButton ), m_WindowNameLobby );
 		m_ButtonStartGame->SetText( "Start" );
@@ -153,11 +154,11 @@ void SSGameLobby::Startup()
 
 		// Back button
 		m_ButtonBackLobby = g_GUI.AddButton( "", GUI::Rectangle( 0, sizeLobby.y - m_HeightButton, m_WidthButton, m_HeightButton ), m_WindowNameLobby );
-		g_Script.Register( m_ScriptNameBackLobby.c_str(), [this](IScriptEngine*) 
-			{
-				BackFromLobby();
-				return 0; 
-			} );
+		g_Script.Register( m_ScriptNameBackLobby.c_str(), [this] ( IScriptEngine* )
+		{
+			BackFromLobby();
+			return 0;
+		} );
 		m_ButtonBackLobby->SetClickScript( m_ScriptNameBackLobby + "()" );
 		m_ButtonBackLobby->SetText( "Back" );
 		m_ButtonBackLobby->GetBackgroundRef().Texture = m_TextureNameButtons;
@@ -169,53 +170,53 @@ void SSGameLobby::Startup()
 		m_ButtonReady->SetClickScript( m_ScriptNameReady + "()" );
 		{ // Connected clients 
 			m_WindowConnectedClients = g_GUI.AddWindow( m_WindowNameConnectedClients,
-					GUI::Rectangle( 0, 0,
-						sizeParent.x / 2, sizeParent.y / 2 ),
-					m_WindowNameLobby, true );
-			m_WindowConnectedClients->ToggleOpen( );
+				GUI::Rectangle( 0, 0,
+				sizeParent.x / 2, sizeParent.y / 2 ),
+				m_WindowNameLobby, true );
+			m_WindowConnectedClients->ToggleOpen();
 			g_GUI.UseFont( FONT_ID_LEKTON_20 );
-			g_Script.Register( m_ScriptNameColourChange.c_str(), [this](IScriptEngine* script) -> int
-					{
-						int playerID = script->PopInt( );
-						assert( playerID >= 0 && playerID < MAX_PLAYERS );
-						int selectedIndex = m_ConnectedPlayerEntries[playerID].Colour->GetSelectedIndex( );
-						TryChangeColour( selectedIndex, playerID, false );
-						return 0;
-					} );
-			g_Script.Register( m_ScriptNameTeamChange.c_str(), [this](IScriptEngine* script) -> int
-					{
-						int playerID = script->PopInt( );
-						assert( playerID >= 0 && playerID < MAX_PLAYERS );
-						int selectedIndex = m_ConnectedPlayerEntries[playerID].Team->GetSelectedIndex( );
-						TryChangeTeam( selectedIndex, playerID, false );
-						return 0;
-					} );
-			g_Script.Register( m_ScriptNameKick.c_str( ), [this](IScriptEngine* script) -> int
-					{
-						int playerID = script->PopInt( );
-						if ( m_ConnectedPlayerEntries[ playerID ].IsAI )
-						{
-							ChangeReserveAI( playerID, false );
-							OnDisconnection( &playerID );
-						}
-						else
-							g_NetworkEngine.RequestDisconnection( playerID );
-						return 0;
-					} );
-			g_Script.Register( m_ScriptNameReserveForAI.c_str( ), [this](IScriptEngine* script) -> int
-					{
-						int playerID = script->PopInt( );
-						if ( !m_ConnectedPlayerEntries[playerID].IsAI )
-						{
-							OnNewClientConnect( playerID );
-						}
-						ChangeReserveAI( playerID, true );
-						g_NetworkEngine.RequestDisconnection( playerID );
-						return 0;
-					} );
+			g_Script.Register( m_ScriptNameColourChange.c_str(), [this] ( IScriptEngine* script ) -> int
+			{
+				int playerID = script->PopInt();
+				assert( playerID >= 0 && playerID < MAX_PLAYERS );
+				int selectedIndex = m_ConnectedPlayerEntries[playerID].Colour->GetSelectedIndex();
+				TryChangeColour( selectedIndex, playerID, false );
+				return 0;
+			} );
+			g_Script.Register( m_ScriptNameTeamChange.c_str(), [this] ( IScriptEngine* script ) -> int
+			{
+				int playerID = script->PopInt();
+				assert( playerID >= 0 && playerID < MAX_PLAYERS );
+				int selectedIndex = m_ConnectedPlayerEntries[playerID].Team->GetSelectedIndex();
+				TryChangeTeam( selectedIndex, playerID, false );
+				return 0;
+			} );
+			g_Script.Register( m_ScriptNameKick.c_str(), [this] ( IScriptEngine* script ) -> int
+			{
+				int playerID = script->PopInt();
+				if ( m_ConnectedPlayerEntries[playerID].IsAI )
+				{
+					ChangeReserveAI( playerID, false );
+					OnDisconnection( &playerID );
+				}
+				else
+					g_NetworkEngine.RequestDisconnection( playerID );
+				return 0;
+			} );
+			g_Script.Register( m_ScriptNameReserveForAI.c_str(), [this] ( IScriptEngine* script ) -> int
+			{
+				int playerID = script->PopInt();
+				if ( !m_ConnectedPlayerEntries[playerID].IsAI )
+				{
+					OnNewClientConnect( playerID );
+				}
+				ChangeReserveAI( playerID, true );
+				g_NetworkEngine.RequestDisconnection( playerID );
+				return 0;
+			} );
 			// Players
-			int entryY = m_HeightPlayerEntry * (MAX_PLAYERS - 1) + m_TopPadding;
-			for ( int i = MAX_PLAYERS -1 ; i >= 0; --i )
+			int entryY = m_HeightPlayerEntry * ( MAX_PLAYERS - 1 ) + m_TopPadding;
+			for ( int i = MAX_PLAYERS - 1; i >= 0; --i )
 			{
 				int x = m_WindowConnectedClients->GetSize().x - m_WidthReady;
 				ConnectedPlayer& playerEntry = m_ConnectedPlayerEntries[i];
@@ -228,12 +229,12 @@ void SSGameLobby::Startup()
 				playerEntry.Team->AddItem( "Team 2" );
 				playerEntry.Team->AddItem( "Team 3" );
 				playerEntry.Team->AddItem( "Team 4" );
-				playerEntry.Team->SetClickScript( m_ScriptNameTeamChange + "(" + rToString( i ) + ")");
+				playerEntry.Team->SetClickScript( m_ScriptNameTeamChange + "(" + rToString( i ) + ")" );
 				playerEntry.Team->GetBackgroundRef().Texture = m_TextureNameComboBox;
 				playerEntry.Team->SetItemBackgroundImage( m_TextureNameComboBoxItem );
 				x -= m_WidthColour;
 				playerEntry.Colour = g_GUI.AddComboBox( "", GUI::Rectangle( x, entryY, m_WidthColour, m_HeightPlayerEntry ), m_WindowNameConnectedClients );
-				for( auto& colourEntry : m_ColourEntries )
+				for ( auto& colourEntry : m_ColourEntries )
 				{
 					playerEntry.Colour->AddItem( colourEntry.Text );
 					playerEntry.Colour->GetItem( playerEntry.Colour->GetNumItems() - 1 ).Text.Colour = colourEntry.TextColour;
@@ -257,77 +258,76 @@ void SSGameLobby::Startup()
 			}
 		}
 		{ // Select level window
-			m_WindowSelectLevel = g_GUI.AddWindow( m_WindowNameSelectLevel, 
-					GUI::Rectangle( sizeLobby.x / 2, 0, sizeLobby.x / 2, sizeLobby.y / 2 ), 
-					m_WindowNameLobby, true );
+			m_WindowSelectLevel = g_GUI.AddWindow( m_WindowNameSelectLevel,
+				GUI::Rectangle( sizeLobby.x / 2, 0, sizeLobby.x / 2, sizeLobby.y / 2 ),
+				m_WindowNameLobby, true );
 			glm::ivec2 slSize = m_WindowSelectLevel->GetSize();
-			m_WindowSelectLevel->ToggleOpen( );
+			m_WindowSelectLevel->ToggleOpen();
 			m_ComboBoxSelectLevel = g_GUI.AddComboBox( "", GUI::Rectangle(
-						0, m_WindowSelectLevel->GetSize().y - m_HeightComboBoxSelectLevel, m_WindowSelectLevel->GetSize().x, m_HeightComboBoxSelectLevel ),
-					m_WindowNameSelectLevel );
+				0, m_WindowSelectLevel->GetSize().y - m_HeightComboBoxSelectLevel, m_WindowSelectLevel->GetSize().x, m_HeightComboBoxSelectLevel ),
+				m_WindowNameSelectLevel );
 			m_ComboBoxSelectLevel->SetBackgroundImage( m_TextureNameSelectLevel );
 			m_ComboBoxSelectLevel->SetItemBackgroundImage( m_TextureNameSelectLevel );
-			g_Script.Register( m_ScriptClickLevelChange.c_str(), [this](IScriptEngine*){ SetLevel(m_ComboBoxSelectLevel->GetTextDefinitionRef().Text); return 0; } );
+			g_Script.Register( m_ScriptClickLevelChange.c_str(), [this] ( IScriptEngine* ) { SetLevel( m_ComboBoxSelectLevel->GetTextDefinitionRef().Text ); return 0; } );
 			m_ComboBoxSelectLevel->SetClickScript( m_ScriptClickLevelChange + "()" );
 
-			m_SizeLevelWindow = std::min(slSize.x, slSize.y - m_HeightComboBoxSelectLevel);
-			m_WindowLevel = g_GUI.AddWindow( m_WindowNameLevel, GUI::Rectangle( 
-						(slSize.x / 2) - (m_SizeLevelWindow / 2), 0, m_SizeLevelWindow, m_SizeLevelWindow ),
-					m_WindowNameSelectLevel );
-			m_WindowLevel->ToggleOpen( );
+			m_SizeLevelWindow = std::min( slSize.x, slSize.y - m_HeightComboBoxSelectLevel );
+			m_WindowLevel = g_GUI.AddWindow( m_WindowNameLevel, GUI::Rectangle(
+				( slSize.x / 2 ) - ( m_SizeLevelWindow / 2 ), 0, m_SizeLevelWindow, m_SizeLevelWindow ),
+				m_WindowNameSelectLevel );
+			m_WindowLevel->ToggleOpen();
 			m_SpriteLevelSelected = g_GUI.AddSprite( "", GUI::SpriteDefinition(
-						"",
-						0,
-						0,
-						m_SizeLevelWindow,
-						m_SizeLevelWindow),
-					m_WindowNameLevel );
+				"",
+				0,
+				0,
+				m_SizeLevelWindow,
+				m_SizeLevelWindow ),
+				m_WindowNameLevel );
 
-			CreateSpawnPointButtons( );
-			LoadLevels( );
+			CreateSpawnPointButtons();
+			LoadLevels();
 		}
+	}
+	{
+		glm::ivec2 sizeLobby = m_WindowLobby->GetSize();
 
-		{ // Gameplay settings
+		int gpsX = sizeLobby.x / 2;
+		int gpsY = sizeLobby.y / 2;
 
-			int gpsX = sizeLobby.x / 2;
-			int gpsY = sizeLobby.y / 2;
+		int gpsW = sizeLobby.x / 2;
+		int gpsH = sizeLobby.y / 2;
 
-			int gpsW = sizeLobby.x / 2;
-			int gpsH = sizeLobby.y / 2;
+		int gpsDiff = m_HeightComboBoxSelectLevel;
 
-			int gpsDiff = m_HeightComboBoxSelectLevel;
+		int gpsStartCountW = gpsW - gpsDiff * 4 - gpsDiff * 3;
 
-			int gpsStartCountW = gpsW - gpsDiff * 4 - gpsDiff * 3;
+		m_WindowGamePlaySettings = g_GUI.AddWindow( m_WindowNameGamePlaySettings, GUI::Rectangle( gpsX, gpsY, gpsW, gpsH - m_HeightButton ), m_WindowNameLobby, true );
+		m_WindowGamePlaySettings->ToggleOpen();
 
-			m_WindowGamePlaySettings = g_GUI.AddWindow(m_WindowNameGamePlaySettings, GUI::Rectangle(gpsX, gpsY, gpsW, gpsH -m_HeightButton), m_WindowNameLobby, true);
-			m_WindowGamePlaySettings->ToggleOpen();
+		// | Starting units count | 
+		m_BtnSpawnCount = g_GUI.AddButton( "GamePlaySettingStartCount", GUI::Rectangle( gpsDiff, gpsDiff, gpsStartCountW, gpsDiff ), m_WindowNameGamePlaySettings );
+		m_BtnSpawnCount->GetBackgroundRef().Texture = m_TextureNameButtons;
+		m_BtnSpawnCount->SetText( "Starting units count" );
+		m_BtnSpawnCount->SetEnabled( false );
 
-			// | Starting units count | 
-			m_BtnSpawnCount = g_GUI.AddButton("GamePlaySettingStartCount", GUI::Rectangle(gpsDiff, gpsDiff, gpsStartCountW, gpsDiff), m_WindowNameGamePlaySettings);
-			m_BtnSpawnCount->GetBackgroundRef().Texture = m_TextureNameButtons;
-			m_BtnSpawnCount->SetText("Starting units count");
-			m_BtnSpawnCount->SetEnabled(false);
+		// | Starting units count | - |
+		m_BtnSpawnCountDec = g_GUI.AddButton( "GamePlaySettingStartCountModDec", GUI::Rectangle( gpsStartCountW + gpsDiff, gpsDiff, gpsDiff, gpsDiff ), m_WindowNameGamePlaySettings );
+		m_BtnSpawnCountDec->GetBackgroundRef().Texture = m_TextureNameButtons;
+		m_BtnSpawnCountDec->SetText( "-" );
+		m_BtnSpawnCountDec->SetClickScript( m_ScriptChangeGameSetting + "(-1)" );
 
-			// | Starting units count | - |
-			m_BtnSpawnCountDec = g_GUI.AddButton("GamePlaySettingStartCountModDec", GUI::Rectangle(gpsStartCountW + gpsDiff, gpsDiff, gpsDiff, gpsDiff), m_WindowNameGamePlaySettings);
-			m_BtnSpawnCountDec->GetBackgroundRef().Texture = m_TextureNameButtons;
-			m_BtnSpawnCountDec->SetText("-");
-			m_BtnSpawnCountDec->SetClickScript(m_ScriptChangeGameSetting + "(-1)");
-			
 
-			// | Starting units count | - | X |
-			m_BtnSpawnCountVal = g_GUI.AddButton("GamePlaySettingStartCountVal", GUI::Rectangle(gpsStartCountW + gpsDiff * 2, gpsDiff, gpsDiff, gpsDiff), m_WindowNameGamePlaySettings);
-			m_BtnSpawnCountVal->GetBackgroundRef().Texture = m_TextureNameButtons;
-			m_BtnSpawnCountVal->SetText("X");
-			m_BtnSpawnCountVal->SetEnabled(false);
+		// | Starting units count | - | X |
+		m_BtnSpawnCountVal = g_GUI.AddButton( "GamePlaySettingStartCountVal", GUI::Rectangle( gpsStartCountW + gpsDiff * 2, gpsDiff, gpsDiff, gpsDiff ), m_WindowNameGamePlaySettings );
+		m_BtnSpawnCountVal->GetBackgroundRef().Texture = m_TextureNameButtons;
+		m_BtnSpawnCountVal->SetText( "X" );
+		m_BtnSpawnCountVal->SetEnabled( false );
 
-			// | Starting units count | - | X | + |
-			m_BtnSpawnCountInc = g_GUI.AddButton("GamePlaySettingStartCountModInc", GUI::Rectangle(gpsStartCountW + gpsDiff * 3, gpsDiff, gpsDiff, gpsDiff), m_WindowNameGamePlaySettings);
-			m_BtnSpawnCountInc->GetBackgroundRef().Texture = m_TextureNameButtons;
-			m_BtnSpawnCountInc->SetText("+");
-			m_BtnSpawnCountInc->SetClickScript(m_ScriptChangeGameSetting + "(1)");
-			
-		}
+		// | Starting units count | - | X | + |
+		m_BtnSpawnCountInc = g_GUI.AddButton( "GamePlaySettingStartCountModInc", GUI::Rectangle( gpsStartCountW + gpsDiff * 3, gpsDiff, gpsDiff, gpsDiff ), m_WindowNameGamePlaySettings );
+		m_BtnSpawnCountInc->GetBackgroundRef().Texture = m_TextureNameButtons;
+		m_BtnSpawnCountInc->SetText( "+" );
+		m_BtnSpawnCountInc->SetClickScript( m_ScriptChangeGameSetting + "(1)" );
 	}
 }
 
@@ -356,6 +356,8 @@ void SSGameLobby::Shutdown()
 	g_SubsystemManager.RestartSubsystem( "Chat" );
 	m_ColourEntries.clear();
 	g_SSMail.UnregisterSubscriber( this );
+
+	m_IsEditorLobby = false;
 }
 
 void SSGameLobby::UpdateUserLayer( const float deltaTime )
@@ -416,12 +418,12 @@ void SSGameLobby::UpdateUserLayer( const float deltaTime )
 			}
 			if (mail->CreatedFromPacket && mail->Type == MessageTypes::CHANGE_SPAWN_COUNT)
 			{
-				const SpawnCountChangeMessage* countChange = static_cast<const SpawnCountChangeMessage*>(mail);
+				const SpawnCountChangeMessage* countChange = static_cast<const SpawnCountChangeMessage*>( mail );
 				ChangeSpawnCount( countChange->Count );
 			}
 			if (mail->CreatedFromPacket && mail->Type == MessageTypes::RESERVE_AI_PLAYER)
 			{
-				const ReserveAIMessage* reserveAI = static_cast<const ReserveAIMessage*>(mail);
+				const ReserveAIMessage* reserveAI = static_cast<const ReserveAIMessage*>( mail );
 				ChangeReserveAI( reserveAI->PlayerID, reserveAI->On );
 			}
 		}
@@ -451,6 +453,12 @@ void SSGameLobby::UpdateUserLayer( const float deltaTime )
 			}
 			playerEntry.ReserveForAIBtn->SetVisible( g_NetworkInfo.AmIHost() );
 			playerEntry.ReserveForAIBtn->SetEnabled( g_NetworkInfo.AmIHost() );
+
+			if ( m_IsEditorLobby )
+			{
+				playerEntry.Team->SetVisible( false );
+				playerEntry.ReserveForAIBtn->SetVisible( false );
+			}
 		}
 		unsigned int nrOfActivePlayers = 0; // Includes AI
 		for ( auto& player : g_SSNetworkController.GetNetworkedPlayers() )
@@ -487,7 +495,8 @@ void SSGameLobby::UpdateUserLayer( const float deltaTime )
 				nrOfActivePlayers <= m_CurrentLevelNrOfSpawns // Don't start if there is not enough spawn points
 				&& nrOfReadyPlayers == g_SSNetworkController.GetNetworkedPlayers().size() // Only start if all players are ready
 				&& g_SSNetworkController.GetNetworkedPlayers().size() > 1 // Don't start alone
-				&& ArePlayersOnDifferentTeams( ) ); // Do not allow players to play on same team as it will result in instant victory
+				&& ArePlayersOnDifferentTeams( ) // Do not allow players to play on same team as it will result in instant victory 
+				|| m_IsEditorLobby ); 
 		m_ComboBoxSelectLevel->SetEnabled( m_ConnectionState == ConnectionState::Hosting ); // Only host can start
 
 		// Update spawn point colours
@@ -507,10 +516,13 @@ void SSGameLobby::UpdateUserLayer( const float deltaTime )
 		}
 
 		// Only host can change initial spawn count, can not be in startup because you can not be host there
-		m_BtnSpawnCountDec->SetEnabled(g_NetworkInfo.AmIHost());
-		m_BtnSpawnCountInc->SetEnabled(g_NetworkInfo.AmIHost());
+		if ( !m_IsEditorLobby )
+		{
+			m_BtnSpawnCountDec->SetEnabled( g_NetworkInfo.AmIHost() );
+			m_BtnSpawnCountInc->SetEnabled( g_NetworkInfo.AmIHost() );
 
-		m_BtnSpawnCountVal->SetText(rToString(m_NumberOfSpawns));
+			m_BtnSpawnCountVal->SetText( rToString( m_NumberOfSpawns ) );
+		}
 	}
 	if ( g_SSKeyBinding.ConsumeFromPressStack( ACTION::ACTION_GUI_ABORT ) )
 	{
@@ -526,6 +538,21 @@ void SSGameLobby::UpdateUserLayer( const float deltaTime )
 		{
 			BackFromLobby( );
 		}
+	}
+
+	if ( m_IsEditorLobby )
+	{
+		m_BtnSpawnCount->SetVisible( false );
+		m_BtnSpawnCountDec->SetVisible( false );
+		m_BtnSpawnCountInc->SetVisible( false );
+		m_BtnSpawnCountVal->SetVisible( false );
+	}
+	else if ( !m_IsEditorLobby )
+	{
+		m_BtnSpawnCount->SetVisible( true );
+		m_BtnSpawnCountDec->SetVisible( true );
+		m_BtnSpawnCountInc->SetVisible( true );
+		m_BtnSpawnCountVal->SetVisible( true );
 	}
 }
 
@@ -557,7 +584,7 @@ void SSGameLobby::SwitchToMultiplayer( )
 			g_GameData.AddPlayer( player.PlayerID, player.IsAI );
 		}
 	}
-	g_GameModeSelector.SwitchToGameMode( GameModeType::Multiplayer );
+	m_IsEditorLobby ? g_GameModeSelector.SwitchToGameMode( GameModeType::Editor ) : g_GameModeSelector.SwitchToGameMode( GameModeType::Multiplayer );
 }
 
 void SSGameLobby::ToggleReadyStatus( short playerID )
@@ -610,6 +637,11 @@ void SSGameLobby::SetLevel( const rString& levelName )
 	}
 }
 
+void SSGameLobby::SetEditorMode( bool editorMode )
+{
+	m_IsEditorLobby = editorMode;
+}
+
 const rString& SSGameLobby::GetSelectedLevel( ) const
 {
 	return m_ComboBoxSelectLevel->GetTextDefinitionRef().Text;
@@ -623,6 +655,9 @@ void SSGameLobby::OnNewClientConnect( short playerID )
 	TryChangeColour( 0, playerID, false );
 	TryChangeTeam( playerID, playerID, false ); // Run just in case it is decided to run limitation logic on teams
 	ChangeSpawnCount(m_NumberOfSpawns);
+
+	// Make sure it is the correct lobby type
+	m_IsEditorLobby ? g_PacketPump.Send( UserSignalMessage( UserSignalType::SET_EDITOR_LOBBY, g_NetworkInfo.GetNetworkID() ), playerID ) : g_PacketPump.Send( UserSignalMessage( UserSignalType::SET_MULTIPLAYER_LOBBY, g_NetworkInfo.GetNetworkID() ), playerID );  //TODODB: Get network id from player ID and use it instead of playerID
 
 	if ( !m_ConnectedPlayerEntries[ playerID ].IsAI ) // No need to send to AI players
 	{
@@ -649,6 +684,11 @@ void SSGameLobby::OnNewClientConnect( short playerID )
 			++i;
 		}
 	}
+}
+
+bool SSGameLobby::IsEditorLobby() const
+{
+	return m_IsEditorLobby;
 }
 
 void SSGameLobby::ConnectToGame( const rString& input )
@@ -813,8 +853,12 @@ void SSGameLobby::LoadLevels( )
 	FileUtility::GetListOfContentInDirectory( m_MapsFolder.c_str(), directoryContent );
 
 	for ( auto& entry : directoryContent )
-	{
-		m_ComboBoxSelectLevel->AddItem( entry );
+	{		
+		// Only show hidden entries if we're in editor mode
+		if (entry[0] != '_' || m_IsEditorLobby)
+		{
+			m_ComboBoxSelectLevel->AddItem(entry);
+		}
 	}
 
 	LoadLevelPreviews( directoryContent );
@@ -826,9 +870,11 @@ void SSGameLobby::LoadLevels( )
 
 void SSGameLobby::LoadLevelPreviews( const rVector<rString> levelNames )
 {
-	m_SpawnPoints.clear();
 	for ( auto& level : levelNames )
 	{
+		if (level[0] == '_' && !m_IsEditorLobby)
+			continue;
+
 		gfx::Texture* texture = tNew( gfx::Texture );
 		rString levelPath = m_MapsFolder + level + "/" + level + m_LevelPreviewFormat;
 		if ( texture->Init( levelPath.c_str(), gfx::TextureType::TEXTURE_2D ) )

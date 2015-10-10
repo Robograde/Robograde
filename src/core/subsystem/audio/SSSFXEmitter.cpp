@@ -1,5 +1,5 @@
 /**************************************************
-Copyright 2015 Jens Stjernkvist
+2015 Jens Stjernkvist
 ***************************************************/
 
 #include "SSSFXEmitter.h"
@@ -81,7 +81,7 @@ void SSSFXEmitter::UpdateUserLayer( const float deltaTime )
 			for(std::vector<SFXTrigger>::iterator it = sfxEmitter->SFXTriggers.begin(); it != sfxEmitter->SFXTriggers.end(); it++)
 			{
 				SFXTrigger* trigger = &(*it);
-	
+
 				UpdateTriggeredSFX(deltaTime, entityID, sfxEmitter, trigger);
 			}
 
@@ -107,50 +107,35 @@ SSSFXEmitter::SSSFXEmitter( )
 //\----------------------------------------------------------------------------+
 void SSSFXEmitter::HandleEvents(const int entityID, SFXEmitterComponent* &sfxEmitter)
 {
-	for(std::vector<SFXTriggerType>::iterator it = sfxEmitter->m_Events.begin(); it != sfxEmitter->m_Events.end(); it++)
+	for(std::vector<SFXTriggerType>::iterator it = sfxEmitter->Events.begin(); it != sfxEmitter->Events.end(); it++)
 	{
 		for(std::vector<SFXTrigger>::iterator jt = sfxEmitter->SFXTriggers.begin(); jt != sfxEmitter->SFXTriggers.end(); jt++)
 		{
 			if((*it) == (*jt).TriggerType)
 			{
 				SFXTrigger* trigger = &(*jt);
-				SFXTriggerActivation(entityID, sfxEmitter, trigger);
+				trigger->Triggered = true;
 			}
 		}
 	}
-	sfxEmitter->m_Events.clear();
+	sfxEmitter->Events.clear();
 }
 //+----------------------------------------------------------------------------+
-//|void AddSFXTrigger(SFXEmitterComponent* &sfxEmitter, const rString &name, SFXTriggerType triggerType, const unsigned int Loop, const float timeInterval, const float distanceMin, const float distanceMax)
+//|void AddSFXTrigger(SFXEmitterComponent* &sfxEmitter, const rString &name, const rString &path, SFXTriggerType triggerType,
+//|const bool Looping, const float timeInterval, const float distanceMin, const float distanceMax)
 //\----------------------------------------------------------------------------+
-void SSSFXEmitter::AddSFXTrigger(SFXEmitterComponent* &sfxEmitter, const rString &name, SFXTriggerType triggerType, const unsigned int Loop,
-	const float timeInterval, const float distanceMin, const float distanceMax)
+void SSSFXEmitter::AddSFXTrigger(SFXEmitterComponent* &sfxEmitter, const rString &name, const rString &path, SFXTriggerType triggerType,
+	const bool Looping, const float timeInterval, const float distanceMin, const float distanceMax)
 {
 	SFXTrigger trigger;
 	trigger.DistanceMin = distanceMin;
 	trigger.DistanceMax = distanceMax;
 	trigger.TimeInterval = timeInterval;
-	trigger.Loops = Loop;
+	trigger.Looping = Looping;
 	trigger.TriggerType = triggerType;
 	trigger.Name = name;
+	trigger.Path = path;
 	sfxEmitter->SFXTriggers.push_back(trigger);
-}
-//+----------------------------------------------------------------------------+
-//|bool ModifySFXTriggerName(SFXEmitterComponent* &sfxEmitter, const rString &toModify, const rString &newName)
-//\----------------------------------------------------------------------------+
-bool SSSFXEmitter::ModifySFXTriggerName(SFXEmitterComponent* &sfxEmitter, const rString &toModify, const rString &newName)
-{
-	for(std::vector<SFXTrigger>::iterator it = sfxEmitter->SFXTriggers.begin(); it != sfxEmitter->SFXTriggers.end(); it++)
-	{
-		if(toModify == (*it).Name)
-		{
-			SFXTrigger* trigger = &(*it);
-			trigger->Name = newName;
-			return true;
-		}
-	}
-
-	return false;
 }
 //+----------------------------------------------------------------------------+
 //|void RemoveSFXTrigger(SFXEmitterComponent* &sfxEmitter, const rString &name)
@@ -158,7 +143,7 @@ bool SSSFXEmitter::ModifySFXTriggerName(SFXEmitterComponent* &sfxEmitter, const 
 bool SSSFXEmitter::RemoveSFXTrigger(SFXEmitterComponent* &sfxEmitter, const rString &name)
 {
 	///Locate the trigger and remove it
-	for(std::vector<SFXTrigger>::iterator it = sfxEmitter->SFXTriggers.begin(); it != sfxEmitter->SFXTriggers.end(); it++)
+	for(rVector<SFXTrigger>::iterator it = sfxEmitter->SFXTriggers.begin(); it != sfxEmitter->SFXTriggers.end(); it++)
 	{
 		if(name == (*it).Name)
 		{
@@ -176,79 +161,12 @@ bool SSSFXEmitter::RemoveSFXTrigger(SFXEmitterComponent* &sfxEmitter, const rStr
 //\----------------------------------------------------------------------------+
 void SSSFXEmitter::AddEvent(SFXEmitterComponent* &sfxEmitter, const SFXTriggerType &type)
 {
-	sfxEmitter->m_Events.push_back(type);
-}
-//+----------------------------------------------------------------------------+
-//|void SFXTriggerActivation(const int entityID, SFXEmitterComponent* &sfxEmitter, SFXTrigger* &trigger)
-//|Check if the assigned SFX on the trigger should be activated
-//\----------------------------------------------------------------------------+
-void SSSFXEmitter::SFXTriggerActivation(const int entityID, SFXEmitterComponent* &sfxEmitter, SFXTrigger* &trigger )
-{
-	switch(trigger->TriggerType)
-	{
-		case SFXTriggerType::AT_CREATION:
-		{
-			//if(trigger->Loops == 0)
-			//{
-				trigger->Triggered = true;
-			//}
-			//else if(trigger->Triggered == false && trigger->LoopCount < trigger->Loops)
-			//{
-			//	trigger->Triggered = true;
-			//}
-			
-			break;
-		}
-
-		case SFXTriggerType::AT_DEATH:
-		{
-			trigger->Triggered = true;
-			break;
-		}
-
-		case SFXTriggerType::AT_MOVE_EAT:
-		{
-			trigger->Triggered = true;
-			break;
-		}
-
-		case SFXTriggerType::AT_MOVE_ATTACK:
-		{
-			break;
-		}
-
-		case SFXTriggerType::AT_TAKING_DAMAGE:
-		{
-
-			break;
-		}
-
-		case SFXTriggerType::WHILE_EATING:
-		{
-			trigger->Triggered = true;
-			break;
-		}
-
-		case SFXTriggerType::WHILE_MOVING:
-		{
-			trigger->Triggered = true;
-			break;
-		}
-
-		case SFXTriggerType::WHILE_ATTACKING:
-		{
-			trigger->Triggered = true;
-			break;
-		}
-
-		default:
-		break;
-	}
+	sfxEmitter->Events.push_back(type);
 }
 //+----------------------------------------------------------------------------+
 //|void UpdateTriggeredSFX(const float deltaTime, const int entityID, SFXEmitterComponent* &sfxEmitter, SFXTrigger* &trigger)
 //\----------------------------------------------------------------------------+
-void SSSFXEmitter::UpdateTriggeredSFX( const float deltaTime, int entityID, SFXEmitterComponent* &sfxEmitter, SFXTrigger* &trigger )
+void SSSFXEmitter::UpdateTriggeredSFX(const float deltaTime, int entityID, SFXEmitterComponent* &sfxEmitter, SFXTrigger* &trigger)
 {
 	if(trigger->Triggered)
 	{	
@@ -275,25 +193,28 @@ void SSSFXEmitter::UpdateTriggeredSFX( const float deltaTime, int entityID, SFXE
 //|void PlaySFXTrigger(SFXEmitterComponent* &sfxEmitter, SFXTrigger* &trigger)
 //|Play a SFX if the camera is within the distance
 //\----------------------------------------------------------------------------+
-void SSSFXEmitter::PlaySFXTrigger( SFXEmitterComponent* &sfxEmitter, SFXTrigger* &trigger )
+void SSSFXEmitter::PlaySFXTrigger(SFXEmitterComponent* &sfxEmitter, SFXTrigger* &trigger)
 {
 	///Only trigger sfx if its wihtin range to be heard
 	const float distanceMax = trigger->DistanceMax * trigger->DistanceMax;
 	const glm::vec3 diff = sfxEmitter->Position - g_SSCamera.GetActiveCamera()->GetPosition();
-	const float distanceCamera = diff.x * diff.x + diff.y * diff.y + diff.z + diff.z;
+	const float distanceCamera = diff.x * diff.x + diff.y * diff.y + diff.z * diff.z;
 	
 	if(distanceCamera > distanceMax)
 		return;
 
 	///Play sfx
 	SFXEvent event;
-	event.Name = trigger->Name;
+	event.Name = trigger->Path;
 	event.AtBeat = BeatType::NONE;
 	event.Info3D.Is3D = true;
 	event.Info3D.Position = sfxEmitter->Position;
 	event.Info3D.DistMin = trigger->DistanceMin;
 	event.Info3D.DistMax = trigger->DistanceMax;
 	trigger->SFXHandle = g_SSAudio.PostEventSFX(event);
-	trigger->Triggered = false;
-	trigger->LoopCount++;
+
+	if(!trigger->Looping)
+	{
+		trigger->Triggered = false;
+	}
 }

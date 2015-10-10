@@ -1,5 +1,5 @@
 /**************************************************
-Copyright 2015 Jens Stjernkvist
+2015 Jens Stjernkvist
 ***************************************************/
 
 #include "SSAudio.h"
@@ -261,11 +261,7 @@ const bool SSAudio::LoadSFX(const rString &path, const unsigned int maxInstanecs
 {
 	MemoryAllocator::ResetPos();
 
-	///Check if the sound needs to be loaded
-	///Check if sound already was created, otherwise create it
-	rUnorderedMap<rString, SFXBuffer>::iterator it = m_BufferSFX.find(path);
-
-	if(it == m_BufferSFX.end())
+	if(!GetIsLoaded(path))
 	{
 		///No mathing name found, create the sound
 		Audio::Sound* sfx = CreateSound(path);
@@ -455,23 +451,35 @@ bool SSAudio::SetSFXStop(SFX_HANDLE handle)
 	return false;
 }
 //+----------------------------------------------------------------------------+
+//|const bool GetIsLoaded(rString path)
+//\----------------------------------------------------------------------------+
+const bool SSAudio::GetIsLoaded(rString path)
+{
+	rUnorderedMap<rString, SFXBuffer>::iterator it = m_BufferSFX.find(path);
+
+	if(it == m_BufferSFX.end())
+		return false;
+
+	return true;
+}
+//+----------------------------------------------------------------------------+
 //|const float GetVolumeMaster(void)
 //\----------------------------------------------------------------------------+
-const float	SSAudio::GetVolumeMaster( void ) const
+const float	SSAudio::GetVolumeMaster(void) const
 {
 	return m_VolumeMaster;
 }
 //+----------------------------------------------------------------------------+
 //|const float GetVolumeMusic(void)
 //\----------------------------------------------------------------------------+
-const float	SSAudio::GetVolumeMusic( void ) const
+const float	SSAudio::GetVolumeMusic(void) const
 {
 	return m_VolumeMusic;
 }
 //+----------------------------------------------------------------------------+
 //|const float GetVolumeSFX(void)
 //\----------------------------------------------------------------------------+
-const float	SSAudio::GetVolumeSFX( void ) const
+const float	SSAudio::GetVolumeSFX(void) const
 {
 	return m_VolumeSFX;
 }
@@ -1291,7 +1299,6 @@ SSAudio::MusicChannel* SSAudio::GetMusic(const rString &name)
 //\----------------------------------------------------------------------------+
 SSAudio::SFXChannel* SSAudio::GetSFXChannel(SFX_HANDLE handle)
 {
-	///Check if the music has been loaded
 	rUnorderedMap<SFX_HANDLE, SFXChannel>::iterator it = m_SFXChannels.find(handle);
 
 	if(it == m_SFXChannels.end())

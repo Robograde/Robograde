@@ -1,5 +1,5 @@
 /**************************************************
-Copyright 2015 Johan Melin och Viktor Kelkannen
+2015 Johan Melin och Viktor Kelkannen
 ***************************************************/
 
 #include "SSKill.h"

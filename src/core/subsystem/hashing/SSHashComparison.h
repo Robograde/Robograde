@@ -1,5 +1,5 @@
 /**************************************************
-Copyright 2015 Daniel "MonzUn" Bengtsson
+2015 Daniel "MonzUn" Bengtsson
 ***************************************************/
 
 #pragma once
@@ -13,7 +13,6 @@ class SSHashComparison : public Subsystem
 public:
 	static SSHashComparison& GetInstance();
 
-	void Startup() override;
 	void UpdateSimLayer( const float timeStep ) override;
 	void Shutdown() override;
 

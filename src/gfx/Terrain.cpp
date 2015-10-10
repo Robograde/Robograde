@@ -22,10 +22,12 @@ gfx::Terrain::Terrain()
 gfx::Terrain::~Terrain()
 {
 	//Cleanup();
+	delete m_LoadedConfig;
 }
 
 bool gfx::Terrain::LoadFromFile( const rString& heightMapFilename, const Terrain::Config& config )
 {
+	m_LoadedConfig =  new Config(config);
 	// Save config data
 	m_ImageWidth =			config.ImageWidth;
 	m_ImageHeight =			config.ImageHeight;
@@ -68,6 +70,41 @@ bool gfx::Terrain::LoadFromFile( const rString& heightMapFilename, const Terrain
 	return true;
 }
 
+bool gfx::Terrain::LoadEmptyMap(const Terrain::Config& config)
+{	
+	// Register for logger
+	Logger::RegisterType("Graphics");
+
+	int imgChannels = 0;				// Soil wants an int* for channels
+	const int imgForceChannels = 1;		// But a regular int for force_channels...
+
+	// Make a lambda expression because I need this code twice (But really I just want to try lamdba expressions!)
+	auto printLoadError = [](const rString& filename)
+	{
+		rStringStream msg;
+		msg << "Failed to load file: " << filename << std::endl;
+		msg << "File: " << __FILE__ << std::endl << "Line: " << __LINE__ << std::endl;
+		Logger::Log(msg.str(), "Graphics", LogSeverity::ERROR_MSG);
+	};
+
+
+	m_HeightPoints = pNewArray(float, m_ImageWidth * m_ImageHeight);
+	float max = std::numeric_limits<float>::min();
+	float min = std::numeric_limits<float>::max();
+	for (int i = 0; i < m_ImageWidth * m_ImageHeight; i++)
+	{
+		m_HeightPoints[i] = 0.5f;
+	}
+	m_MaxHeight = 0.5f;
+	m_MinHeight = 0.5f;
+
+	// And into OpenGL
+	glGenTextures(1, &m_OGLHeightTexture);
+	glBindTexture(GL_TEXTURE_2D, m_OGLHeightTexture);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, m_ImageWidth, m_ImageHeight, 0, GL_RED, GL_FLOAT, m_HeightPoints);
+
+	return true;
+}
 
 float gfx::Terrain::GetHeightAtWorldCoord( const float x, const float z ) const
 {
@@ -296,7 +333,7 @@ std::pair<float, float> gfx::Terrain::WorldToImageCoordinates( const float& worl
 
 void gfx::Terrain::Draw(const glm::mat4& Lightmat, GLuint ShadowMap )
 {
-	glm::vec3 color = { 0.5f, 0.5f, 0.5f }; // r, g, b, strength
+	glm::vec3 color = { 1.0f, 0.5f, 0.5f }; // r, g, b, strength
 	glm::mat4 world = glm::translate( m_Position ) * glm::scale( glm::vec3( 1 ) );
 	ShaderProgram* prog = g_ShaderBank.GetProgramFromHandle(m_RenderProgram);
 	prog->Apply();
@@ -516,4 +553,74 @@ void gfx::Terrain::GenerateNormalMap(int resolution, glm::vec2 worldSize)
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	fDeleteArray(normalMap);
 
+}
+
+void gfx::Terrain::ChangeHeight(const glm::vec2 xz, const float dY)
+{
+	return; 
+	int xLow = (int)xz.x;
+	int xHigh = std::min(xLow + 1, m_ImageWidth);
+	int zLow = (int)xz.y;
+	int zHigh = std::min(zLow + 1, m_ImageHeight);
+	float diffX = xz.x - xLow;
+	float diffZ = xz.y - zLow;
+
+	int useX = diffX > 0.5f ? xHigh : xLow;
+	int useZ = diffZ > 0.5f ? zHigh : zLow;
+	int index = useX + useZ * m_ImageWidth;
+
+	m_HeightPoints[index] += dY;
+	gfx::Terrain::RebuildHeightMap();
+}
+
+
+void gfx::Terrain::RebuildHeightMap()
+{
+	glGenTextures(1, &m_OGLHeightTexture);
+	glBindTexture(GL_TEXTURE_2D, m_OGLHeightTexture);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, m_ImageWidth, m_ImageHeight, 0, GL_RED, GL_FLOAT, m_HeightPoints);
+	
+	glBindTexture(GL_TEXTURE_2D, m_OGLHeightTexture);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+}
+
+void gfx::Terrain::ApplyHeightbrush(const glm::vec2 center, const float strength, const float hardness, float radius)
+{
+	int x = (int)center.x;
+	int z = (int)center.y;
+
+	int lowestX = std::max((int)(center.x - radius), 0);
+	int highestX = std::min((int)(center.x + radius) + 1, m_ImageWidth - 1);
+
+	int lowestZ = std::max((int)(center.y - radius), 0);
+	int highestZ = std::min((int)(center.y + radius) + 1, m_ImageHeight - 1);
+
+	for (int thisX = lowestX; thisX < highestX; thisX++)
+	{
+		for (int thisZ = lowestZ; thisZ < highestZ; thisZ++)
+		{
+			glm::vec2 distanceVec = (glm::vec2(thisX, thisZ) - center);
+			float distance = sqrtf(distanceVec.x * distanceVec.x + distanceVec.y * distanceVec.y);
+			if (distance < radius)
+			{
+				float softness = 1.0f - hardness;
+				float distanceFactor = 1.0f - softness * distance / radius;
+				ChangeHeightAt(thisX, thisZ, distanceFactor * strength);
+			}
+		}
+
+	}
+
+	//ChangeHeightAt(x, lowestZ, strength);
+	//ChangeHeightAt(x, highestZ, strength);
+	RebuildHeightMap();
+}
+
+void gfx::Terrain::ChangeHeightAt(const int x, const int z, const float dy)
+{
+	int index = x + z * m_ImageWidth;
+	m_HeightPoints[index] += dy;
 }

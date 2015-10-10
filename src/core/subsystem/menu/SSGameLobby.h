@@ -1,5 +1,5 @@
 /**************************************************
-Copyright 2015 Johan Melin
+2015 Johan Melin
 ***************************************************/
 
 #pragma once
@@ -28,9 +28,12 @@ public:
 
 	bool			IsPlayerReady( short playerID );
 	void 			SetLevel( const rString& levelName );
+	void			SetEditorMode( bool editorMode );
 
 	const rString& 	GetSelectedLevel( ) const;
 	void 			OnNewClientConnect( short playerID );
+
+	bool			IsEditorLobby() const;
 
 private:
 	enum class ConnectionState
@@ -150,8 +153,8 @@ private:
 	const rString 		m_ScriptNameKick		  		= "GE_Kick";
 	const int 			m_HeightPlayerEntry 			= 32;
 	const int 			m_WidthName						= 100;
-	const int 			m_WidthColour					= 100;
-	const int 			m_WidthTeam						= 100;
+	const int 			m_WidthColour					= 128;
+	const int 			m_WidthTeam						= 128;
 	const int 			m_WidthReady					= 32;
 	const int 			m_WidthKick						= 32;
 	const int 			m_WidthReserveForAI				= 32;
@@ -187,7 +190,9 @@ private:
 	const int 			m_MaxNrOfSpawnPoints			= MAX_PLAYERS;
 	int 				m_SizeLevelWindow				= 0;
 
-	int					m_NumberOfSpawns = 8;
+	int					m_NumberOfSpawns				= 8;
+
+	bool				m_IsEditorLobby					= false;
 
 	struct SpawnPointButton
 	{

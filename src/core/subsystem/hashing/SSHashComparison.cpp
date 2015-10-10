@@ -1,5 +1,5 @@
 /**************************************************
-Copyright 2015 Daniel "MonzUn" Bengtsson
+2015 Daniel "MonzUn" Bengtsson
 ***************************************************/
 
 #include "SSHashComparison.h"
@@ -9,6 +9,7 @@ Copyright 2015 Daniel "MonzUn" Bengtsson
 #include "SSHashGenerator.h"
 #include "../replay/SSReplayPlayer.h"
 #include "../gui/SSGUIInfo.h"
+#include "../../subsystem/network/SSNetworkController.h"
 #include "../../datadriven/DenseComponentCollection.h"
 #include "../../component/PlacementComponent.h"
 #include "../../datadriven/EntityManager.h"
@@ -22,11 +23,6 @@ SSHashComparison& SSHashComparison::GetInstance()
 	return instance;
 }
 
-void SSHashComparison::Startup()
-{
-
-}
-
 void SSHashComparison::UpdateSimLayer( const float timeStep )
 {
 	if ( !m_OutOfSync )
@@ -37,8 +33,8 @@ void SSHashComparison::UpdateSimLayer( const float timeStep )
 		unsigned int currentPositionHash = g_SSHashGenerator.GetHash();
 		if ( ( g_GameModeSelector.GetCurrentGameMode().IsNetworked && !g_NetworkInfo.AmIHost() ) )
 		{
-			hashToCompare			= g_NetworkInfo.PopHostHash();
-			randomCountToCompare	= g_NetworkInfo.PopHostRandomCount();
+			hashToCompare			= g_SSNetworkController.PopHostHash();
+			randomCountToCompare	= g_SSNetworkController.PopHostRandomCount();
 		}
 		else if ( g_GameModeSelector.GetCurrentGameMode().Type == GameModeType::Replay )
 		{

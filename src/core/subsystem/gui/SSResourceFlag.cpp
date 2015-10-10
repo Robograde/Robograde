@@ -1,17 +1,18 @@
 /**************************************************
-Copyright 2015 Ola Enberg
+2015 Ola Enberg
 ***************************************************/
 
 #include "SSResourceFlag.h"
 
 #include <input/Input.h>
 #include <gfx/GraphicsEngine.h>
-#include <messaging/GameMessages.h>
 #include "../gamelogic/SSResourceManager.h"
 #include "../utility/SSMail.h"
 #include "../../ai/Squad.h"
+#include "../../input/GameMessages.h"
 #include "../../utility/GameData.h"
 #include "../../utility/PlayerData.h"
+#include "../input/SSPicking.h"
 
 SSResourceFlag& SSResourceFlag::GetInstance( )
 {

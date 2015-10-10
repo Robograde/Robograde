@@ -95,7 +95,7 @@ namespace GUI
 	
 	glm::ivec2 Graphics2D::GetTextSize( TextDefinition* textDefinition )
 	{
-		return m_TextRenderer.GetTextSize( textDefinition->Text.c_str(), textDefinition->FontID );
+		return m_TextRenderer.GetTextSize( textDefinition->Text, textDefinition->FontID );
 	}
 	
 }

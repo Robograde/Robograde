@@ -1,18 +1,18 @@
 /**************************************************
-Copyright 2015 Isak Almgren
+2015 Isak Almgren
 ***************************************************/
 
 #include "SSSquadControlGUI.h"
 #include "../../utility/PlayerData.h"
 #include "../../component/UpgradeComponent.h"
 #include "../../datadriven/ComponentHelper.h"
+#include "../../input/GameMessages.h"
 #include "../gamelogic/SSAI.h"
 #include "../gamelogic/SSUpgrades.h"
 
 #include "../../utility/GameData.h"
 
 #include "../gamelogic/SSAI.h"
-#include <messaging/GameMessages.h>
 #include <input/Input.h>
 #include "../input/SSKeyBinding.h"
 #include "../input/SSButtonInput.h"

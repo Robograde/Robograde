@@ -32,6 +32,7 @@ namespace GUI
 		GUI_API TextDefinition&	GetTextDefinitionRef();
 		GUI_API SpriteDefinition& GetBackgroundRef();
 		GUI_API SpriteDefinition& GetImageRef();
+		GUI_API glm::vec4&		GetColour();
 		
 		//Setters
 		GUI_API void			SetText( const rString& text );

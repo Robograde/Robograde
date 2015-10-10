@@ -1,5 +1,5 @@
 /**************************************************
-Zlib Copyright <2015> <Daniel "MonzUn" Bengtsson>
+Zlib Copyright 2015 Daniel "MonzUn" Bengtsson
 ***************************************************/
 
 #pragma once
@@ -7,6 +7,7 @@ Zlib Copyright <2015> <Daniel "MonzUn" Bengtsson>
 #include "TCPListener.h"
 #include "Pinger.h"
 #include "NetworkLibraryDefine.h"
+#include "NetworkMessages.h"
 
 #define g_NetworkEngine NetworkEngine::GetInstance()
 
@@ -67,13 +68,17 @@ public:
 	// Unregisters a previously registered callback function
 	NETWORK_API bool						UnRegisterCallback( int callbackHandle );
 
+	// Registers a game specific message so that the engine can identify it when it arrives
+	NETWORK_API bool						RegisterMessage( const Message* gameMessage );
+
+	// This is an ugly hack that stops the network engine from using certain networkIDs. (Required by the game lobby for AI players) 
 	NETWORK_API bool						ReserveSlot( short index );
 	NETWORK_API bool						UnreserveSlot( short index );
 
-	// Gets a received game specific packet from the internal packet queue and pops it from the queue
-	NETWORK_API bool						GetSimulationPacket( Message*& outPacket );
-	NETWORK_API bool						GetUserPacket( Message*& outPacket );
+	// Gets a received game specific packet from the internal packet queue and pops it
+	NETWORK_API bool						GetPacket( Message*& outPacket );
 
+	// Sets the maximum number of allowed clients
 	NETWORK_API void						SetMaxClientCount( short maxClients );
 
 	// Returns true if the network engine is initialized
@@ -100,20 +105,24 @@ private:
 	~NetworkEngine( );
 	NetworkEngine& operator=(const NetworkEngine& rhs);
 
-	void										Update						();
-	void										CheckListener				();
-	void										HandleConnectionRequests	();
-	void										HandleDisconnectionRequests	();
-	void										MeasureLatency				();
-	void										HandleUnverifiedSockets		();
-	void										HandleTraffic				();
-	void										Disconnect					( const short networkIDToDisconnect );
-	void										DisconnectAllUnverified		();
-	short										FindEmptySocketSlot			();
-	void										CallCallbacks( NetworkCallbackEvent callbackEvent, const void* const arg ) const;
-	
+	void	Update						();
+	void	CheckListener				();
+	void	HandleConnectionRequests	();
+	void	HandleDisconnectionRequests	();
+	void	HandleMessageRegistrations	();
+	void	MeasureLatency				();
+	void	HandleUnverifiedSockets		();
+	void	HandleTraffic				();
+	void	Disconnect					( const short networkIDToDisconnect );
+	void	DisconnectAllUnverified		();
+	short	FindEmptySocketSlot			();
+	void	CallCallbacks( NetworkCallbackEvent callbackEvent, const void* const arg ) const;
+	void	RegisterNetworkMessages		();
 	
 	rMap<int, std::function<void( const void* const )>> m_Callbacks[static_cast<int>( NetworkCallbackEvent::NUMBER_OF_NETWORK_CALLBACK_EVENTS )];
+	rMap<char, NetworkMessage*> m_NetworkMessages;
+	rMap<MESSAGE_TYPE_ENUM_UNDELYING_TYPE, const Message*>							m_GameMessages;
+	LocklessQueue<const Message*>						m_GameMessagesToRegister;
 								
 	TCPListener									m_Listener;
 	rMap<short, TCPSocket*>						m_Sockets;
@@ -122,9 +131,9 @@ private:
 	rMap<short, Pinger>							m_PingTargets;
 	LocklessQueue<IPv4Address*>					m_ConnectionRequests;
 	LocklessQueue<short>						m_DisconnectionRequests;
-	LocklessQueue<Message*>						m_GameSimulationPackets;
-	LocklessQueue<Message*>						m_GameUserPackets;
+	LocklessQueue<Message*>						m_GamePackets;
 	InternalPacketQueue							m_InternalPacketQueue;
+
 	GameTimer									m_PingTimer;
 	Uint64										m_AccumulatedTimerTicks;
 									

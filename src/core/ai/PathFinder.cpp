@@ -1,5 +1,5 @@
 /**************************************************
-Viktor Kelkkanen & Ola Enberg
+2015 Viktor Kelkkanen & Ola Enberg
 ***************************************************/
 
 #include "PathFinder.h"

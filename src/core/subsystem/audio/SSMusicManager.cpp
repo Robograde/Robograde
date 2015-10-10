@@ -1,16 +1,16 @@
 /**************************************************
-Copyright 2015 Jens Stjernkvist
+2015 Jens Stjernkvist
 ***************************************************/
 
 #include "SSMusicManager.h"
 
 #include <utility/Logger.h>
 #include <utility/Randomizer.h>
-#include <messaging/GameMessages.h>
 
 #include "SSAudio.h"
 #include "../utility/SSMail.h"
 #include "../../../script/ScriptEngine.h"
+#include "../../input/GameMessages.h"
 #include "../../utility/PlayerData.h"
 #include "../../ai/Squad.h"
 #include "../../ai/AIMessages.h"

@@ -20,7 +20,7 @@ namespace GUI
 	{
 		m_BoundingBox		= boundingBox;
 		
-		m_Background		= SpriteDefinition( "", boundingBox.X, boundingBox.Y + 8, boundingBox.Width, boundingBox.Height - 16, glm::vec4( 0.9f, 0.9f, 1.0f, 1.0f ) );
+		m_Background		= SpriteDefinition( "", boundingBox.X, boundingBox.Y + (boundingBox.Height / 4), boundingBox.Width, boundingBox.Height / 2, glm::vec4( 0.9f, 0.9f, 1.0f, 1.0f ) );
 
 		m_Slider			= SpriteDefinition( "", boundingBox.X, boundingBox.Y, boundingBox.Height, boundingBox.Height, glm::vec4( 0.8f, 0.8f, 1.0f, 0.95f ) );
 		
@@ -66,8 +66,22 @@ namespace GUI
 				g_Input->ConsumeMouseButtons();
 			
 		}
-		if( m_BoundingBox.Intersects( g_Input->GetMousePosX(), g_Input->GetMousePosY() ) )
+		 else if( m_BoundingBox.Intersects( g_Input->GetMousePosX(), g_Input->GetMousePosY() ) )
 		{
+			if( g_Input->MouseUpDown( MOUSE_BUTTON_LEFT ) )
+			{
+				m_Dragging = true;
+				m_Slider.Position.x = g_Input->GetMousePosX() - parentPos.x - ( m_Slider.Width / 2 );
+				m_SliderBounds.X = m_Slider.Position.x;
+				m_ClickPos = glm::ivec2( g_Input->GetMousePosX() - m_SliderBounds.X , g_Input->GetMousePosY() - m_SliderBounds.Y );
+
+
+				g_Input->ConsumeMouseButtons();
+			}
+			if( g_Input->MouseDownUp( MOUSE_BUTTON_LEFT ) )
+				g_Input->ConsumeMouseButtons();
+			
+
 			int scroll = g_Input->GetScrollY();
 			
 			if( scroll != 0 )

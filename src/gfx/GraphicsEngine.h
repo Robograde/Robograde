@@ -40,8 +40,8 @@ namespace gfx
 	public:
 		GFX_API ~GraphicsEngine();
 		GFX_API static GraphicsEngine& GetInstance();
-		GFX_API virtual void InitializeWindow( int width, int height, int msaa, bool fullscreen, bool vsync );
-		GFX_API void ReinitializeWindow( int width, int height, int msaa, bool fullscreen, bool vsync );
+		GFX_API virtual void InitializeWindow(int width, int height, int msaa, bool fullscreen, bool vsync, bool useFogOfWar);
+		GFX_API void ReinitializeWindow(int width, int height, int msaa, bool fullscreen, bool vsync, bool useFogOfWar);
 		GFX_API virtual void Swap();
 		GFX_API virtual void Draw();
 		GFX_API virtual SDL_Window* GetWindow();

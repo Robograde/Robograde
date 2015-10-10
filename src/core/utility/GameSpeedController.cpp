@@ -1,5 +1,5 @@
 /**************************************************
-Copyright 2015 Daniel "MonzUn" Bengtsson
+2015 Daniel "MonzUn" Bengtsson
 ***************************************************/
 
 #include "GameSpeedController.h"
@@ -8,13 +8,14 @@ Copyright 2015 Daniel "MonzUn" Bengtsson
 #include <utility/Logger.h>
 #include <input/Input.h>
 #include <input/KeyBindings.h>
-#include <messaging/GameMessages.h>
+#include "../input/GameMessages.h"
 #include "GameData.h"
 #include "GameModeSelector.h"
 #include "../subsystem/utility/SSMail.h"
 #include "../subsystem/menu/SSInGameMenu.h"
 #include "../utility/PlayerData.h"
 #include "../subsystem/input/SSKeyBinding.h"
+#include "../subsystem/network/SSNetworkController.h"
 
 #define AUTO_DEBUG_SPEED_MULTIPLIER 3
 
@@ -89,7 +90,7 @@ bool GameSpeedController::ShouldUpdateSimLayer( const GameTimer::DeltaTimeInfo& 
 					toReturn = true;
 				}
 			}
-			else if ( g_NetworkInfo.DecrementFramesToRun() ) // If host say we can run a frame  
+			else if ( g_SSNetworkController.DecrementFramesToRun() ) // If host say we can run a frame  
 				toReturn = true;
 		}
 	}

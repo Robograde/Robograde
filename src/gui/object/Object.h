@@ -44,7 +44,7 @@ namespace GUI
 		virtual void				OnFocus();
 		
 		rString						GetName() { return rString( m_Name.c_str() ); }
-		const Rectangle& 			GetBoundingBoxRef() { return m_BoundingBox; }
+		Rectangle& 					GetBoundingBoxRef() { return m_BoundingBox; }
 		bool						GetBringToFront();
 		GUI_API void				BringToFront();
 		
@@ -55,6 +55,9 @@ namespace GUI
 		void						SetCulled( bool culled ){ m_Culled = culled; }
 		bool						GetCulled() { return m_Culled; }
 		
+		GUI_API void				SetToolTipText( const rString& text );
+		GUI_API void				SetToolTipDelay( float delay );
+		
 		//Used to find Window Objects
 		bool						IsWindow() { return m_IsWindow; } 
 		
@@ -64,6 +67,9 @@ namespace GUI
 	protected:
 		rString						m_Name;
 		rString						m_Parent;
+		rString						m_ToolTipText;
+		float						m_ToolTipTimer;
+		float						m_ToolTipDelay;
 		Rectangle 					m_BoundingBox;
 		
 		bool						m_Focused = false;

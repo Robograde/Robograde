@@ -127,7 +127,7 @@ void ScriptEngine::Call( const char* functionName, std::initializer_list<ScriptA
 				break;
 
 			case ScriptPrimitive::Uint:
-				lua_pushinteger( m_Lua, arg.asUint );
+				lua_pushunsigned( m_Lua, arg.asUint );
 				break;
 
 			case ScriptPrimitive::Bool:
@@ -331,14 +331,14 @@ int ScriptEngine::GetInt( const char* name )
 #pragma region UINT
 void ScriptEngine::PushUint( unsigned int value )
 {
-	lua_pushinteger( m_Lua, value );
+	lua_pushunsigned( m_Lua, value );
 }
 
 unsigned int ScriptEngine::PopUint( )
 {
 	// TODODP: Check if integer instead of number ?
 	int isNum = lua_isnumber( m_Lua, STACK_TOP );
-	unsigned int u = (unsigned int) lua_tointeger( m_Lua, STACK_TOP );
+	unsigned int u = (unsigned int) lua_tounsigned( m_Lua, STACK_TOP );
 	if ( !isNum )
 		Error( "Popping non-number value in PopUint( )." );
 	lua_pop( m_Lua, 1 );

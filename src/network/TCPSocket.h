@@ -6,14 +6,15 @@ Zlib Copyright <2015> <Daniel "MonzUn" Bengtsson>
 #include <messaging/Message.h>
 #include "IPv4Adress.h"
 #include "NetworkUtility.h"
+#include "NetworkMessages.h"
 
 using namespace NetworkUtility;
 class TCPSocket
 {
 public:
-	TCPSocket( );
+	TCPSocket();
 	TCPSocket( Socket socket, IPv4Address destination );
-	~TCPSocket( );
+	~TCPSocket();
 
 	bool				Connect( const rString& adress, const unsigned short port );
 	bool				Connect( const IPv4Address& destination );
@@ -24,14 +25,17 @@ public:
 	Message*			Receive();
 
 	bool				SetTimeout( unsigned int seconds );
-	
+	void				SetNetworkMessagesReference( rMap<char, NetworkMessage*>* networkMessagesReference );
+	void				SetGameMessagesReference( rMap<MESSAGE_TYPE_ENUM_UNDELYING_TYPE, const Message*>* gameMessagesReference );
+
 	bool				IsConnected() const;
 	const IPv4Address&	GetDestination() const;
+
 
 private:
 	bool				SetBlockingMode( bool shouldBlock );
 	bool				SetNoDelay();
-	
+
 	Socket				m_Socket;
 	IPv4Address			m_Destination;
 
@@ -42,4 +46,7 @@ private:
 	int					m_ExpectedPayloadBytes;		// How many more bytes of payload we expect for the current packet
 	Byte*				m_PayloadData;				// Dynamic buffer for packet payload
 	Byte*				m_Pos;						// Pointer to where the next recv should write to
+
+	rMap<char, NetworkMessage*>*	m_NetworkMessagesReference	= nullptr;
+	rMap<MESSAGE_TYPE_ENUM_UNDELYING_TYPE, const Message*>*		m_GameMessagesReference		= nullptr;
 };

@@ -1,5 +1,5 @@
 /**************************************************
-Copyright 2015 Mattias Wilelmsen
+2015 Mattias Wilelmsen
 ***************************************************/
 
 #include "SSAnimation.h"
