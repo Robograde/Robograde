@@ -1,0 +1,103 @@
+# Visual studio project files
+*.sln
+*.vcxproj
+*.vcxproj.filters
+*.vcxproj.user
+*.opensdf
+*.sdf
+*.suo
+
+# Other visual studio files
+*.pdb
+*.ilk
+*.tlog
+*.log
+
+# Windows thumbnails
+Thumbs.db
+
+#Qt Creator project files ignores
+*.cbp
+*.user
+*.autosave
+
+# Folders
+build/
+dump/
+/replay/
+
+# Compiled
+bin/linux/*
+bin/windows/Debug/*.exe
+bin/windows/Release/*.exe
+bin/windows/Debug/Utility.dll
+bin/windows/Release/Utility.dll
+src/.ycm_extra_conf.pyc
+lib/gtest/libgtest.so
+lib/gtest/libgtest_main.so
+
+#binary shaders
+shader/*.glsl.bin
+shader/*/*.glsl.bin
+
+# Installed
+install/*
+Robograde/*
+
+# CMake files
+lib/gtest/cmake_install.cmake
+lib/gtest/CTestTestfile.cmake
+*CMakeCache.txt
+*CMakeFiles
+*Makefile
+*Testfile.cmake
+cmake_install.cmake
+install_manifest.txt
+
+# Other
+.directory
+
+# Config files
+/cfg/*.cfg
+
+# Temporary files
+*.swp
+*.swo
+
+*test.xml
+
+*.*~
+*.kdev4
+*.kdev_include_paths
+*.swp
+*.kate-swp
+*.ninja*
+
+bin/windows/Debug/*
+bin/windows/Release/*
+
+#windows dlls that should be included (Anti-ignores :)
+!/bin/windows/*/Assimp64.dll
+!/bin/windows/*/freetype252.dll
+!/bin/windows/*/glew32.dll
+!/bin/windows/*/SDL2.dll
+!/bin/windows/*/libogg.dll
+!/bin/windows/*/libvorbis.dll
+!/bin/windows/*/libvorbisfile.dll
+!/bin/windows/*/lua52.dll
+#Add more dlls above that you want to include
+
+#gtest
+lib/gtest/gtest.dir/
+lib/gtest/gtest_main.dir/
+lib/gtest/Debug/*
+lib/gtest/Release/*
+
+# Utilities
+!/bin/linux/Debug/valgrind.suppress
+!/bin/linux/Debug/leakcheck.sh
+
+# User specific ignores
+proj/toiconfigpatch.zsh
+asset/ai/bestWeights.txt
+
