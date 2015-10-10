@@ -1,0 +1,4 @@
+../../src/profiler/Profiler.cpp:13:	std::map<std::string, ProfileEntry>		ProfileEntries; // Cannot be rMaps since memory allocator is initialized after logger since logger is a namespace only // TODODP: See if anything can be done about this
+../../src/utility/Logger.cpp:10:	std::map<std::string, LogType> LogTypes; // Cannot be rMaps since memory allocator is initialized after logger since logger is a namespace only // TODODP: See if anything can be done about this
+../../src/utility/Config.cpp:184:			// TODODP: h4x!!! Make prettier with a proper new method or macro!!
+../../src/script/ScriptEngine.cpp:333:	// TODODP: Check if integer instead of number ?

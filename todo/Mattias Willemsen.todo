@@ -1,0 +1,3 @@
+../../src/gfx/Terrain.cpp:69:// TODOMW: Take floats as input/output and interpolate between different values in the height map
+../../src/gfx/Terrain.h:19:// TODOMW : Some units are placed at weird heights - fix it!
+../../src/gfx/Terrain.h:20:// TODOMW : When units are between heightmap coordinates, interpolate.

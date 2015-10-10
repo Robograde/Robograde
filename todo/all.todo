@@ -1,0 +1,85 @@
+../../src/gfx/ObjectImporter.h:59:	//TODORP remove this temporary structure and move to another header
+../../src/gfx/ObjectImporter.h:68:	//TODORP remove this temporary structure and move to another header
+../../src/gfx/ObjectImporter.h:74:	//TODORP remove this temporary structure and move to another header
+../../src/gfx/ObjectImporter.h:80:	//TODORP remove this temporary structure and move to another header
+../../src/gfx/Terrain.cpp:69:// TODOMW: Take floats as input/output and interpolate between different values in the height map
+../../src/gfx/Terrain.cpp:245:	prog->SetUniformVec3( "eyepos", campos ); //TODOHJ: HAX!!!!*Throws monitor*
+../../src/gfx/GraphicsEngine.cpp:131:	//TODOHJ: handle msaa sometime
+../../src/gfx/Shader/ShaderProgram.cpp:99:                // TODO assert or fancy recovery when recompiling in run-time? assert for now.
+../../src/gfx/Shader/ShaderBank.cpp:121:    //TODOHJ: Clear
+../../src/gfx/Shader/BitFlagToDefine.h:9:		//TODOHJ: Fill out when a shader exist
+../../src/gfx/MaterialBank.cpp:10:	//TODOHJ: Delete materials
+../../src/gfx/ModelBank.cpp:46:	//TODO: Delete model data ,vertices and indices.
+../../src/gfx/Terrain.h:19:// TODOMW : Some units are placed at weird heights - fix it!
+../../src/gfx/Terrain.h:20:// TODOMW : When units are between heightmap coordinates, interpolate.
+../../src/profiler/Profiler.cpp:13:	std::map<std::string, ProfileEntry>		ProfileEntries; // Cannot be rMaps since memory allocator is initialized after logger since logger is a namespace only // TODODP: See if anything can be done about this
+../../src/profiler/ProfileMacro.h:4:	#define REKTOUT_PROFILING // TODO remove when people know how to send define to compiler
+../../src/gui/object/Window.h:6:	//TODOIA: Should this be here?
+../../src/gui/object/TextBox.h:8:	//TODOIA: Possibly make this console specific instead
+../../src/gui/graphics2D/tempGfxUtility/Texture.h:6://TODOIA Change this when Henrik has created new stuff, I won't touch any of this code.
+../../src/gui/graphics2D/tempGfxUtility/Texture.cpp:25:			//TODOi Fix later
+../../src/gui/graphics2D/tempGfxUtility/Texture.cpp:47:			//TODOi remove later
+../../src/gui/graphics2D/TextRenderer.cpp:200:		//TODOIA: Fix this later, is not right at all
+../../src/gui/GUIEngine.cpp:57:		//TODOIA: Will not work when something has more than one parent, fix.
+../../src/core/datadriven/EntityManager.cpp:52:	// TODOJM: Dynamically expand? Discuss this when relevant limits can be tested.
+../../src/core/subsystem/SubsystemCollection.cpp:3:#include <utility/messaging/MessagePump.h> //TODODB: Remove when we have decided where to put FrameCount
+../../src/core/subsystem/SSInput.cpp:44:		if ( g_Input->KeyUpDown( x.first ) ) // Check if the key has been triggered // TODODB: Add support for other checks than keyUpDown
+../../src/core/subsystem/SSInput.cpp:74:						Logger::GetStream( ) << "Client " << x.first << ": " << x.second << "ms" << "\n"; // TODODB: Output with nicer decimals
+../../src/core/subsystem/SSAudio.cpp:602:		//music.Loop = looping;	///TODOJS: Fix so the music actually may be controlled if it should loop or not. Does not work right now
+../../src/core/subsystem/SSAudio.cpp:915:				music = GetMusic(event->Name);///TODOJS: Make this less h4xx...Music created above is searched for again.
+../../src/core/subsystem/SSAudio.cpp:1131:		fadeTo = GetMusic(to);		//TODOJS: Make this less h4xx...Music created above is searched for again.
+../../src/core/subsystem/SSAI.cpp:368:///TODOJS: remove when squad is an entity
+../../src/core/subsystem/SSInput.h:16:	PrintHostLatencies, //TODODB: Make this a console command instead
+../../src/core/subsystem/SSInput.h:51:	void PrintKeys( ); // TODODB: Use the inputMap to print the currently mapped keys in a more automated manner
+../../src/core/subsystem/SSAudio.h:130:	float	Volume,				///The modifyable volume used by the fading ///TODOJS: Make possible to modify volume externally 
+../../src/core/subsystem/SSConsole.cpp:74:		//TODOIA: Fairly temporary input
+../../src/core/subsystem/SSConsole.cpp:75:		if( m_TimeSinceLastMove >= 0.1f * speedMod ) //TODOIA Change this when better input locking is done
+../../src/core/subsystem/SSConsole.cpp:119:				g_SSInput.Pause();//TODOIA: Temp fix
+../../src/core/subsystem/SSConsole.cpp:130:				g_SSInput.Unpause();//TODOIA: Temp fix
+../../src/core/subsystem/SSConsole.cpp:168:		g_SSInput.Unpause();//TODOIA: Temp fix
+../../src/core/subsystem/Subsystem.cpp:66:	//TODOJM: Use something else so I can turn it off
+../../src/core/ai/Squad.cpp:959:///TODOJS: remove when squad is an entity
+../../src/core/ai/AIPlayer.cpp:33:					int x = rand() % FIELD_WIDTH; // TODOVK: Do not use randin simulation logic
+../../src/core/component/WeaponComponent.h:25:		//TODO: move to scripts
+../../src/core/component/SFXEmitterComponent.h:10://----|Describes the effect that will trigger the SFX											TODOJS: Add all the trigger event types when the information needed is available
+../../src/core/Engine.cpp:10:#include <glm/gtx/transform.hpp> //TODOHJ: Remove
+../../src/core/Engine.cpp:20:#include "subsystem/SSRender.h" // TODOJM: Remove when factory created
+../../src/core/Engine.cpp:39:#include "LocalPlayer.h" //TODODB: Remove when network can be started through lobby
+../../src/core/Engine.cpp:51:	// TODO: Read config somewhere and send it to graphics.
+../../src/core/Engine.cpp:113:	// TODO: Read this from config
+../../src/core/Engine.cpp:119:	if ( g_NetworkInfo.IsNetworkOn( ) ) // TODODB: Remove when network can be started trough lobby
+../../src/core/Engine.cpp:155:	// TODO: Add new component types here
+../../src/core/Engine.cpp:180:	g_SSAI.				SetUpdateOrderPriority( 50U  );	// TODOVK: Why should this be updated here?
+../../src/core/Engine.cpp:212:	// TODOJS: Move this when relevant place exists. Only for testing / demo
+../../src/core/Engine.cpp:227:	///TODOJS: Insert support for loading these when a scene/level is created(used in Game, Mainmenu etc)
+../../src/core/Engine.cpp:302:	// TODO: Add game timer
+../../src/core/Engine.cpp:426:	//TODOIA Change this when resolution isn't static
+../../src/core/Engine.cpp:432:// TODOJS: Remove when not temporary
+../../src/core/Engine.h:7:#include "../audio/MusicManager.h"	//TODOJS: Remove when scenes are implemented
+../../src/core/Engine.h:22:	// TODOJS: Remove when not temporary
+../../src/core/Engine.h:28:	// TODOIA: Decide how gui engine should receive resolution
+../../src/core/Engine.h:32: 	gfx::ModelHandle		m_TempModel; //TODOHJ: Remove when proper subsystems are up
+../../src/core/Engine.h:33:// 	gfx::ModelHandle		m_TempModel2; //TODOHJ: Remove when proper subsystems are up
+../../src/core/Engine.h:34:	gfx::PointLight*		m_PLight; //TODOHJ: Remove when testing is done
+../../src/core/Engine.h:35:	MusicManager			m_TempMusicManager; ///TODOJS: remove later
+../../src/utility/Logger.h:34:		//TODOJM can this be set to 0xff?
+../../src/utility/Config.h:11:	// TODO maybe move to other file?
+../../src/utility/Logger.cpp:10:	std::map<std::string, LogType> LogTypes; // Cannot be rMaps since memory allocator is initialized after logger since logger is a namespace only // TODODP: See if anything can be done about this
+../../src/utility/Logger.cpp:36:	// TODOJM should RegisterInterestFromFile be run here?
+../../src/utility/Logger.cpp:224:		// TODOJM, Implement
+../../src/utility/Logger.cpp:226:	// TODOJM dicuss good way to make threadsafe cout printing
+../../src/utility/messaging/Subscriber.h:15:	rVector<MessageTypes::MessageType>	m_Interests;	// TODODB: Should I handle this as bitmask instead?
+../../src/utility/messaging/MessagePump.h:11:class MessagePump // TODODB: Document the hell out of this class
+../../src/utility/messaging/MessagePump.h:34:	std::mutex						m_MessageQueueLock; // TODODB: Make this lock only the relevant queue or create a multiproducerqueue
+../../src/utility/Config.cpp:162:			// TODO begin scoped
+../../src/utility/Config.cpp:184:			// TODODP: h4x!!! Make prettier with a proper new method or macro!!
+../../src/utility/Config.cpp:297:				// TODO implement array adding
+../../src/utility/Config.cpp:302:				// TODO implement map adding
+../../src/script/ScriptEngine.cpp:333:	// TODODP: Check if integer instead of number ?
+../../src/audio/sdl/AudioEngineSDL.cpp:81:	///TODOJS: Add streaming support
+../../src/audio/MusicManager.h:11:enum class SceneState		///TODOJS: A more general approach will be constructed where these will be defined inside the scripts, and stored as strings
+../../src/network/NetworkEngine.h:37:	NETWORK_API void						RequestConnection	( const rString& adress, const rString& port ); // TODODB Support DNS
+../../src/network/NetworkUtility.h:28:	static rString GetErrorName( int error ) // This function is ugly as fuck and I blame Microsoft //TODODB: Use this function everywhere!
+../../src/network/NetworkUtility.h:41:			return rToString( error ); //TODODB Find something similar for Linux
+../../src/network/Packets.h:16:#define MAX_SQUADS 32 // TODODB: Find solution for packets with dynamic size
+../../src/network/NetworkEngine.cpp:299:							m_UnverifiedSockets[i]->Send( reinterpret_cast<Byte*>(&IDpacket), IDpacket.Size );	//TODODB: Send this ID to the other clients as well so they know this ID ixists

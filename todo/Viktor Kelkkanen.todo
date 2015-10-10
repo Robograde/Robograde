@@ -1,0 +1,2 @@
+../../src/core/ai/AIPlayer.cpp:33:					int x = rand() % FIELD_WIDTH; // TODOVK: Do not use randin simulation logic
+../../src/core/Engine.cpp:180:	g_SSAI.				SetUpdateOrderPriority( 50U  );	// TODOVK: Why should this be updated here?

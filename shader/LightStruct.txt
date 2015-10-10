@@ -1,0 +1,55 @@
+struct PointLight
+{
+	vec3 Position;
+	float Range;
+	vec3 Color;
+	float Intensity;
+};
+
+struct DirectionalLight
+{
+	vec3 Direction;
+	float padd;
+	vec3 Color;
+	float padd2;
+};
+
+struct LineLight
+{
+	vec4 Color;
+	vec3 Position;
+	float Intensity;
+	vec3 Direction;
+	float Length;
+	vec3 Padd;
+	float Range;
+};
+
+struct Light
+{
+	vec4 Color;
+	vec3 Position;
+	float Intensity;
+	vec3 Direction;
+	float Length;
+	vec3 Padd;
+	float Range;
+};
+
+#define MAX_POINTLIGHTS 4096
+#define MAX_DIRLIGHTS 4
+#define MAX_LINELIGHTS 128
+#define MAX_NUM_LIGHTS MAX_POINTLIGHTS + MAX_DIRLIGHTS + MAX_LINELIGHTS
+layout(location = 20) uniform int numPLights;
+layout(location = 21) uniform int numDLights;
+layout(location = 22) uniform int numLLights;
+#define MAX_LIGHTS_PER_TILE 256
+
+#define PI 3.141592653589793
+#define saturate(x) clamp(x,0.0f,1.0f)
+#define sqr(x) x * x
+
+layout(std430, binding = 3) readonly buffer LightBuffer
+{
+	Light lights[MAX_NUM_LIGHTS];
+};

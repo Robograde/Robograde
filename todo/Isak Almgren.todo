@@ -1,0 +1,12 @@
+../../src/gui/object/Window.h:6:	//TODOIA: Should this be here?
+../../src/gui/object/TextBox.h:8:	//TODOIA: Possibly make this console specific instead
+../../src/gui/graphics2D/tempGfxUtility/Texture.h:6://TODOIA Change this when Henrik has created new stuff, I won't touch any of this code.
+../../src/gui/graphics2D/TextRenderer.cpp:200:		//TODOIA: Fix this later, is not right at all
+../../src/gui/GUIEngine.cpp:57:		//TODOIA: Will not work when something has more than one parent, fix.
+../../src/core/subsystem/SSConsole.cpp:74:		//TODOIA: Fairly temporary input
+../../src/core/subsystem/SSConsole.cpp:75:		if( m_TimeSinceLastMove >= 0.1f * speedMod ) //TODOIA Change this when better input locking is done
+../../src/core/subsystem/SSConsole.cpp:119:				g_SSInput.Pause();//TODOIA: Temp fix
+../../src/core/subsystem/SSConsole.cpp:130:				g_SSInput.Unpause();//TODOIA: Temp fix
+../../src/core/subsystem/SSConsole.cpp:168:		g_SSInput.Unpause();//TODOIA: Temp fix
+../../src/core/Engine.cpp:426:	//TODOIA Change this when resolution isn't static
+../../src/core/Engine.h:28:	// TODOIA: Decide how gui engine should receive resolution

@@ -1,0 +1,15 @@
+../../src/core/subsystem/SSAudio.cpp:602:		//music.Loop = looping;	///TODOJS: Fix so the music actually may be controlled if it should loop or not. Does not work right now
+../../src/core/subsystem/SSAudio.cpp:915:				music = GetMusic(event->Name);///TODOJS: Make this less h4xx...Music created above is searched for again.
+../../src/core/subsystem/SSAudio.cpp:1131:		fadeTo = GetMusic(to);		//TODOJS: Make this less h4xx...Music created above is searched for again.
+../../src/core/subsystem/SSAI.cpp:368:///TODOJS: remove when squad is an entity
+../../src/core/subsystem/SSAudio.h:130:	float	Volume,				///The modifyable volume used by the fading ///TODOJS: Make possible to modify volume externally 
+../../src/core/ai/Squad.cpp:959:///TODOJS: remove when squad is an entity
+../../src/core/component/SFXEmitterComponent.h:10://----|Describes the effect that will trigger the SFX											TODOJS: Add all the trigger event types when the information needed is available
+../../src/core/Engine.cpp:212:	// TODOJS: Move this when relevant place exists. Only for testing / demo
+../../src/core/Engine.cpp:227:	///TODOJS: Insert support for loading these when a scene/level is created(used in Game, Mainmenu etc)
+../../src/core/Engine.cpp:432:// TODOJS: Remove when not temporary
+../../src/core/Engine.h:7:#include "../audio/MusicManager.h"	//TODOJS: Remove when scenes are implemented
+../../src/core/Engine.h:22:	// TODOJS: Remove when not temporary
+../../src/core/Engine.h:35:	MusicManager			m_TempMusicManager; ///TODOJS: remove later
+../../src/audio/sdl/AudioEngineSDL.cpp:81:	///TODOJS: Add streaming support
+../../src/audio/MusicManager.h:11:enum class SceneState		///TODOJS: A more general approach will be constructed where these will be defined inside the scripts, and stored as strings

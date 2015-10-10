@@ -1,0 +1,7 @@
+../../src/core/datadriven/EntityManager.cpp:52:	// TODOJM: Dynamically expand? Discuss this when relevant limits can be tested.
+../../src/core/subsystem/Subsystem.cpp:66:	//TODOJM: Use something else so I can turn it off
+../../src/core/Engine.cpp:20:#include "subsystem/SSRender.h" // TODOJM: Remove when factory created
+../../src/utility/Logger.h:34:		//TODOJM can this be set to 0xff?
+../../src/utility/Logger.cpp:36:	// TODOJM should RegisterInterestFromFile be run here?
+../../src/utility/Logger.cpp:224:		// TODOJM, Implement
+../../src/utility/Logger.cpp:226:	// TODOJM dicuss good way to make threadsafe cout printing

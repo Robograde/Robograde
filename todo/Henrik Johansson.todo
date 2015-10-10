@@ -1,0 +1,9 @@
+../../src/gfx/Terrain.cpp:245:	prog->SetUniformVec3( "eyepos", campos ); //TODOHJ: HAX!!!!*Throws monitor*
+../../src/gfx/GraphicsEngine.cpp:131:	//TODOHJ: handle msaa sometime
+../../src/gfx/Shader/ShaderBank.cpp:121:    //TODOHJ: Clear
+../../src/gfx/Shader/BitFlagToDefine.h:9:		//TODOHJ: Fill out when a shader exist
+../../src/gfx/MaterialBank.cpp:10:	//TODOHJ: Delete materials
+../../src/core/Engine.cpp:10:#include <glm/gtx/transform.hpp> //TODOHJ: Remove
+../../src/core/Engine.h:32: 	gfx::ModelHandle		m_TempModel; //TODOHJ: Remove when proper subsystems are up
+../../src/core/Engine.h:33:// 	gfx::ModelHandle		m_TempModel2; //TODOHJ: Remove when proper subsystems are up
+../../src/core/Engine.h:34:	gfx::PointLight*		m_PLight; //TODOHJ: Remove when testing is done

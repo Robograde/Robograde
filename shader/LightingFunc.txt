@@ -1,0 +1,161 @@
+//Functions
+vec3 OrenNayarDiffuse(in vec3 normal,in vec3 lightDir, in vec3 toeye,in float roughness){
+	float ndotl = dot(normal , lightDir);
+	float ndotv = dot(normal , toeye);
+
+	float angleVN = acos(ndotv);
+	float angleLN = acos(ndotl);
+
+	float alpha = max(angleVN, angleLN);
+	float beta = min(angleVN, angleLN);
+	float gamma = dot((toeye - normal) * ndotv, (lightDir - normal) * ndotl);
+
+	float rSqr = roughness * roughness;
+
+	float A = 1.0 - 0.5 * (rSqr / (rSqr + 0.57));
+	float B = 0.45 * (rSqr / (rSqr + 0.09));
+
+	float C = sin(alpha) * tan(beta);
+
+	return vec3(max(0.0, ndotl) * (A + B * max(0.0 , gamma) * C));
+}
+
+vec3 F_Schlick(vec3 f0, float f90, float u)
+{
+	return f0 + (f0 - f90) * pow(1.0f - u, 5.0f);
+}
+
+float DisneyDiffuse(float ndotv, float ndotl, float ldoth,float roughness)
+{
+	float energybias = mix(0.0, 0.5, roughness);
+	float energyFactor = mix(1.0, 1.0 / 1.51, roughness);
+	float fd90 = energybias + 2.0 * ldoth*ldoth * roughness;
+	vec3 f0 = vec3(1.0f);
+	float lightScatter = F_Schlick(f0,fd90,ndotl).r;
+	float viewScatter = F_Schlick(f0,fd90,ndotv).r;
+	return lightScatter * viewScatter * energyFactor;
+}
+
+vec3 FresnelSchlick(in float HdotL, in vec3 spec)
+{
+	return spec + (vec3(1.0f) - spec) * pow(1.0 - HdotL,5);
+}
+
+float GeometricAtt(in vec3 normal,in vec3 lightDir, in vec3 toeye, in vec3 halfwayVec)
+{
+	float hdotn = dot(halfwayVec,normal);
+	float edotn = dot(toeye, normal);
+	float edoth = dot(toeye, halfwayVec);
+	float ndotl = dot(lightDir, normal);
+
+	float a = 2 * hdotn * edotn / edoth;
+	float b = 2 * hdotn * ndotl / edoth;
+	float c = min(a,b);
+	return min(1,c);
+}
+
+float BeckmannDistribution(in float ndoth,in float roughness)
+{
+	ndoth = max(0.0001, ndoth);
+	float cos2Alpha = ndoth * ndoth;
+	float tan2Alpha = (cos2Alpha - 1) / cos2Alpha;
+	float rSqr = roughness * roughness;
+	float denom = PI * rSqr * cos2Alpha * cos2Alpha;
+	return exp(tan2Alpha / rSqr) / denom;
+}
+float GGX(float ndoth, float  roughness) //ty Tim
+{
+	float cosSquared = ndoth * ndoth;
+	float tanSquared = (1 - cosSquared) / cosSquared;
+	return (1.0 / PI) * sqr(roughness / cosSquared * ( sqr(roughness + tanSquared)));
+}
+
+float D_GGX(float ndoth, float roughness) //ty frostbite
+{
+	float rSqr = sqr(roughness);
+	float f = (ndoth * rSqr - ndoth) * ndoth + 1;
+	return rSqr / (f * f);
+}
+
+float V_SmithGGXCorrelated(float ndotl, float ndotv, float roughness)//ty Frostbite
+{
+	float rSqr = sqr(roughness);
+
+	float lambda_GGXV = ndotl * sqrt((-ndotv * rSqr + ndotv) * ndotv + rSqr);
+	float lambda_GGXL = ndotv * sqrt((-ndotv * rSqr + ndotv) * ndotv + rSqr);
+	return 0.5f / (lambda_GGXV + lambda_GGXL);
+}
+
+vec3 CookTorranceSpecular(vec3 normal, vec3 lightDir, vec3 toeye, SurfaceMaterial mat, float roughness)
+{
+	vec3 halfWayVector = normalize(toeye + lightDir);
+	float hdotl = dot(halfWayVector, lightDir);
+	float ndotl = dot(normal, lightDir);
+	float ndoth = dot(halfWayVector, normal);
+	float ndotv = dot(toeye, normal);
+
+	vec3 F = FresnelSchlick(hdotl, mat.SpecularColor.xyz);
+	vec3 D = vec3(BeckmannDistribution(ndoth, roughness));
+	//float G = V_SmithGGXCorrelated(ndotl,ndotv,roughness);
+	vec3 G = vec3(GeometricAtt(normal, lightDir,toeye, halfWayVector));
+	vec3 a = F * D * G;
+	return a / (4 * ndotl * ndotv);
+}
+
+vec4 CalcPLight(in Light light, in vec3 inNormal, in vec3 posw, in vec3 campos, in SurfaceMaterial inMat, float roughness, float metal )
+{
+	vec4 lightColor = vec4(0);
+	vec3 lightDir = posw - light.Position;
+	float dist = length(lightDir);
+	if(dist < light.Range)
+	{
+		lightDir = normalize(lightDir);
+		vec3 toeye = normalize(campos - posw);
+		float att = light.Intensity / max(dist * dist, 0.01f * 0.01f); //ty frostbite team
+		vec3 diff = OrenNayarDiffuse(inNormal, -lightDir, toeye, roughness);
+		vec3 spec = CookTorranceSpecular(inNormal, -lightDir, toeye, inMat, roughness) * inMat.SpecularColor.xyz;
+		diff = mix(diff, vec3(0.0),metal);
+		spec = mix(spec, spec * inMat.BaseColor.xyz,metal);
+		lightColor.xyz = inMat.BaseColor.xyz * vec3(light.Color.xyz) * (diff + spec) * att;
+	}
+	return lightColor;
+}
+
+vec4 CalcDLight(in Light light,in vec3 inNormal, in vec3 posw, in vec3 campos, in SurfaceMaterial inMat, float roughness, float metal )
+{
+	vec4 lightColor = vec4(0);
+	vec3 lightDir = normalize(light.Direction);
+	float dist = length(posw - light.Position);
+	//float att = light.Intensity / max(dist * dist, 0.01f * 0.01f); //ty frostbite team
+	vec3 toeye = normalize(campos - posw);
+	vec3 diff = OrenNayarDiffuse(inNormal, -lightDir,toeye,roughness);
+	vec3 spec = CookTorranceSpecular(inNormal, -lightDir, toeye, inMat, roughness) * inMat.SpecularColor.xyz;
+	diff = mix(diff, vec3(0.0),metal);
+	spec = mix(spec, spec * inMat.BaseColor.xyz,metal);
+	lightColor.xyz = vec3(light.Color.xyz) * inMat.BaseColor.xyz * (diff + spec);
+	return lightColor;
+}
+
+vec4 CalcLineLight(in Light light, in vec3 inNormal, in vec3 posw, in vec3 campos, in SurfaceMaterial inMat, float roughness, float metal )
+{
+	vec4 lightColor = vec4(0);
+	vec3 dir = normalize(-light.Direction);
+	float l = dot(dir, light.Position - posw);
+	l = min(l ,light.Length);
+	l = max(0, l);
+	vec3 projDir = (l * dir);
+	vec3 lightDir = projDir - (light.Position - posw);
+	float dist = length(lightDir);
+	if(dist < light.Range)
+	{
+		lightDir = normalize(lightDir);
+		vec3 toeye = normalize(campos - posw);
+		float att = light.Intensity / max(dist * dist, 0.01f * 0.01f); //ty frostbite team
+		vec3 diff = OrenNayarDiffuse(inNormal, -lightDir, toeye, roughness);
+		vec3 spec = CookTorranceSpecular(inNormal, -lightDir, toeye, inMat, roughness) * inMat.SpecularColor.xyz;
+		diff = mix(diff, vec3(0.0),metal);
+		spec = mix(spec, spec * inMat.BaseColor.xyz,metal);
+		lightColor.xyz = inMat.BaseColor.xyz * light.Color.xyz * (diff + spec) * att;
+	}
+	return lightColor;
+}

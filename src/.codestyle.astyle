@@ -1,0 +1,16 @@
+--style=allman
+--indent-switches
+--indent-namespaces
+--indent=force-tab=4
+--indent-preproc-define
+--indent-preproc-cond
+--indent-preproc-block
+--min-conditional-indent=0
+--pad-oper
+--pad-paren-in
+--pad-header
+--align-pointer=type
+--align-reference=type
+--max-code-length=150
+--lineend=linux
+--quiet

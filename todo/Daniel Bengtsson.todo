@@ -1,0 +1,15 @@
+../../src/core/subsystem/SubsystemCollection.cpp:3:#include <utility/messaging/MessagePump.h> //TODODB: Remove when we have decided where to put FrameCount
+../../src/core/subsystem/SSInput.cpp:44:		if ( g_Input->KeyUpDown( x.first ) ) // Check if the key has been triggered // TODODB: Add support for other checks than keyUpDown
+../../src/core/subsystem/SSInput.cpp:74:						Logger::GetStream( ) << "Client " << x.first << ": " << x.second << "ms" << "\n"; // TODODB: Output with nicer decimals
+../../src/core/subsystem/SSInput.h:16:	PrintHostLatencies, //TODODB: Make this a console command instead
+../../src/core/subsystem/SSInput.h:51:	void PrintKeys( ); // TODODB: Use the inputMap to print the currently mapped keys in a more automated manner
+../../src/core/Engine.cpp:39:#include "LocalPlayer.h" //TODODB: Remove when network can be started through lobby
+../../src/core/Engine.cpp:119:	if ( g_NetworkInfo.IsNetworkOn( ) ) // TODODB: Remove when network can be started trough lobby
+../../src/utility/messaging/Subscriber.h:15:	rVector<MessageTypes::MessageType>	m_Interests;	// TODODB: Should I handle this as bitmask instead?
+../../src/utility/messaging/MessagePump.h:11:class MessagePump // TODODB: Document the hell out of this class
+../../src/utility/messaging/MessagePump.h:34:	std::mutex						m_MessageQueueLock; // TODODB: Make this lock only the relevant queue or create a multiproducerqueue
+../../src/network/NetworkEngine.h:37:	NETWORK_API void						RequestConnection	( const rString& adress, const rString& port ); // TODODB Support DNS
+../../src/network/NetworkUtility.h:28:	static rString GetErrorName( int error ) // This function is ugly as fuck and I blame Microsoft //TODODB: Use this function everywhere!
+../../src/network/NetworkUtility.h:41:			return rToString( error ); //TODODB Find something similar for Linux
+../../src/network/Packets.h:16:#define MAX_SQUADS 32 // TODODB: Find solution for packets with dynamic size
+../../src/network/NetworkEngine.cpp:299:							m_UnverifiedSockets[i]->Send( reinterpret_cast<Byte*>(&IDpacket), IDpacket.Size );	//TODODB: Send this ID to the other clients as well so they know this ID ixists
